@@ -1,9 +1,10 @@
 /********************************************************/
 /* Konvertierung Winsol-LogDatei in CVS- oder SQL-Datei */
-/* (c) H. Roemer                                         */
+/* (c) H. Roemer                                        */
 /* Version 0.2  25.10.2006                              */
 /* Version 0.3  11.01.2007                              */
 /* Version 0.4  27.01.2008                              */
+/* Version 0.5  23.07.2008                              */
 /********************************************************/
 
 /* unter Windows Absturz bei Eclipse 3.2 + gcc + Build als Release
@@ -28,6 +29,7 @@
 
 #define UVR61_3 0x90
 #define UVR1611 0x80
+#define HZR65 0x60
 
 typedef union{
       short short_word;
@@ -121,14 +123,30 @@ struct csv_UVR61_3 {
     float mwh1;
 } struct_csv_UVR61_3;
 
+struct csv_HZR65 {
+    int tag;
+    int monat;
+    int jahr;
+    int std;
+    int min;
+    int sec;
+    float tempt[7]; /* tempt[0] wird nicht benutzt*/
+    int ausgang1;   /* Zustand der Ausgaenge */
+    int ausgang2;   /* Zustand der Ausgaenge */
+    int ausgang3;   /* Zustand der Ausgaenge */
+    int ausgang4;   /* Zustand der Ausgaenge */
+    int ausgang5;   /* Zustand der Ausgaenge */
+} struct_csv_HZR65;
 
 int main(int argc, char **argv)
 {
-  int i, c, x, y, erg, csv, sql, tmp_i, argv4_laenge=0;
+  int i, c, x, y, erg, csv, sql, tmp_i, argv4_laenge=0, satzlaenge=59;
   unsigned char buffer[60], temp_byte;
   unsigned char uvr_typ;
-  char tmp_kopf1[100], tmp_kopf2[100], tmp_kopf1_uvr61_3[100], tmp_kopf2_uvr61_3[100], sql_kopf[31];
-  char *p_tmp_kopf1, *p_tmp_kopf2, *p_tmp_kopf1_uvr61_3, *p_tmp_kopf2_uvr61_3, *p_sql_kopf;
+  char tmp_kopf1[100], tmp_kopf2[100], tmp_kopf1_uvr61_3[100],
+       tmp_kopf2_uvr61_3[100], sql_kopf[31], tmp_kopf_hzr65[80];
+  char *p_tmp_kopf1, *p_tmp_kopf2, *p_tmp_kopf1_uvr61_3, *p_tmp_kopf2_uvr61_3,
+       *p_sql_kopf, *p_tmp_kopf_hzr65;
   char *tabelle;
 
   sql = FALSE;
@@ -193,22 +211,35 @@ int main(int argc, char **argv)
   else
     aufrufhinweis();
 
-  /*  Daten auslesen und in CVS/SQL-Form neu schreiben */
-  if( (c=read(fd_in,buffer,59)) == -1 ) /* Kopfsatz lesen */
+  /* Kopfsatz lesen zum ermitteln des Reglers */
+  if( (c=read(fd_in,buffer,satzlaenge)) == -1 ) /* Kopfsatz lesen */
   {
     printf("Fehler beim Lesen der Logdatei.\n");
     error_abbruch();
   }
   uvr_typ=0;
-  if (buffer[7] == 0x07)
-    uvr_typ = UVR1611;
-  else if  (buffer[7] == 0x06)
-    uvr_typ = UVR61_3;
+  if ( (buffer[1] == 0x55) && (buffer[3] == 0x14) )
+  {
+    uvr_typ = HZR65;
+    satzlaenge = 18;
+  }  
+  else if (buffer[7] == 0x07)
+      uvr_typ = UVR1611;
+    else if  (buffer[7] == 0x06)
+      uvr_typ = UVR61_3;
 
+  /* Datei-Deskriptor auf ersten Datensatz setzen */
+  if ( lseek(fd_in,(long)satzlaenge,SEEK_SET) == -1)
+  {
+    printf("Fehler beim Lesen der Logdatei.\n");
+    error_abbruch();
+  }
+  
   p_tmp_kopf1 = tmp_kopf1;
   p_tmp_kopf2 = tmp_kopf2;
   p_tmp_kopf1_uvr61_3 = tmp_kopf1_uvr61_3;
   p_tmp_kopf2_uvr61_3 = tmp_kopf2_uvr61_3;
+  p_tmp_kopf_hzr65 = tmp_kopf_hzr65; 
   p_sql_kopf = sql_kopf;
   sprintf(p_sql_kopf,"INSERT INTO %s VALUES(",tabelle);
   p_tmp_kopf1 = "Datum;Zeit;Sens1;Sens2;Sens3;Sens4;Sens5;Sens6;Sens7;Sens8;Sens9;\
@@ -219,6 +250,7 @@ Ausg8;Ausg9;Ausg10;Ausg11;Ausg12;Ausg13;";
   p_tmp_kopf1_uvr61_3 = "Datum;Zeit;Sens1;Sens2;Sens3;Sens4;Sens5;Sens6;\
 Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
   p_tmp_kopf2_uvr61_3 = "volstrom;kW;kWh;";
+  p_tmp_kopf_hzr65 = "Datum;Zeit;Temp1;Temp2;Temp3;Temp4;Temp5;Temp6;Ausg1;Ausg2;Ausg3;Ausg4;Ausg5";
 
   if (csv)
   {
@@ -226,6 +258,8 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
       fprintf(fd_out,"%s%s\n",p_tmp_kopf1, p_tmp_kopf2);
     else if (uvr_typ == UVR61_3)
       fprintf(fd_out,"%s%s\n",p_tmp_kopf1_uvr61_3, p_tmp_kopf2_uvr61_3);
+      else if (uvr_typ == HZR65)
+        fprintf(fd_out,"%s\n",p_tmp_kopf_hzr65);
   }
 
   i = 1;
@@ -234,21 +268,27 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
 
   get_JahrMonat(argv[1]); /* Jahr und Monat aus Dateiname ermitteln */
 
-  while( (c=read(fd_in,buffer,59)) > 0 )  /* solange lesen, bis EOF der Logdatei erreicht ist*/
+  /*  Daten auslesen und in CVS/SQL-Form neu schreiben */
+  while( (c=read(fd_in,buffer,satzlaenge)) > 0 )  /* solange lesen, bis EOF der Logdatei erreicht ist*/
   {
    /* Tag, Stunde, Minute und Sekunde */
     struct_winsol.tag = buffer[0];
     struct_csv_UVR61_3.tag = buffer[0];
+    struct_csv_HZR65.tag = buffer[0];
     struct_winsol.std = buffer[1];
     struct_csv_UVR61_3.std = buffer[1];
+    struct_csv_HZR65.std = buffer[1];
     struct_winsol.min = buffer[2];
     struct_csv_UVR61_3.min = buffer[2];
+    struct_csv_HZR65.min = buffer[2];
     struct_winsol.sec = buffer[3];
     struct_csv_UVR61_3.sec = buffer[3];
+    struct_csv_HZR65.sec = buffer[3];
 
     /* Zustaende der Ausgangsbyte's */
     ausgangsbyte1_belegen(buffer[4],uvr_typ);
-    drehzahlstufen(buffer,uvr_typ);
+    if ( (uvr_typ == UVR1611) || (uvr_typ == UVR61_3) )
+      drehzahlstufen(buffer,uvr_typ);
 
     if (uvr_typ == UVR1611)
     {
@@ -321,8 +361,21 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
       }
 
     }
+    
+    /* 23.07.2008: negative Temperaturen muessen noch ueberprueft werden!!! */
+    if (uvr_typ == HZR65)
+    {
+      x = 6;
+      for (y=1;y<7;y++)      /* Temperatur wird ermittelt und abgelegt */
+      {
+        struct_csv_HZR65.tempt[y] = berechnetemp(buffer[x],buffer[x+1], 10)/10;
+        x= x +2;
+      }
+    }
 
-    waermemengen(buffer, uvr_typ);
+    if ( (uvr_typ == UVR1611) || (uvr_typ == UVR61_3) )
+      waermemengen(buffer, uvr_typ);
+    
     if (csv)
     {
       if (uvr_typ == UVR1611)
@@ -361,6 +414,14 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
         struct_csv_UVR61_3.ausgang1,struct_csv_UVR61_3.dza1_stufe,
         struct_csv_UVR61_3.ausgang2,struct_csv_UVR61_3.ausgang3,struct_csv_UVR61_3.analog,
         struct_csv_UVR61_3.volstrom,struct_csv_UVR61_3.leistung1,(struct_csv_UVR61_3.mwh1*1000 +struct_csv_UVR61_3.kwh1));
+
+      if (uvr_typ == HZR65)
+        erg = fprintf(fd_out,"%02d.%02d.%4d; %02d:%02d:%02d; \
+%.1f; %.1f; %.1f; %.1f; %.1f; %.1f; %i; %i; %i; %i; %i;\n",
+        struct_csv_HZR65.tag,struct_csv_HZR65.monat,struct_csv_HZR65.jahr,struct_csv_HZR65.std,struct_csv_HZR65.min,struct_csv_HZR65.sec,
+        struct_csv_HZR65.tempt[1],struct_csv_HZR65.tempt[2],struct_csv_HZR65.tempt[3],
+        struct_csv_HZR65.tempt[4],struct_csv_HZR65.tempt[5],struct_csv_HZR65.tempt[6],
+        struct_csv_HZR65.ausgang1,struct_csv_HZR65.ausgang2,struct_csv_HZR65.ausgang3,struct_csv_HZR65.ausgang4,struct_csv_HZR65.ausgang5);
     }
 
     if (sql)
@@ -395,6 +456,14 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
         struct_csv_UVR61_3.ausgang2,struct_csv_UVR61_3.ausgang3,struct_csv_UVR61_3.analog,
         struct_csv_UVR61_3.wmz1,struct_csv_UVR61_3.volstrom,
         struct_csv_UVR61_3.leistung1,(struct_csv_UVR61_3.mwh1*1000 +struct_csv_UVR61_3.kwh1));
+
+      if (uvr_typ == HZR65)
+        erg = fprintf(fd_out,"%s'%02d.%02d.%4d; %02d:%02d:%02d; \
+%.1f; %.1f; %.1f; %.1f; %.1f; %.1f; %i; %i; %i; %i; %i');\n",
+        p_sql_kopf,struct_csv_HZR65.tag,struct_csv_HZR65.monat,struct_csv_HZR65.jahr,struct_csv_HZR65.std,struct_csv_HZR65.min,struct_csv_HZR65.sec,
+        struct_csv_HZR65.tempt[1],struct_csv_HZR65.tempt[2],struct_csv_HZR65.tempt[3],
+        struct_csv_HZR65.tempt[4],struct_csv_HZR65.tempt[5],struct_csv_HZR65.tempt[6],
+        struct_csv_HZR65.ausgang1,struct_csv_HZR65.ausgang2,struct_csv_HZR65.ausgang3,struct_csv_HZR65.ausgang4,struct_csv_HZR65.ausgang5);
     }
 
         tmp_i++;
@@ -416,7 +485,8 @@ void aufrufhinweis()
   printf("-sql Tabelle  - speichern als SQL-Import-Datei\n");
   printf("     Tabelle  - Tabellenname der (My)SQL-Dattenbank\n");
   printf("Beispiel:  winsol2csv Y200511.log 200511.csv -csv\n");
-  printf("           winsol2csv Y200511.log 200511.sql -sql UVR_1611\n\n");
+  printf("           winsol2csv Y200511.log 200511.sql -sql UVR_1611\n");
+  printf("           winsol2csv U200511.log 200511.sql -sql HZR65\n\n");
   exit(-1);
 }
 
@@ -489,6 +559,33 @@ void ausgangsbyte1_belegen(char aus_byte, int uvr_typ)
     else
       struct_csv_UVR61_3.ausgang3 = 0;
   }
+  if (uvr_typ == HZR65)
+  {
+    if ((aus_byte & 0x01) != 0)
+      struct_csv_HZR65.ausgang1 = 1;
+    else
+      struct_csv_HZR65.ausgang1 = 0;
+
+    if ((aus_byte & 0x02) != 0)
+      struct_csv_HZR65.ausgang2 = 1;
+    else
+      struct_csv_HZR65.ausgang2 = 0;
+
+    if ((aus_byte & 0x04) != 0)
+      struct_csv_HZR65.ausgang3 = 1;
+    else
+      struct_csv_HZR65.ausgang3 = 0;
+
+    if ((aus_byte & 0x08) != 0)
+      struct_csv_HZR65.ausgang4 = 1;
+    else
+      struct_csv_HZR65.ausgang4 = 0;
+
+    if ((aus_byte & 0x10) != 0)
+      struct_csv_HZR65.ausgang5 = 1;
+    else
+      struct_csv_HZR65.ausgang5 = 0;
+  }
 }
 
 void ausgangsbyte2_belegen(char aus_byte)
@@ -538,6 +635,8 @@ void get_JahrMonat(char *logfilename)
     struct_winsol.monat = atoi(chmon);
     struct_csv_UVR61_3.jahr = atoi(chjahr);
     struct_csv_UVR61_3.monat = atoi(chmon);
+    struct_csv_HZR65.jahr = atoi(chjahr);
+    struct_csv_HZR65.monat = atoi(chmon);   
 }
 
 /* Ermittle die Art des Eingangsparameters */
