@@ -46,7 +46,7 @@ void ausgangsbyte1_belegen(char aus_byte, int uvr_typ);
 void ausgangsbyte2_belegen(char aus_byte);
 void get_JahrMonat(char *logfilename);
 int eingangsparameter(UCHAR highbyte);
-float berechnetemp(UCHAR lowbyte, UCHAR highbyte, int sensor);
+float berechnetemp(UCHAR lowbyte, UCHAR highbyte, int sensor, int uvr_typ);
 float berechnevol(UCHAR lowbyte, UCHAR highbyte);
 void drehzahlstufen(UCHAR buffer[],int uvr_typ);
 void waermemengen(UCHAR buffer[],int uvr_typ);
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
        tmp_kopf2_uvr61_3[100], sql_kopf[31], tmp_kopf_hzr65[80];
   char *p_tmp_kopf1, *p_tmp_kopf2, *p_tmp_kopf1_uvr61_3, *p_tmp_kopf2_uvr61_3,
        *p_sql_kopf, *p_tmp_kopf_hzr65;
-  char *tabelle;
+  char *tabelle = 0;
 
   sql = FALSE;
   csv = FALSE;
@@ -302,13 +302,13 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
         {
           case 0: struct_winsol.tempt[y] = 0; break;
           case 1: struct_winsol.tempt[y] = 0; break; // digit. Pegel (AUS)
-          case 2: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Temp.
+          case 2: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Temp.
           case 3: struct_winsol.tempt[y] = berechnevol(buffer[x],buffer[x+1]); break;
-          case 6: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Strahlung
-          case 7: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Raumtemp.
+          case 6: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Strahlung
+          case 7: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Raumtemp.
           case 9: struct_winsol.tempt[y] = 1; break; // digit. Pegel (EIN)
-          case 10: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Minus-Temperaturen
-          case 15: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Minus-Raumtemp.
+          case 10: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Minus-Temperaturen
+          case 15: struct_winsol.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Minus-Raumtemp.
         }
         x= x +2;
       }
@@ -334,14 +334,14 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
         {
           case 0: struct_csv_UVR61_3.tempt[y] = 0; break;
           case 1: struct_csv_UVR61_3.tempt[y] = 0; break; // digit. Pegel (AUS)
-          case 2: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Temp.
+          case 2: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Temp.
           case 3: struct_csv_UVR61_3.tempt[y] = berechnevol(buffer[x],buffer[x+1]);
                   struct_csv_UVR61_3.volstrom = struct_csv_UVR61_3.tempt[y]; break;
-          case 6: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Strahlung
-          case 7: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Raumtemp.
+          case 6: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Strahlung
+          case 7: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Raumtemp.
           case 9: struct_csv_UVR61_3.tempt[y] = 1; break; // digit. Pegel (EIN)
-          case 10: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Minus-Temperaturen
-          case 15: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y]); break; // Minus-Raumtemp.
+          case 10: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Minus-Temperaturen
+          case 15: struct_csv_UVR61_3.tempt[y] = berechnetemp(buffer[x],buffer[x+1],S_Art[y],uvr_typ); break; // Minus-Raumtemp.
         }
         x= x +2;
       }
@@ -368,7 +368,7 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
       x = 6;
       for (y=1;y<7;y++)      /* Temperatur wird ermittelt und abgelegt */
       {
-        struct_csv_HZR65.tempt[y] = berechnetemp(buffer[x],buffer[x+1], 10)/10;
+        struct_csv_HZR65.tempt[y] = berechnetemp(buffer[x],buffer[x+1],7,uvr_typ);
         x= x +2;
       }
     }
@@ -658,7 +658,7 @@ int eingangsparameter(UCHAR highbyte)
 }
 
 /* Berechne die Temperatur / Strahlung */
-float berechnetemp(UCHAR lowbyte, UCHAR highbyte, int sensor)
+float berechnetemp(UCHAR lowbyte, UCHAR highbyte, int sensor, int uvr_typ)
 {
   UCHAR tmp_highbyte;
   int z;
@@ -666,6 +666,17 @@ float berechnetemp(UCHAR lowbyte, UCHAR highbyte, int sensor)
 
   tmp_highbyte = highbyte;
   wert = lowbyte | ((highbyte & 0x0f)<<8);
+  
+  if ( uvr_typ == HZR65)
+  {
+    if ( (highbyte & 0x80) != 0)
+    {
+      wert = -wert -1 ;
+      return ((float) wert / 100);      
+    }
+    else
+      return((((float)tmp_highbyte*256) + (float)lowbyte) / 100); /* Temperatur in C */
+  }
 
   if( (highbyte & UVR1611) != 0 )
     {
