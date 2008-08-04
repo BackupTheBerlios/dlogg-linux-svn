@@ -22,6 +22,7 @@
    13.01.2008  Version 0.8.0 (Wechsel der Anzeige zwischen Geraet 1 und 2 mit Taste 'w')
    24.01.2008  Version 0.8.1 Fehlerkorrektur Momentanleistung in csv-Ausgabe
    25.02.2008  Version 0.8.2 --rrd Unterstuetzung
+     .08.2008  Version 0.9 Unterstuetzung HZR65
 */
 /*************************************************************************/
 
@@ -52,6 +53,7 @@
 #define BUFFER_SIZE 1024
 #define UVR61_3 0x90
 #define UVR1611 0x80
+#define HZR65 0x60
 
 //#define DEBUG 1
 
@@ -363,7 +365,8 @@ int main(int argc, char *argv[])
 #endif
 
       /* if (result>0 && result <=57)  */
-      if (result>27 && result <=115)
+      /* if (result>27 && result <=115) */
+      if (result>15 && result <=115) /* 15 Byte: HZR65 */
         akt_daten[result]='\0'; /* mit /000 abschliessen!! */
     } /* Ende if (usb_zugriff) */
 
@@ -751,8 +754,8 @@ int do_cleanup(WINDOW *fenster1, WINDOW *fenster2)
 /* Statische Bildschirmausgabe / Hilfetext */
 static int print_usage()
 {
-  fprintf(stderr,"\n    UVR1611 / UVR61-3 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
-  fprintf(stderr,"    Version 0.8.2 vom 25.02.2008 \n");
+  fprintf(stderr,"\n    UVR1611/UVR61-3/HZR65 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
+  fprintf(stderr,"    Version 0.9-Entwicklung vom 04.08.2008 \n");
   fprintf(stderr,"\ndl-aktuelle-datenx (-p USB-Port | -i IP:Port) [-t sek] [-h] [-v] [--csv] [--rrd] \n");
   fprintf(stderr,"    -p USB-Port -> Angabe des USB-Portes,\n");
   fprintf(stderr,"                   an dem der D-LOGG angeschlossen ist.\n");
@@ -962,6 +965,7 @@ int check_pruefsumme(void)
   {
     case UVR1611: anzByte_uvr1 = 55; break; /* UVR1611 */
     case UVR61_3: anzByte_uvr1 = 26; break; /* UVR61-3 */
+    case HZR65: anzByte_uvr1 = 14; break; /* HZR65 */
   }
 
   if (uvr_modus == 0xA8)
@@ -1331,8 +1335,11 @@ void berechne_werte(int anz_regler)
 
   temperaturanz(anz_regler);
   ausgaengeanz(anz_regler);
-  drehzahlstufenanz(anz_regler);
-  waermemengenanz(anz_regler);
+  if (akt_daten[0] != HZR65)
+  {
+    drehzahlstufenanz(anz_regler);
+    waermemengenanz(anz_regler);
+  }
 
 }
 
@@ -1352,41 +1359,52 @@ void temperaturanz(int regler)
   {
     case UVR1611: anzSensoren = 16; break; /* UVR1611 */
     case UVR61_3: anzSensoren = 6; break; /* UVR61-3 */
+    case HZR65: anzSensoren = 6; break; /* HZR65 */
   }
 
   /* vor berechnetemp() die oberen 4 Bit des HighByte auswerten!!!! */
   /* Wichtig fuer Minus-Temp. */
   j=1;
   for(i=1;i<=anzSensoren;i++)
+  {
+    if (uvr_typ != HZR65)
     {
       SENS_Art[i] = eingangsparameter(akt_daten[j+1]);
       switch(SENS_Art[i])
-  {
-  case 0: SENS[i] = 0; break;
-  case 1: SENS[i] = 0; break; // digit. Pegel (AUS)
-  case 2: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Temp.
-  case 3: SENS[i] = berechnevol(akt_daten[j],akt_daten[j+1]); break;
-  case 6: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Strahlung
-  case 7: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Raumtemp.
-  case 9: SENS[i] = 1; break; // digit. Pegel (EIN)
-  case 10: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Minus-Temperaturen
-  case 15: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Minus-Raumtemp.
-  }
-      j=j+2;
+      {
+        case 0: SENS[i] = 0; break;
+        case 1: SENS[i] = 0; break; // digit. Pegel (AUS)
+        case 2: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Temp.
+        case 3: SENS[i] = berechnevol(akt_daten[j],akt_daten[j+1]); break;
+        case 6: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Strahlung
+        case 7: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Raumtemp.
+        case 9: SENS[i] = 1; break; // digit. Pegel (EIN)
+        case 10: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Minus-Temperaturen
+        case 15: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Minus-Raumtemp.
+      }
     }
+    else /* Regler HZR65 */
+    {
+      SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],7);
+    }
+    j=j+2;
+  }
   uvr_typ=temp_uvr_typ;
 }
 
 /* Bearbeitung der Ausgaenge */
 void ausgaengeanz(int regler)
 {
-  //  int ausgaenge[13];
-  // Ausgnge 2byte: low vor high
+  // int ausgaenge[13];
+  // Ausgaenge 2byte: low vor high (UVR1611 und UVR61_3)
   // Bitbelegung:
   // AAAA AAAA
   // xxxA AAAA
   //  x ... dont care
   // A ... Ausgang (von low nach high zu nummerieren)
+  // -----------------
+  // AAAA Axxx ... HZR65 (1 Byte)
+  // A ... von rechts nach links zu nummerieren
   int z;
   UCHAR temp_uvr_typ=0;
   temp_uvr_typ=uvr_typ;
@@ -1425,6 +1443,17 @@ void ausgaengeanz(int regler)
         AUSG[z] = 0;
      }
   }
+    else if (uvr_typ == HZR65) /* HZR65 */
+    {
+      for(z=1;z<6;z++)
+      {
+        if (tstbit( akt_daten[13], z+3 ) == 1)
+          AUSG[z] = 1;
+        else
+          AUSG[z] = 0;
+      }
+    }
+  
   uvr_typ=temp_uvr_typ;
 }
 
@@ -1611,31 +1640,42 @@ float berechnetemp(UCHAR lowbyte, UCHAR highbyte, int sensor)
   temp_highbyte = highbyte;
   wert = lowbyte | ((highbyte & 0x0f)<<8);
 
-  if( (highbyte & UVR1611) != 0 )
+  if ( uvr_typ == HZR65)
+  {
+    if ( (highbyte & 0x80) != 0)
     {
-      wert = wert ^ 0xfff;
       wert = -wert -1 ;
-      return ((float) wert / 10);
+      return ((float) wert / 100);      
     }
+    else
+      return((((float)temp_highbyte*256) + (float)lowbyte) / 100); /* Temperatur in C */
+  }
+
+  if( (highbyte & UVR1611) != 0 )
+  {
+    wert = wert ^ 0xfff;
+    wert = -wert -1 ;
+    return ((float) wert / 10);
+  }
   else
+  {
+    if( sensor == 7)  // Raumtemperatur
     {
-      if( sensor == 7)  // Raumtemperatur
-      {
-        if( (highbyte & 0x01) != 0 )
-          return((256 + (float)lowbyte) / 10); /* Temperatur in C */
-        else
-          return(((float)lowbyte) / 10); /* Temperatur in C */
-      }
+      if( (highbyte & 0x01) != 0 )
+        return((256 + (float)lowbyte) / 10); /* Temperatur in C */
       else
-      {
-        for(z=5;z<9;z++)
-          temp_highbyte = temp_highbyte & ~(1 << z); /* die oberen 4 Bit auf 0 setzen */
-        if (sensor == 6)
-          return(((float)temp_highbyte*256) + (float)lowbyte); /* Strahlung in W/m2 */
-        else
-          return((((float)temp_highbyte*256) + (float)lowbyte) / 10); /* Temperatur in C */
-      }
+        return(((float)lowbyte) / 10); /* Temperatur in C */
     }
+    else
+    {
+      for(z=5;z<9;z++)
+        temp_highbyte = temp_highbyte & ~(1 << z); /* die oberen 4 Bit auf 0 setzen */
+      if (sensor == 6)
+        return(((float)temp_highbyte*256) + (float)lowbyte); /* Strahlung in W/m2 */
+      else
+        return((((float)temp_highbyte*256) + (float)lowbyte) / 10); /* Temperatur in C */
+    }
+  }
 }
 
 /* Berechne Volumenstrom */
