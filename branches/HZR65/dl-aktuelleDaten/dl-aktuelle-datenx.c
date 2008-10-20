@@ -755,7 +755,7 @@ int do_cleanup(WINDOW *fenster1, WINDOW *fenster2)
 static int print_usage()
 {
   fprintf(stderr,"\n    UVR1611/UVR61-3/HZR65 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
-  fprintf(stderr,"    Version 0.9-Entwicklung vom 04.08.2008 \n");
+  fprintf(stderr,"    Version 0.9-Entwicklung vom 20.10.2008 \n");
   fprintf(stderr,"\ndl-aktuelle-datenx (-p USB-Port | -i IP:Port) [-t sek] [-h] [-v] [--csv] [--rrd] \n");
   fprintf(stderr,"    -p USB-Port -> Angabe des USB-Portes,\n");
   fprintf(stderr,"                   an dem der D-LOGG angeschlossen ist.\n");
@@ -2496,7 +2496,7 @@ void write_CSVCONSOLE(int regler, time_t datapoint_time)
     for (i=1;i<=2;i++)
     {
       if (WMReg[i] == 1)
-        fprintf(stdout," %.1f;%.0f%.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
+        fprintf(stdout," %.1f;%.1f;",Mlstg[i], (W_Mwh[i]*1000 + W_kwh[i]));
       else
         fprintf(stdout,"  ---;  ---;");
       }
@@ -2518,7 +2518,7 @@ void write_CSVCONSOLE(int regler, time_t datapoint_time)
     if (WMReg[1] == 1)
     {
       fprintf(stdout,"%4d;",akt_daten[18]*0x100 + akt_daten[17]);
-      fprintf(stdout," %.1f;%.1f;%.1f;",Mlstg[1], W_Mwh[1],W_kwh[1]);
+      fprintf(stdout," %.1f;%.1f;",Mlstg[1], (W_Mwh[i]*1000 + W_kwh[i]));
     }
     else
       fprintf(stdout,"  ---;  ---;  ---;  ---;");
