@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU General Public License         *
  * along with this program; if not, see <http://www.gnu.org/licenses/>.      *
  *                                                                           *
- * Version 0.1		18.04.2006 erste Testversion                             *
- * Version 0.5a		05.10.2006 Protokoll-Log in /var/dl-lesenx.log speichern *
- * Version 0.6		27.01.2006 C. Dolainsky                                  *
- * 					28.01.2006 Anpassung an geaenderte dl-lesen.h.           *
- * 					18.03.2007 IP                                            *
- * Version 0.7		01.04.2007                                               *
- * Version 0.7.7	26.12.2007 UVR61-3                                       *
- * Version 0.8		13.01.2008 2DL-Modus                                     *
- * Version 0.8.1 	04.12.2009 --dir Parameter aufgenommen                   *
+ * Version 0.1        18.04.2006 erste Testversion                             *
+ * Version 0.5a        05.10.2006 Protokoll-Log in /var/dl-lesenx.log speichern *
+ * Version 0.6        27.01.2006 C. Dolainsky                                  *
+ *                     28.01.2006 Anpassung an geaenderte dl-lesen.h.           *
+ *                     18.03.2007 IP                                            *
+ * Version 0.7        01.04.2007                                               *
+ * Version 0.7.7    26.12.2007 UVR61-3                                       *
+ * Version 0.8        13.01.2008 2DL-Modus                                     *
+ * Version 0.8.1     04.12.2009 --dir Parameter aufgenommen                   *
+ * Version ?????    ??.01.2010 CAN-Logging                                   *
  *****************************************************************************/
 
 #include <sys/types.h>
@@ -230,10 +231,37 @@ int main(int argc, char *argv[])
     do_cleanup();
   }
 
-  uvr_modus = get_modulmodus(); /* Welcher Modus 0xA8 (1DL) oder 0xD1 (2DL) */
+  uvr_modus = get_modulmodus(); /* Welcher Modus 
+                                0xA8 (1DL) / 0xD1 (2DL) / 0xDC (CAN) bzw.
+                                0xAA bei CAN -> 3 Sek. warten, 
+                                da BL-Net noch nicht bereit zum auslesen        */
+								
+  if ( uvr_modus == 0xDC )
+  {
+    fprintf(stderr, " CAN-Logging erkannt.\n");
+  }
+  
+  if ( uvr_modus == 0xAA )
+  {
+    fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
+	sleep(3000);                /* 3 Sekunden warten */
+	uvr_modus = get_modulmodus();
+    if ( uvr_modus == 0xAA )
+    {
+      fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit, nochmal 3 Sekunden warten...\n");
+	  sleep(3000);                /* 3 Sekunden warten */
+	  uvr_modus = get_modulmodus();
+    }
+	  if ( uvr_modus == 0xAA )
+      {
+	    fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
+        do_cleanup();
+        return ( -1 );
+	  }
+  }
 
   /* ************************************************************************   */
-  /* Lesen des Kopfsatzes zur Ermittlung der Anzahl der zu lesenden Datensaetze  */
+  /* Lesen des Kopfsatzes zur Ermittlung der Anzahl der zu lesenden Datensaetze */
   i=1;
   do                        /* max. 5 durchlgaenge */
   {
@@ -244,7 +272,9 @@ int main(int argc, char *argv[])
       i++;
   }
   while((anz_ds == -1) && (i < 6));
-
+  
+  fprintf(stderr, " CAN-Logging-Test: Anzahl Datensaetze: %u\n",anz_ds); /********************/
+  
   if ( anz_ds == -1 )
   {
     printf(" Kopfsatzlesen fehlgeschlagen\n");
@@ -258,6 +288,12 @@ int main(int argc, char *argv[])
   if (uvr_typ == UVR61_3)
     printf(" UVR Typ: UVR61-3\n");
 
+/* Abbruch - Test CAN */
+  fprintf(stderr, " CAN-Logging-Test: hier erst einmal Abbruch.\n");
+  do_cleanup();
+  return ( -1 );
+/* Abbruch - Test CAN */
+	
   zeitstempel();
   fprintf(fp_varlogfile,"%s - %s -- %d Datensaetze im D-LOGG\n\n",sDatum, sZeit,anz_ds);
 
@@ -377,7 +413,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
     {
       {"csv", 0, 0, 0},
       {"res", 0, 0, 0},
-	  {"dir", 1, 0, 0},
+      {"dir", 1, 0, 0},
       {0, 0, 0, 0}
     };
 
@@ -397,7 +433,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-		printf("    Version 0.8.1 vom 04.12.2009 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 00.01.2010 \n");
         return 0;
       }
       case 'h':
@@ -872,79 +908,95 @@ int kopfsatzlesen(void)
   UCHAR print_endaddr;
   KopfsatzD1 kopf_D1[1];
   KopfsatzA8 kopf_A8[1];
+  KOPFSATZ_DC kopf_DC[1];
   durchlauf=0;
 
   do
     {
       sendbuf[0]=KOPFSATZLESEN;    /* Senden der Kopfsatz-abfrage */
 
-  if (usb_zugriff)
-  {
-    write_erg=write(fd_serialport,sendbuf,1);
-    if (write_erg == 1)    /* Lesen der Antwort*/
+    if (usb_zugriff)
     {
-      if ( uvr_modus == 0xD1 )
+      write_erg=write(fd_serialport,sendbuf,1);
+      if (write_erg == 1)    /* Lesen der Antwort*/
       {
-        result=read(fd_serialport,kopf_D1,14);
-      }
-      else
-      {
-        result=read(fd_serialport,kopf_A8,13);
+        if ( uvr_modus == 0xD1 )
+        {
+          result=read(fd_serialport,kopf_D1,14);
+        }
+        else
+        {
+          result=read(fd_serialport,kopf_A8,13);
+        }
       }
     }
-  }
 
-  if (ip_zugriff)
-  {
-    if (!ip_first)
+    if (ip_zugriff)
     {
-      sock = socket(PF_INET, SOCK_STREAM, 0);
-      if (sock == -1)
+      if (!ip_first)
       {
-        perror("socket failed()");
-        do_cleanup();
-        return 2;
-      }
-      if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
+        sock = socket(PF_INET, SOCK_STREAM, 0);
+        if (sock == -1)
+        {
+          perror("socket failed()");
+          do_cleanup();
+          return 2;
+        }
+        if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
+        {
+          perror("connect failed()");
+          do_cleanup();
+          return 3;
+        }
+      }  /* if (!ip_first) */
+      write_erg=send(sock,sendbuf,1,0);
+      if (write_erg == 1)    /* Lesen der Antwort */
       {
-        perror("connect failed()");
-        do_cleanup();
-        return 3;
-      }
-    }  /* if (!ip_first) */
-    write_erg=send(sock,sendbuf,1,0);
-    if (write_erg == 1)    /* Lesen der Antwort */
-    {
-      if ( uvr_modus == 0xD1 )
-      {
-        result = recv(sock,kopf_D1,14,0);
-      }
-      else
-      {
-        result = recv(sock,kopf_A8,13,0);
+	    switch(uvr_modus)
+		{
+          case 0xD1: result = recv(sock,kopf_D1,14,0); break;
+          case 0xA8: result = recv(sock,kopf_A8,13,0); break;
+		  case 0xDC: result = recv(sock,kopf_DC,14,0); break;
+        }
       }
     }
-  }
 
-  if ( uvr_modus == 0xD1 )
-  {
-    pruefz = berechneKopfpruefziffer_D1( kopf_D1 );
-    merk_pruefz = kopf_D1[0].pruefsum;
-  }
-  else
-  {
-    pruefz = berechneKopfpruefziffer_A8( kopf_A8 );
-    merk_pruefz = kopf_A8[0].pruefsum;
-  }
+    switch(uvr_modus)
+    {
+      case 0xD1: 
+	    pruefz = berechneKopfpruefziffer_D1( kopf_D1 );
+	    merk_pruefz = kopf_D1[0].pruefsum;
+        break;
+      case 0xA8: 
+        pruefz = berechneKopfpruefziffer_A8( kopf_A8 );
+        merk_pruefz = kopf_A8[0].pruefsum;
+		break;
+	  case 0xDC: 
+		fprintf(stderr, " CAN-Logging-Test: Anzahl Datenrahmen laut Byte 6: %x\n",kopf_DC[0].all_bytes[5]); /********************/	  
+	    pruefz = berechneKopfpruefziffer_DC( kopf_DC );
+		switch(kopf_DC[0].all_bytes[5])
+		{
+		  case 1: merk_pruefz = kopf_DC[0].DC_Rahmen1.pruefsum; break;
+		  case 2: merk_pruefz = kopf_DC[0].DC_Rahmen2.pruefsum; break;
+		  case 3: merk_pruefz = kopf_DC[0].DC_Rahmen3.pruefsum; break;
+		  case 4: merk_pruefz = kopf_DC[0].DC_Rahmen4.pruefsum; break;
+		  case 5: merk_pruefz = kopf_DC[0].DC_Rahmen5.pruefsum; break;
+		  case 6: merk_pruefz = kopf_DC[0].DC_Rahmen6.pruefsum; break;
+		  case 7: merk_pruefz = kopf_DC[0].DC_Rahmen7.pruefsum; break;
+		  case 8: merk_pruefz = kopf_DC[0].DC_Rahmen8.pruefsum; break;
+		}
+        break;
+	}
 
-   durchlauf++;
-
-#ifdef DEBUG
-  if ( uvr_modus == 0xD1 )
-    printf("  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_D1[0].pruefsum);
-  else
-    printf("  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_A8[0].pruefsum);
-#endif
+    durchlauf++;
+   #ifdef DEBUG
+    if ( uvr_modus == 0xD1 )
+      printf("  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_D1[0].pruefsum);
+    if ( uvr_modus == 0xA8 )
+      printf("  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_A8[0].pruefsum);
+    if ( uvr_modus == 0xDC )
+      printf("  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].pruefsum);
+   #endif
   }
   while (( (pruefz != merk_pruefz )  && (durchlauf < 10)));
 
@@ -961,15 +1013,30 @@ int kopfsatzlesen(void)
     printf("Anzahl Durchlaeufe Pruefziffer Kopfsatz: %i\n",durchlauf);
 #endif
 
-  if ( uvr_modus == 0xD1 )
+  switch(uvr_modus)
   {
-    anz_ds = anzahldatensaetze_D1(kopf_D1);
-    print_endaddr = kopf_D1[0].endadresse[0];
-  }
-  else
-  {
-    anz_ds = anzahldatensaetze_A8(kopf_A8);
-    print_endaddr = kopf_A8[0].endadresse[0];
+    case 0xD1: 
+      anz_ds = anzahldatensaetze_D1(kopf_D1);
+      print_endaddr = kopf_D1[0].endadresse[0];
+      break;
+    case 0xA8: 
+      anz_ds = anzahldatensaetze_A8(kopf_A8);
+      print_endaddr = kopf_A8[0].endadresse[0];
+      break;
+	case 0xDC:
+      anz_ds = anzahldatensaetze_DC(kopf_DC);
+	  switch(kopf_DC[0].all_bytes[5])
+	  {
+	    case 1: print_endaddr = kopf_DC[0].DC_Rahmen1.endadresse[0]; break;
+	    case 2: print_endaddr = kopf_DC[0].DC_Rahmen2.endadresse[0]; break;
+	    case 3: print_endaddr = kopf_DC[0].DC_Rahmen3.endadresse[0]; break;
+	    case 4: print_endaddr = kopf_DC[0].DC_Rahmen4.endadresse[0]; break;
+	    case 5: print_endaddr = kopf_DC[0].DC_Rahmen5.endadresse[0]; break;
+	    case 6: print_endaddr = kopf_DC[0].DC_Rahmen6.endadresse[0]; break;
+	    case 7: print_endaddr = kopf_DC[0].DC_Rahmen7.endadresse[0]; break;
+	    case 8: print_endaddr = kopf_DC[0].DC_Rahmen8.endadresse[0]; break;
+	  }
+      break;
   }
 
   if ( anz_ds == -1 )
@@ -1005,6 +1072,10 @@ int kopfsatzlesen(void)
   else
   {
     uvr_typ = kopf_A8[0].satzlaengeGeraet1; /* 0x5A -> UVR61-3; 0x76 -> UVR1611 */
+  }
+  if ( uvr_modus == 0xDC )
+  {
+    uvr_typ = 0x76; /* CAN-Logging nur mit UVR1611 */  
   }
 
   return anz_ds;
@@ -2157,6 +2228,163 @@ int berechneKopfpruefziffer_D1(KopfsatzD1 derKopf[] )
      + derKopf[0].endadresse[2]) % 0x100);
 }
 
+/* Berechnung der Pruefsumme des Kopfsatz Modus 0xDC */
+int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
+{
+  int i, z;
+  z = 0;
+  for (i=0;i++;i<13+derKopf[0].all_bytes[5])
+  {
+    z = z + derKopf[0].all_bytes[i];
+  }
+  return z % 0x100;
+  
+/*   switch(derKopf[0].all_bytes[5])
+  {
+    case 1:
+	
+    return  ((derKopf[0].DC_Rahmen1.kennung + derKopf[0].version
+     + derKopf[0].zeitstempel[0]
+     + derKopf[0].zeitstempel[1]
+     + derKopf[0].zeitstempel[2]
+     + derKopf[0].anzahlCAN_Rahmen
+     + derKopf[0].satzlaengeRahmen1
+     + derKopf[0].startadresse[0]
+     + derKopf[0].startadresse[1]
+     + derKopf[0].startadresse[2]
+     + derKopf[0].endadresse[0]
+     + derKopf[0].endadresse[1]
+     + derKopf[0].endadresse[2]) % 0x100);
+      break;
+	case 2:
+    return  ((derKopf[0].kennung + derKopf[0].version
+     + derKopf[0].zeitstempel[0]
+     + derKopf[0].zeitstempel[1]
+     + derKopf[0].zeitstempel[2]
+     + derKopf[0].anzahlCAN_Rahmen
+     + derKopf[0].satzlaengeRahmen1
+     + derKopf[0].satzlaengeRahmen2
+     + derKopf[0].startadresse[0]
+     + derKopf[0].startadresse[1]
+     + derKopf[0].startadresse[2]
+     + derKopf[0].endadresse[0]
+     + derKopf[0].endadresse[1]
+     + derKopf[0].endadresse[2]) % 0x100);
+      break;
+	case 3:
+    return  ((derKopf[0].kennung + derKopf[0].version
+     + derKopf[0].zeitstempel[0]
+     + derKopf[0].zeitstempel[1]
+     + derKopf[0].zeitstempel[2]
+     + derKopf[0].anzahlCAN_Rahmen
+     + derKopf[0].satzlaengeRahmen1
+     + derKopf[0].satzlaengeRahmen2
+     + derKopf[0].satzlaengeRahmen3
+     + derKopf[0].startadresse[0]
+     + derKopf[0].startadresse[1]
+     + derKopf[0].startadresse[2]
+     + derKopf[0].endadresse[0]
+     + derKopf[0].endadresse[1]
+     + derKopf[0].endadresse[2]) % 0x100);
+      break;
+	case 4:
+    return  ((derKopf[0].kennung + derKopf[0].version
+     + derKopf[0].zeitstempel[0]
+     + derKopf[0].zeitstempel[1]
+     + derKopf[0].zeitstempel[2]
+     + derKopf[0].anzahlCAN_Rahmen
+     + derKopf[0].satzlaengeRahmen1
+     + derKopf[0].satzlaengeRahmen2
+     + derKopf[0].satzlaengeRahmen3
+     + derKopf[0].satzlaengeRahmen4
+     + derKopf[0].startadresse[0]
+     + derKopf[0].startadresse[1]
+     + derKopf[0].startadresse[2]
+     + derKopf[0].endadresse[0]
+     + derKopf[0].endadresse[1]
+     + derKopf[0].endadresse[2]) % 0x100);
+      break;
+	case 5:
+    return  ((derKopf[0].kennung + derKopf[0].version
+     + derKopf[0].zeitstempel[0]
+     + derKopf[0].zeitstempel[1]
+     + derKopf[0].zeitstempel[2]
+     + derKopf[0].anzahlCAN_Rahmen
+     + derKopf[0].satzlaengeRahmen1
+     + derKopf[0].satzlaengeRahmen2
+     + derKopf[0].satzlaengeRahmen3
+     + derKopf[0].satzlaengeRahmen4
+     + derKopf[0].satzlaengeRahmen5
+     + derKopf[0].startadresse[0]
+     + derKopf[0].startadresse[1]
+     + derKopf[0].startadresse[2]
+     + derKopf[0].endadresse[0]
+     + derKopf[0].endadresse[1]
+     + derKopf[0].endadresse[2]) % 0x100);
+      break;
+	case 6:
+    return  ((derKopf[0].kennung + derKopf[0].version
+     + derKopf[0].zeitstempel[0]
+     + derKopf[0].zeitstempel[1]
+     + derKopf[0].zeitstempel[2]
+     + derKopf[0].anzahlCAN_Rahmen
+     + derKopf[0].satzlaengeRahmen1
+     + derKopf[0].satzlaengeRahmen2
+     + derKopf[0].satzlaengeRahmen3
+     + derKopf[0].satzlaengeRahmen4
+     + derKopf[0].satzlaengeRahmen5
+     + derKopf[0].satzlaengeRahmen6
+     + derKopf[0].startadresse[0]
+     + derKopf[0].startadresse[1]
+     + derKopf[0].startadresse[2]
+     + derKopf[0].endadresse[0]
+     + derKopf[0].endadresse[1]
+     + derKopf[0].endadresse[2]) % 0x100);
+      break;
+	case 7:
+    return  ((derKopf[0].kennung + derKopf[0].version
+     + derKopf[0].zeitstempel[0]
+     + derKopf[0].zeitstempel[1]
+     + derKopf[0].zeitstempel[2]
+     + derKopf[0].anzahlCAN_Rahmen
+     + derKopf[0].satzlaengeRahmen1
+     + derKopf[0].satzlaengeRahmen2
+     + derKopf[0].satzlaengeRahmen3
+     + derKopf[0].satzlaengeRahmen4
+     + derKopf[0].satzlaengeRahmen5
+     + derKopf[0].satzlaengeRahmen6
+     + derKopf[0].satzlaengeRahmen7
+     + derKopf[0].startadresse[0]
+     + derKopf[0].startadresse[1]
+     + derKopf[0].startadresse[2]
+     + derKopf[0].endadresse[0]
+     + derKopf[0].endadresse[1]
+     + derKopf[0].endadresse[2]) % 0x100);
+      break;
+	case 8:
+    return  ((derKopf[0].kennung + derKopf[0].version
+     + derKopf[0].zeitstempel[0]
+     + derKopf[0].zeitstempel[1]
+     + derKopf[0].zeitstempel[2]
+     + derKopf[0].anzahlCAN_Rahmen
+     + derKopf[0].satzlaengeRahmen1
+     + derKopf[0].satzlaengeRahmen2
+     + derKopf[0].satzlaengeRahmen3
+     + derKopf[0].satzlaengeRahmen4
+     + derKopf[0].satzlaengeRahmen5
+     + derKopf[0].satzlaengeRahmen6
+     + derKopf[0].satzlaengeRahmen7
+     + derKopf[0].satzlaengeRahmen8
+     + derKopf[0].startadresse[0]
+     + derKopf[0].startadresse[1]
+     + derKopf[0].startadresse[2]
+     + derKopf[0].endadresse[0]
+     + derKopf[0].endadresse[1]
+     + derKopf[0].endadresse[2]) % 0x100);
+      break;
+  } */
+}
+
 /* Berechnung der Pruefsumme des Kopfsatz Modus 0xA8 */
 int berechneKopfpruefziffer_A8(KopfsatzA8 derKopf[] )
 {
@@ -2251,7 +2479,7 @@ int berechnepruefziffer_modus_D1(u_modus_D1 *ds_modus_D1, int anzahl)
   return retval % modTeiler;
 }
 
-/* Ermittlung Anzahl der Datensaetze Modus 0xA8 */
+/* Ermittlung Anzahl der Datensaetze Modus 0xD1 */
 int anzahldatensaetze_D1(KopfsatzD1 kopf[])
 {
   /* UCHAR byte1, byte2, byte3; */
@@ -2271,6 +2499,130 @@ int anzahldatensaetze_D1(KopfsatzD1 kopf[])
 
   /* Byte 3 - highest */
   byte3 = (kopf[0].endadresse[2] * 0x100)*0x02;
+
+  return byte1 + byte2 + byte3;
+}
+
+/* Ermittlung Anzahl der Datensaetze Modus 0xDC (CAN-Logging) */
+int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
+{
+  /* UCHAR byte1, byte2, byte3; */
+  int byte1, byte2, byte3;
+  switch(kopf[0].all_bytes[5])
+  {
+    case 1:
+      /* Byte 1 - lowest */
+      switch (kopf[0].DC_Rahmen1.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x80 : byte1 = 2; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
+      }
+      /* Byte 2 - mitte */
+      byte2 = ((kopf[0].DC_Rahmen1.endadresse[1] / 0x02) * 0x02);
+      /* Byte 3 - highest */
+      byte3 = (kopf[0].DC_Rahmen1.endadresse[2] * 0x100)*0x02;
+      break;
+    case 2:
+      /* Byte 1 - lowest */
+      switch (kopf[0].DC_Rahmen2.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x80 : byte1 = 2; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
+      }
+      /* Byte 2 - mitte */
+      byte2 = ((kopf[0].DC_Rahmen2.endadresse[1] / 0x02) * 0x02);
+      /* Byte 3 - highest */
+      byte3 = (kopf[0].DC_Rahmen2.endadresse[2] * 0x100)*0x02;
+      break;
+    case 3:
+      /* Byte 1 - lowest */
+      switch (kopf[0].DC_Rahmen3.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x80 : byte1 = 2; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
+      }
+      /* Byte 2 - mitte */
+      byte2 = ((kopf[0].DC_Rahmen3.endadresse[1] / 0x02) * 0x02);
+      /* Byte 3 - highest */
+      byte3 = (kopf[0].DC_Rahmen3.endadresse[2] * 0x100)*0x02;
+      break;
+    case 4:
+      /* Byte 1 - lowest */
+      switch (kopf[0].DC_Rahmen4.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x80 : byte1 = 2; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
+      }
+      /* Byte 2 - mitte */
+      byte2 = ((kopf[0].DC_Rahmen4.endadresse[1] / 0x02) * 0x02);
+      /* Byte 3 - highest */
+      byte3 = (kopf[0].DC_Rahmen4.endadresse[2] * 0x100)*0x02;
+      break;
+    case 5:
+      /* Byte 1 - lowest */
+      switch (kopf[0].DC_Rahmen5.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x80 : byte1 = 2; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
+      }
+      /* Byte 2 - mitte */
+      byte2 = ((kopf[0].DC_Rahmen5.endadresse[1] / 0x02) * 0x02);
+      /* Byte 3 - highest */
+      byte3 = (kopf[0].DC_Rahmen5.endadresse[2] * 0x100)*0x02;
+      break;
+    case 6:
+      /* Byte 1 - lowest */
+      switch (kopf[0].DC_Rahmen6.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x80 : byte1 = 2; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
+      }
+      /* Byte 2 - mitte */
+      byte2 = ((kopf[0].DC_Rahmen6.endadresse[1] / 0x02) * 0x02);
+      /* Byte 3 - highest */
+      byte3 = (kopf[0].DC_Rahmen6.endadresse[2] * 0x100)*0x02;
+      break;
+    case 7:
+      /* Byte 1 - lowest */
+      switch (kopf[0].DC_Rahmen7.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x80 : byte1 = 2; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
+      }
+      /* Byte 2 - mitte */
+      byte2 = ((kopf[0].DC_Rahmen7.endadresse[1] / 0x02) * 0x02);
+      /* Byte 3 - highest */
+      byte3 = (kopf[0].DC_Rahmen7.endadresse[2] * 0x100)*0x02;
+      break;
+    case 8:
+      /* Byte 1 - lowest */
+      switch (kopf[0].DC_Rahmen8.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x80 : byte1 = 2; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
+      }
+      /* Byte 2 - mitte */
+      byte2 = ((kopf[0].DC_Rahmen8.endadresse[1] / 0x02) * 0x02);
+      /* Byte 3 - highest */
+      byte3 = (kopf[0].DC_Rahmen8.endadresse[2] * 0x100)*0x02;
+	  break;
+  }
 
   return byte1 + byte2 + byte3;
 }

@@ -26,6 +26,7 @@
  * 17.02.2007 C. Dolainsky   - aktualisiert                                  *
  * 22.10.2007 H. Roemer      - UVR61-3 hinzugefuegt                          *
  *    11.2007 H. Roemer      - Modus 2DL (0xD1) hinzugefuegt                 *
+ *    01.2010 H. Roemer      - CAN-Logging                                   *
  *****************************************************************************/
 
 #define VERSIONSABFRAGE 0x81
@@ -324,6 +325,128 @@ typedef struct {
   UCHAR endadresse[3];
   UCHAR pruefsum;  /* Summer der Bytes mod 256 */
 } KopfsatzA8;
+
+/* Datenstruktur des Kopfsatzes aus dem BL-Net kommend CAN-Logging */
+/* Modus 0xDC - Laenge 14 bis 21 Byte - KopfsatzDC -                     */
+typedef union{
+  UCHAR all_bytes[21];
+  struct 
+  {
+  UCHAR kennung;
+  UCHAR version;
+  UCHAR zeitstempel[3];
+  UCHAR anzahlCAN_Rahmen;
+  UCHAR satzlaengeRahmen1;
+  UCHAR startadresse[3];
+  UCHAR endadresse[3];
+  UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  }DC_Rahmen1;
+  struct 
+  {
+  UCHAR kennung;
+  UCHAR version;
+  UCHAR zeitstempel[3];
+  UCHAR anzahlCAN_Rahmen;
+  UCHAR satzlaengeRahmen1;
+  UCHAR satzlaengeRahmen2;
+  UCHAR startadresse[3];
+  UCHAR endadresse[3];
+  UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  }DC_Rahmen2;
+  struct 
+  {
+  UCHAR kennung;
+  UCHAR version;
+  UCHAR zeitstempel[3];
+  UCHAR anzahlCAN_Rahmen;
+  UCHAR satzlaengeRahmen1;
+  UCHAR satzlaengeRahmen2;
+  UCHAR satzlaengeRahmen3;
+  UCHAR startadresse[3];
+  UCHAR endadresse[3];
+  UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  }DC_Rahmen3;
+  struct 
+  {
+  UCHAR kennung;
+  UCHAR version;
+  UCHAR zeitstempel[3];
+  UCHAR anzahlCAN_Rahmen;
+  UCHAR satzlaengeRahmen1;
+  UCHAR satzlaengeRahmen2;
+  UCHAR satzlaengeRahmen3;
+  UCHAR satzlaengeRahmen4;
+  UCHAR startadresse[3];
+  UCHAR endadresse[3];
+  UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  }DC_Rahmen4;
+  struct 
+  {
+  UCHAR kennung;
+  UCHAR version;
+  UCHAR zeitstempel[3];
+  UCHAR anzahlCAN_Rahmen;
+  UCHAR satzlaengeRahmen1;
+  UCHAR satzlaengeRahmen2;
+  UCHAR satzlaengeRahmen3;
+  UCHAR satzlaengeRahmen4;
+  UCHAR satzlaengeRahmen5;
+  UCHAR startadresse[3];
+  UCHAR endadresse[3];
+  UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  }DC_Rahmen5;
+  struct 
+  {
+  UCHAR kennung;
+  UCHAR version;
+  UCHAR zeitstempel[3];
+  UCHAR anzahlCAN_Rahmen;
+  UCHAR satzlaengeRahmen1;
+  UCHAR satzlaengeRahmen2;
+  UCHAR satzlaengeRahmen3;
+  UCHAR satzlaengeRahmen4;
+  UCHAR satzlaengeRahmen5;
+  UCHAR satzlaengeRahmen6;
+  UCHAR startadresse[3];
+  UCHAR endadresse[3];
+  UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  }DC_Rahmen6;
+  struct 
+  {
+  UCHAR kennung;
+  UCHAR version;
+  UCHAR zeitstempel[3];
+  UCHAR anzahlCAN_Rahmen;
+  UCHAR satzlaengeRahmen1;
+  UCHAR satzlaengeRahmen2;
+  UCHAR satzlaengeRahmen3;
+  UCHAR satzlaengeRahmen4;
+  UCHAR satzlaengeRahmen5;
+  UCHAR satzlaengeRahmen6;
+  UCHAR satzlaengeRahmen7;
+  UCHAR startadresse[3];
+  UCHAR endadresse[3];
+  UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  }DC_Rahmen7;
+  struct 
+  {
+  UCHAR kennung;
+  UCHAR version;
+  UCHAR zeitstempel[3];
+  UCHAR anzahlCAN_Rahmen;
+  UCHAR satzlaengeRahmen1;
+  UCHAR satzlaengeRahmen2;
+  UCHAR satzlaengeRahmen3;
+  UCHAR satzlaengeRahmen4;
+  UCHAR satzlaengeRahmen5;
+  UCHAR satzlaengeRahmen6;
+  UCHAR satzlaengeRahmen7;
+  UCHAR satzlaengeRahmen8;
+  UCHAR startadresse[3];
+  UCHAR endadresse[3];
+  UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  }DC_Rahmen8;
+} KOPFSATZ_DC;
 
 /* Union fuer Daten im Modus 0xD1 (2DL)     */
 /* aus dem Datenlogger / Bootloader kommend */
