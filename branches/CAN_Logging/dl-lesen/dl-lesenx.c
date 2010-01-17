@@ -920,13 +920,11 @@ int kopfsatzlesen(void)
       write_erg=write(fd_serialport,sendbuf,1);
       if (write_erg == 1)    /* Lesen der Antwort*/
       {
-        if ( uvr_modus == 0xD1 )
-        {
-          result=read(fd_serialport,kopf_D1,14);
-        }
-        else
-        {
-          result=read(fd_serialport,kopf_A8,13);
+	    switch(uvr_modus)
+		{
+          case 0xD1: result=read(fd_serialport,kopf_D1,14); break;
+          case 0xA8: result=read(fd_serialport,kopf_A8,13); break;
+		  case 0xDC: result=read(fd_serialport,kopf_DC,14); break;
         }
       }
     }
