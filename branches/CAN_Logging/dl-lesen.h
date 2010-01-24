@@ -154,6 +154,7 @@ typedef struct{
 } the_datum_zeit;
 
 /* Union fuer Datensatz der UVR1611 und UVR61-3 */
+/* und Modus CAN-Logging                        */
 /* aus dem Datenlogger / Bootloader kommend     */
 typedef union{
   /* UVR1611 Datensatz DS_UVR1611 */
@@ -237,6 +238,56 @@ typedef union{
     UCHAR zeitstempel[3];
     UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   } DS_UVR61_3;
+  /* CAN-Logging Datensatz DS_UVR1611_CAN */
+  struct {
+    UCHAR zeitstempel[3];
+  /* Sensor-Eingaenge */
+#ifdef NEW_WSOL_TEMP
+    UCHAR sensT[16][2];
+#else
+    UCHAR t2[2];
+    UCHAR t3[2];
+    UCHAR t4[2];
+    UCHAR t5[2];
+    UCHAR t6[2];
+    UCHAR t7[2];
+    UCHAR t8[2];
+    UCHAR t9[2];
+    UCHAR t10[2];
+    UCHAR t11[2];
+    UCHAR t12[2];
+    UCHAR t13[2];
+    UCHAR t14[2];
+    UCHAR t15[2];
+    UCHAR t16[2];
+#endif
+    /*  Ausgaenge durch bits: */
+    /*   a8 a7 a6 a5 a4 a3 a2 a1*/
+    UCHAR ausgbyte1;
+    /*  Ausgaenge durch bits: */
+    /*  leer1  leer2 leer3 a13 a12 a11 a10 a9 */
+    UCHAR ausgbyte2;
+
+    /* Drehzahlausgaenge */
+    UCHAR dza[4];
+
+    /* WMZ 1/2 aktiv in bit 1 und bit2 */
+    UCHAR wmzaehler_reg;
+
+    /* Solar1: momentane Leistung, Waermemenge kWh/MWh */
+    UCHAR mlstg1[4];
+    UCHAR kwh1[2];
+    UCHAR mwh1[2];
+
+    /* Solar2: momentane Leistung, Waermemenge kWh/MWh */
+    UCHAR mlstg2[4];
+    UCHAR kwh2[2];
+    UCHAR mwh2[2];
+
+    the_datum_zeit datum_zeit;
+
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_UVR1611_CAN;
 } u_DS_UVR1611_UVR61_3;
 
 /* Bitfeld Drehzahlreglung*/

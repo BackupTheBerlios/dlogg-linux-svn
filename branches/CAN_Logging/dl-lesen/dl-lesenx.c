@@ -70,10 +70,12 @@ int copy_UVR2winsol_D1_1611(u_modus_D1 *dsatz_modus_d1, DS_Winsol *dsatz_winsol 
 int copy_UVR2winsol_D1_61_3(u_modus_D1 *dsatz_modus_d1, DS_Winsol_UVR61_3 *dsatz_winsol_uvr61_3, int geraet);
 int datenlesen_A8(int anz_datensaetze);
 int datenlesen_D1(int anz_datensaetze);
+int datenlesen_DC(int anz_datensaetze);
 int berechneKopfpruefziffer_D1(KopfsatzD1 derKopf[] );
 int berechneKopfpruefziffer_A8(KopfsatzA8 derKopf[] );
 int berechnepruefziffer_uvr1611(u_DS_UVR1611_UVR61_3 ds_uvr1611[]);
 int berechnepruefziffer_uvr61_3(u_DS_UVR1611_UVR61_3 ds_uvr61_3[]);
+int berechnepruefziffer_uvr1611_CAN(u_DS_UVR1611_UVR61_3 ds_uvr1611[]);
 int berechnepruefziffer_modus_D1(u_modus_D1 ds_modus_D1[], int anzahl);
 int anzahldatensaetze_D1(KopfsatzD1 kopf[]);
 int anzahldatensaetze_A8(KopfsatzA8 kopf[]);
@@ -289,9 +291,9 @@ int main(int argc, char *argv[])
     printf(" UVR Typ: UVR61-3\n");
 
 /* Abbruch - Test CAN */
-  fprintf(stderr, " CAN-Logging-Test: hier erst einmal Abbruch.\n");
-  do_cleanup();
-  return ( -1 );
+//  fprintf(stderr, " CAN-Logging-Test: hier erst einmal Abbruch.\n");
+//  do_cleanup();
+//  return ( -1 );
 /* Abbruch - Test CAN */
 	
   zeitstempel();
@@ -300,13 +302,16 @@ int main(int argc, char *argv[])
   /* ************************************************************************ */
   /* Daten aus dem D-LOGG lesen und in das Log-File schreiben                 */
   /* falls csv gesetzt ist auch Daten in allcsv.csv dumpen                    */
-  if ( uvr_modus == 0xA8 )
-    erg = datenlesen_A8(anz_ds);
-  else if ( uvr_modus == 0xD1 )
-    erg = datenlesen_D1(anz_ds);
+  switch(uvr_modus)
+  {
+    case 0xA8: erg = datenlesen_A8(anz_ds); break;
+    case 0xD1: erg = datenlesen_D1(anz_ds); break;
+	case 0xDC: erg = datenlesen_DC(anz_ds); break;
+  }
 
   printf("\n%d Datensaetze insgesamt geschrieben.\n",erg);
   zeitstempel();
+if (erg != 999) /*  <-- Test CAN, temporaer */
   fprintf(fp_varlogfile,"%s - %s -- Es wurden %d Datensaetze geschrieben.\n",sDatum, sZeit,erg);
 
   /* ************************************************************************ */
@@ -2209,6 +2214,251 @@ int datenlesen_D1(int anz_datensaetze)
   return i - fehlerhafte_ds;
 }
 
+/* Daten vom DL lesen - 1DL-Modus */
+int datenlesen_DC(int anz_datensaetze)
+{
+  unsigned modTeiler;
+  int i, merk_i, fehlerhafte_ds, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
+  int Bytes_for_0xA8 = 65, monatswechsel = 0;
+  u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];
+  DS_Winsol dsatz_winsol[1];
+  DS_Winsol *puffer_dswinsol = &dsatz_winsol[0];
+  UCHAR pruefsumme = 0, merk_monat = 0;
+  UCHAR sendbuf[6];       /*  sendebuffer fuer die Request-Commandos*/
+  UCHAR empfbuf[6];
+
+  modTeiler = 0x100;
+  i = 0; /* Gesamtdurchlaufzaehler mit 0 initialisiert */
+  merk_i = 0; /* Bei falscher Pruefziffer den Datensatz bis zu fuenfmal wiederholt lesen */
+  fehlerhafte_ds = 0; /* Anzahl fehlerhaft gelesener Datensaetze mit 0 initialisiert */
+  lowbyte = 0;
+  middlebyte = 0;
+  merkmiddlebyte = middlebyte;
+
+  sendbuf[0]=VERSIONSABFRAGE;   /* Senden der Versionsabfrage */
+  if (usb_zugriff)
+  {
+    write_erg=write(fd_serialport,sendbuf,1);
+    if (write_erg == 1)    /* Lesen der Antwort*/
+      result=read(fd_serialport,empfbuf,1);
+  }
+  if (ip_zugriff)
+  {
+    if (!ip_first)
+    {
+      sock = socket(PF_INET, SOCK_STREAM, 0);
+      if (sock == -1)
+      {
+        perror("socket failed()");
+        do_cleanup();
+        return 2;
+      }
+      if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
+      {
+        perror("connect failed()");
+        do_cleanup();
+        return 3;
+      }
+    }  /* if (!ip_first) */
+    write_erg=send(sock,sendbuf,1,0);
+    if (write_erg == 1)    /* Lesen der Antwort */
+      result  = recv(sock,empfbuf,1,0);
+  }
+
+  /* fuellen des Sendebuffer - 6 Byte */
+  sendbuf[0] = DATENBEREICHLESEN;
+  sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
+
+  for(;i<anz_datensaetze;i++)
+  {
+    sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
+
+    if (usb_zugriff)
+    {
+      write_erg=write(fd_serialport,sendbuf,6);
+      if (write_erg == 6)    /* Lesen der Antwort*/
+        // result=read(fd_serialport, dsatz_uvr1611,65);
+        result=read(fd_serialport, u_dsatz_uvr,Bytes_for_0xA8);
+    }
+    if (ip_zugriff)
+    {
+      if (!ip_first)
+      {
+        sock = socket(PF_INET, SOCK_STREAM, 0);
+        if (sock == -1)
+        {
+          perror("socket failed()");
+          do_cleanup();
+          return 2;
+        }
+        if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
+        {
+          perror("connect failed()");
+          do_cleanup();
+          return 3;
+        }
+       }  /* if (!ip_first) */
+
+       write_erg=send(sock,sendbuf,6,0);
+       if (write_erg == 6)    /* Lesen der Antwort */
+          result  = recv(sock, u_dsatz_uvr,Bytes_for_0xA8,0);
+
+        // result  = recv(sock, dsatz_uvr1611,65,0);
+    } /* if (ip_zugriff) */
+
+//**************************************************************************************** !!!!!!!!
+    if (uvr_typ == UVR1611)
+      pruefsumme = berechnepruefziffer_uvr1611_CAN(u_dsatz_uvr);
+
+  if (uvr_typ == UVR1611)
+      printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR1611_CAN.pruefsum,pruefsumme);
+	  
+	 return 999;
+	 
+#if DEBUG > 3
+#endif
+
+    if (u_dsatz_uvr[0].DS_UVR1611.pruefsum == pruefsumme || u_dsatz_uvr[0].DS_UVR61_3.pruefsum == pruefsumme)
+    {  /*Aenderung: 02.09.06 - Hochzaehlen der Startadresse erst dann, wenn korrekt gelesen wurde (eventuell endlosschleife?) */
+#if DEBUG > 4
+    print_dsatz_uvr1611_content(u_dsatz_uvr);
+#endif
+      if ( i == 0 ) /* erster Datenssatz wurde gelesen - Logfile oeffnen / erstellen */
+      {
+        if (uvr_typ == UVR1611)
+        {
+          tmp_erg = (erzeugeLogfileName(u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat,u_dsatz_uvr[0].DS_UVR1611.datum_zeit.jahr));
+          merk_monat = u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat;
+        }
+        if ( tmp_erg == 0 )
+        {
+          printf("Der Logfile-Name konnte nicht erzeugt werden!");
+          exit(-1);
+        }
+        else
+        {
+          if ( open_logfile(LogFileName, 1) == -1 )
+          {
+            printf("Das LogFile kann nicht geoeffnet werden!\n");
+            exit(-1);
+          }
+        }
+      }
+      /* Hat der Monat gewechselt? Wenn ja, neues LogFile erstellen. */
+      if ( uvr_typ == UVR1611 && merk_monat != u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat )
+        monatswechsel = 1;
+
+//  printf("Monat: %2d Variable monatswechsel: %1d\n", u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.monat,monatswechsel);
+      if ( monatswechsel == 1 )
+      {
+        printf("Monatswechsel!\n");
+        if ( close_logfile() == -1)
+        {
+          printf("Fehler beim Monatswechsel: Cannot close logfile!");
+          exit(-1);
+        }
+        else
+        {
+          if (uvr_typ == UVR1611)
+            tmp_erg = (erzeugeLogfileName(u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat,u_dsatz_uvr[0].DS_UVR1611.datum_zeit.jahr));
+          if ( tmp_erg == 0 )
+          {
+            printf("Fehler beim Monatswechsel: Der Logfile-Name konnte nicht erzeugt werden!");
+            exit(-1);
+          }
+          else
+          {
+            if ( open_logfile(LogFileName, 1) == -1 )
+            {
+              printf("Fehler beim Monatswechsel: Das LogFile kann nicht geoeffnet werden!\n");
+              exit(-1);
+            }
+          }
+        }
+      } /* Ende: if ( merk_monat != dsatz_uvr1611[0].datum_zeit.monat ) */
+
+      if (uvr_typ == UVR1611)
+        merk_monat = u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat;
+
+      if (uvr_typ == UVR1611)
+        copy_UVR2winsol_1611( &u_dsatz_uvr[0], &dsatz_winsol[0] );
+
+      if ( csv==1 && fp_csvfile != NULL )
+      {
+        if (uvr_typ == UVR1611)
+//          writeWINSOLlogfile2CSV(fp_csvfile, &dsatz_winsol[0],
+           writeWINSOLlogfile2CSV(fp_logfile, &dsatz_winsol[0],
+           u_dsatz_uvr[0].DS_UVR1611.datum_zeit.jahr,
+           u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat );
+      }
+
+      /* puffer_dswinsol = &dsatz_winsol[0];*/
+      /* schreiben der gelesenen Rohdaten in das LogFile */
+      if (uvr_typ == UVR1611)
+        tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile);
+
+      if ( ((i%100) == 0) && (i > 0) )
+        printf("%d Datensaetze geschrieben.\n",i);
+
+      /* Hochzaehlen der Startadressen                                      */
+      if (lowbyte <= 2)
+        lowbyte++;
+      else
+      {
+        lowbyte = 0;
+        middlebyte++;
+      }
+
+      switch (lowbyte)
+      {
+        case 0: sendbuf[1] = 0x00; break;
+        case 1: sendbuf[1] = 0x40; break;
+        case 2: sendbuf[1] = 0x80; break;
+        case 3: sendbuf[1] = 0xc0; break;
+      }
+
+      if (middlebyte > merkmiddlebyte)   /* das mittlere Byte muss erhoeht werden */
+      {
+        if ( sendbuf[2] != 0xFE )
+        {
+          sendbuf[2] = sendbuf[2] + 0x02;
+          merkmiddlebyte = middlebyte;
+        }
+        else /* das highbyte muss erhoeht werden */
+        {
+          sendbuf[2] = 0x00;
+          sendbuf[3] = sendbuf[3] + 0x01;
+          merkmiddlebyte = middlebyte;
+        }
+      }
+      monatswechsel = 0;
+    } /* Ende: if (dsatz_uvr1611[0].pruefsum == pruefsumme) */
+    else
+    {
+      if (merk_i < 5)
+      {
+        i--; /* falsche Pruefziffer - also nochmals lesen */
+#ifdef DEBUG
+        printf ( " falsche Pruefsumme - Versuch#%d\n",merk_i);
+#endif
+        merk_i++; /* hochzaehlen bis 5 */
+      }
+      else
+      {
+        merk_i = 0;
+        fehlerhafte_ds++;
+        printf ( " fehlerhafter Datensatz - insgesamt:%d\n",fehlerhafte_ds);
+      }
+    }
+  }
+
+  return i - fehlerhafte_ds;
+}
+
+
 /* Berechnung der Pruefsumme des Kopfsatz Modus 0xD1 */
 int berechneKopfpruefziffer_D1(KopfsatzD1 derKopf[] )
 {
@@ -2428,6 +2678,39 @@ int berechnepruefziffer_uvr1611(u_DS_UVR1611_UVR61_3 ds_uvr1611[])
     ds_uvr1611[0].DS_UVR1611.datum_zeit.jahr+
     ds_uvr1611[0].DS_UVR1611.zeitstempel[0]+ds_uvr1611[0].DS_UVR1611.zeitstempel[1]+
     ds_uvr1611[0].DS_UVR1611.zeitstempel[2];
+
+  return retval % modTeiler;
+}
+
+/* Berechnung der Pruefsumme fuer UVR1611 CAN-Logging */
+int berechnepruefziffer_uvr1611_CAN(u_DS_UVR1611_UVR61_3 ds_uvr1611[])
+{
+  unsigned modTeiler;
+  modTeiler = 0x100;    /* modTeiler = 256; */
+
+  int retval=0;
+
+  int k=0;
+  for (k=0;k<16;k++)
+    retval+= (ds_uvr1611[0].DS_UVR1611_CAN.sensT[k][0]+ds_uvr1611[0].DS_UVR1611_CAN.sensT[k][1]);
+
+  retval += ds_uvr1611[0].DS_UVR1611_CAN.ausgbyte1+ds_uvr1611[0].DS_UVR1611_CAN.ausgbyte2+
+    ds_uvr1611[0].DS_UVR1611_CAN.dza[0]+ds_uvr1611[0].DS_UVR1611_CAN.dza[1]+ds_uvr1611[0].DS_UVR1611_CAN.dza[2]+ds_uvr1611[0].DS_UVR1611_CAN.dza[3]+
+    ds_uvr1611[0].DS_UVR1611_CAN.wmzaehler_reg+
+    ds_uvr1611[0].DS_UVR1611_CAN.mlstg1[0]+ds_uvr1611[0].DS_UVR1611_CAN.mlstg1[1]+
+    ds_uvr1611[0].DS_UVR1611_CAN.mlstg1[2]+ds_uvr1611[0].DS_UVR1611_CAN.mlstg1[3]+
+    ds_uvr1611[0].DS_UVR1611_CAN.kwh1[0]+ds_uvr1611[0].DS_UVR1611_CAN.kwh1[1]+
+    ds_uvr1611[0].DS_UVR1611_CAN.mwh1[0]+ds_uvr1611[0].DS_UVR1611_CAN.mwh1[1]+
+    ds_uvr1611[0].DS_UVR1611_CAN.mlstg2[0]+ds_uvr1611[0].DS_UVR1611_CAN.mlstg2[1]+
+    ds_uvr1611[0].DS_UVR1611_CAN.mlstg2[2]+ds_uvr1611[0].DS_UVR1611_CAN.mlstg2[3]+
+    ds_uvr1611[0].DS_UVR1611_CAN.kwh2[0]+ds_uvr1611[0].DS_UVR1611_CAN.kwh2[1]+
+    ds_uvr1611[0].DS_UVR1611_CAN.mwh2[0]+ds_uvr1611[0].DS_UVR1611_CAN.mwh2[1]+
+    ds_uvr1611[0].DS_UVR1611_CAN.datum_zeit.sek+ds_uvr1611[0].DS_UVR1611_CAN.datum_zeit.min+
+    ds_uvr1611[0].DS_UVR1611_CAN.datum_zeit.std+
+    ds_uvr1611[0].DS_UVR1611_CAN.datum_zeit.tag+ds_uvr1611[0].DS_UVR1611_CAN.datum_zeit.monat+
+    ds_uvr1611[0].DS_UVR1611_CAN.datum_zeit.jahr+
+    ds_uvr1611[0].DS_UVR1611_CAN.zeitstempel[0]+ds_uvr1611[0].DS_UVR1611_CAN.zeitstempel[1]+
+    ds_uvr1611[0].DS_UVR1611_CAN.zeitstempel[2];
 
   return retval % modTeiler;
 }
