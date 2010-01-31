@@ -37,6 +37,7 @@
 #define ENDELESEN 0xAD
 #define RESETDATAFLASH 0xAF
 #define DATENBEREICHLESEN 0xAC
+#define KONFIGCAN 0x97
 #define TRUE 1
 #define FALSE 0
 typedef unsigned char UCHAR;
@@ -142,7 +143,7 @@ typedef struct {
   UCHAR unbenutzt2[25];
 } DS_Winsol_UVR61_3;
 
-/* Datenktur des Datensatzes aus dem Datenlogger / Bootloader kommend */
+/* Datenstuktur des Datensatzes aus dem Datenlogger / Bootloader kommend */
 /* the_datum_zeit */
 typedef struct{
   UCHAR sek;
@@ -154,7 +155,6 @@ typedef struct{
 } the_datum_zeit;
 
 /* Union fuer Datensatz der UVR1611 und UVR61-3 */
-/* und Modus CAN-Logging                        */
 /* aus dem Datenlogger / Bootloader kommend     */
 typedef union{
   /* UVR1611 Datensatz DS_UVR1611 */
@@ -238,9 +238,11 @@ typedef union{
     UCHAR zeitstempel[3];
     UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   } DS_UVR61_3;
-  /* CAN-Logging Datensatz DS_UVR1611_CAN */
-  struct {
-    UCHAR zeitstempel[3];
+} u_DS_UVR1611_UVR61_3;
+
+/* Datenstuktur des Datensatzes CAN-Modus       */
+/* aus dem Bootloader kommend                   */
+typedef struct{
   /* Sensor-Eingaenge */
 #ifdef NEW_WSOL_TEMP
     UCHAR sensT[16][2];
@@ -267,28 +269,67 @@ typedef union{
     /*  Ausgaenge durch bits: */
     /*  leer1  leer2 leer3 a13 a12 a11 a10 a9 */
     UCHAR ausgbyte2;
-
     /* Drehzahlausgaenge */
     UCHAR dza[4];
-
     /* WMZ 1/2 aktiv in bit 1 und bit2 */
     UCHAR wmzaehler_reg;
-
     /* Solar1: momentane Leistung, Waermemenge kWh/MWh */
     UCHAR mlstg1[4];
     UCHAR kwh1[2];
     UCHAR mwh1[2];
-
     /* Solar2: momentane Leistung, Waermemenge kWh/MWh */
     UCHAR mlstg2[4];
     UCHAR kwh2[2];
     UCHAR mwh2[2];
-
     the_datum_zeit datum_zeit;
+} s_DS_CAN;
 
+/* Union fuer Datensatz Modus CAN-Logging       */
+/* aus dem Bootloader kommend                   */
+typedef union{
+  UCHAR all_bytes[524];
+  /* CAN-Logging Datensaetze DS_UVR1611_CAN_x */
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CAN DS_CAN[1];
     UCHAR pruefsum;  /* Summer der Bytes mod 256 */
-  } DS_UVR1611_CAN;
-} u_DS_UVR1611_UVR61_3;
+  } DS_CAN_1;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CAN DS_CAN[2];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_2;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CAN DS_CAN[3];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_3;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CAN DS_CAN[4];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_4;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CAN DS_CAN[5];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_5;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CAN DS_CAN[6];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_6;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CAN DS_CAN[7];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_7;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CAN DS_CAN[8];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_8;
+} u_DS_CAN;
 
 /* Bitfeld Drehzahlreglung*/
 struct drehzahlreglung{
