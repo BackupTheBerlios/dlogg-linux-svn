@@ -438,7 +438,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 31.01.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 01.02.2010 \n");
         return 0;
       }
       case 'h':
