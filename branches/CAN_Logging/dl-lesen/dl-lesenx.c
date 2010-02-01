@@ -917,7 +917,7 @@ int kopfsatzlesen(void)
   durchlauf=0;
 
   do
-    {
+  {
       sendbuf[0]=KOPFSATZLESEN;    /* Senden der Kopfsatz-abfrage */
 
     if (usb_zugriff)
@@ -929,7 +929,7 @@ int kopfsatzlesen(void)
 		{
           case 0xD1: result=read(fd_serialport,kopf_D1,14); break;
           case 0xA8: result=read(fd_serialport,kopf_A8,13); break;
-		  case 0xDC: result=read(fd_serialport,kopf_DC,14); break;
+		  case 0xDC: result=read(fd_serialport,kopf_DC,21); break;
         }
       }
     }
@@ -1041,6 +1041,8 @@ int kopfsatzlesen(void)
 	  }
       break;
   }
+
+fprintf(stderr, " CAN-Logging-Test: EndAdresse: %x\n",print_endaddr); /********************/
 
   if ( anz_ds == -1 )
     {
@@ -2995,6 +2997,11 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
   switch(kopf[0].all_bytes[5])
   {
     case 1:
+	  if (kopf[0].DC_Rahmen1.endadresse[0] == kopf[0].DC_Rahmen1.startadresse[0])
+	  {
+	     printf("Keine geloggten Daten verfuegbar!\n");
+		 return -1;
+	  }
       /* Byte 1 - lowest */
       switch (kopf[0].DC_Rahmen1.endadresse[0])
       {
@@ -3009,6 +3016,11 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte3 = (kopf[0].DC_Rahmen1.endadresse[2] * 0x100)*0x02;
       break;
     case 2:
+	  if (kopf[0].DC_Rahmen2.endadresse[0] == kopf[0].DC_Rahmen2.startadresse[0])
+	  {
+	     printf("Keine geloggten Daten verfuegbar!\n");
+		 return -1;
+	  }
       /* Byte 1 - lowest */
       switch (kopf[0].DC_Rahmen2.endadresse[0])
       {
@@ -3023,6 +3035,11 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte3 = (kopf[0].DC_Rahmen2.endadresse[2] * 0x100)*0x02;
       break;
     case 3:
+	  if (kopf[0].DC_Rahmen3.endadresse[0] == kopf[0].DC_Rahmen3.startadresse[0])
+	  {
+	     printf("Keine geloggten Daten verfuegbar!\n");
+		 return -1;
+	  }
       /* Byte 1 - lowest */
       switch (kopf[0].DC_Rahmen3.endadresse[0])
       {
@@ -3037,6 +3054,11 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte3 = (kopf[0].DC_Rahmen3.endadresse[2] * 0x100)*0x02;
       break;
     case 4:
+	  if (kopf[0].DC_Rahmen4.endadresse[0] == kopf[0].DC_Rahmen4.startadresse[0])
+	  {
+	     printf("Keine geloggten Daten verfuegbar!\n");
+		 return -1;
+	  }
       /* Byte 1 - lowest */
       switch (kopf[0].DC_Rahmen4.endadresse[0])
       {
@@ -3051,6 +3073,11 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte3 = (kopf[0].DC_Rahmen4.endadresse[2] * 0x100)*0x02;
       break;
     case 5:
+	  if (kopf[0].DC_Rahmen5.endadresse[0] == kopf[0].DC_Rahmen5.startadresse[0])
+	  {
+	     printf("Keine geloggten Daten verfuegbar!\n");
+		 return -1;
+	  }
       /* Byte 1 - lowest */
       switch (kopf[0].DC_Rahmen5.endadresse[0])
       {
@@ -3065,6 +3092,11 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte3 = (kopf[0].DC_Rahmen5.endadresse[2] * 0x100)*0x02;
       break;
     case 6:
+	  if (kopf[0].DC_Rahmen6.endadresse[0] == kopf[0].DC_Rahmen6.startadresse[0])
+	  {
+	     printf("Keine geloggten Daten verfuegbar!\n");
+		 return -1;
+	  }
       /* Byte 1 - lowest */
       switch (kopf[0].DC_Rahmen6.endadresse[0])
       {
@@ -3079,6 +3111,11 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte3 = (kopf[0].DC_Rahmen6.endadresse[2] * 0x100)*0x02;
       break;
     case 7:
+	  if (kopf[0].DC_Rahmen7.endadresse[0] == kopf[0].DC_Rahmen7.startadresse[0])
+	  {
+	     printf("Keine geloggten Daten verfuegbar!\n");
+		 return -1;
+	  }
       /* Byte 1 - lowest */
       switch (kopf[0].DC_Rahmen7.endadresse[0])
       {
@@ -3093,6 +3130,11 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte3 = (kopf[0].DC_Rahmen7.endadresse[2] * 0x100)*0x02;
       break;
     case 8:
+	  if (kopf[0].DC_Rahmen8.endadresse[0] == kopf[0].DC_Rahmen8.startadresse[0])
+	  {
+	     printf("Keine geloggten Daten verfuegbar!\n");
+		 return -1;
+	  }
       /* Byte 1 - lowest */
       switch (kopf[0].DC_Rahmen8.endadresse[0])
       {
