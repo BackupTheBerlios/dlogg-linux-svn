@@ -959,7 +959,7 @@ int kopfsatzlesen(void)
 		{
           case 0xD1: result = recv(sock,kopf_D1,14,0); break;
           case 0xA8: result = recv(sock,kopf_A8,13,0); break;
-		  case 0xDC: result = recv(sock,kopf_DC,14,0); break;
+		  case 0xDC: result = recv(sock,kopf_DC,21,0); break;
         }
       }
     }
