@@ -134,6 +134,8 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
+  printf("    Version 0.8.1 -CAN_Test- vom 03.02.2010 \n");
+  
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
   printf("angegebener Port: %s Variablen: reset = %d csv = %d \n",dlport,reset,csv);
@@ -981,29 +983,31 @@ int kopfsatzlesen(void)
 		switch(kopf_DC[0].all_bytes[5])
 		{
 		  case 1: merk_pruefz = kopf_DC[0].DC_Rahmen1.pruefsum; 
-		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen1.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen1.pruefsum);
+		        fprintf(stderr,"  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen1.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen1.pruefsum);
                 break;
 		  case 2: merk_pruefz = kopf_DC[0].DC_Rahmen2.pruefsum; 
-		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen2.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen2.pruefsum);
+		        fprintf(stderr,"  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen2.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen2.pruefsum);
 		        break;
 		  case 3: merk_pruefz = kopf_DC[0].DC_Rahmen3.pruefsum; 
-		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen3.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen3.pruefsum);
+		        fprintf(stderr,"  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen3.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen3.pruefsum);
 		        break;
 		  case 4: merk_pruefz = kopf_DC[0].DC_Rahmen4.pruefsum; 
-		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen4.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen4.pruefsum);
+		        fprintf(stderr,"  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen4.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen4.pruefsum);
 		        break;
 		  case 5: merk_pruefz = kopf_DC[0].DC_Rahmen5.pruefsum; 
-		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen5.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen5.pruefsum);
+		        fprintf(stderr,"  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen5.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen5.pruefsum);
 		        break;
 		  case 6: merk_pruefz = kopf_DC[0].DC_Rahmen6.pruefsum; 
-		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen6.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen6.pruefsum);
+		        fprintf(stderr,"  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen6.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen6.pruefsum);
 		        break;
 		  case 7: merk_pruefz = kopf_DC[0].DC_Rahmen7.pruefsum; 
-		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen7.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen7.pruefsum);
+		        fprintf(stderr,"  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen7.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen7.pruefsum);
 		        break;
 		  case 8: merk_pruefz = kopf_DC[0].DC_Rahmen8.pruefsum; 
-		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen8.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen8.pruefsum);
+		        fprintf(stderr,"  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen8.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen8.pruefsum);
 		        break;
+		  default: 
+				fprintf(stderr,"  CAN-Logging-Test:  Kennung %x\n",kopf_DC[0].all_bytes[0]);
 		}
         break;
 	}
@@ -1031,6 +1035,7 @@ int kopfsatzlesen(void)
     printf("Anzahl Durchlaeufe Pruefziffer Kopfsatz: %i\n",durchlauf);
 #endif
 
+fprintf(stderr," switch uvr_modus... \n");
   switch(uvr_modus)
   {
     case 0xD1: 
@@ -1045,14 +1050,67 @@ int kopfsatzlesen(void)
       anz_ds = anzahldatensaetze_DC(kopf_DC);
 	  switch(kopf_DC[0].all_bytes[5])
 	  {
-	    case 1: print_endaddr = kopf_DC[0].DC_Rahmen1.endadresse[0]; break;
-	    case 2: print_endaddr = kopf_DC[0].DC_Rahmen2.endadresse[0]; break;
-	    case 3: print_endaddr = kopf_DC[0].DC_Rahmen3.endadresse[0]; break;
-	    case 4: print_endaddr = kopf_DC[0].DC_Rahmen4.endadresse[0]; break;
-	    case 5: print_endaddr = kopf_DC[0].DC_Rahmen5.endadresse[0]; break;
-	    case 6: print_endaddr = kopf_DC[0].DC_Rahmen6.endadresse[0]; break;
-	    case 7: print_endaddr = kopf_DC[0].DC_Rahmen7.endadresse[0]; break;
-	    case 8: print_endaddr = kopf_DC[0].DC_Rahmen8.endadresse[0]; break;
+	    case 1: print_endaddr = kopf_DC[0].DC_Rahmen1.endadresse[0]; 
+		fprintf(stderr,"%X %X %X %X %X %X %X %X %X %X %X %X %X %X",
+		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
+		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
+		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
+		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13]);
+		break;
+	    case 2: print_endaddr = kopf_DC[0].DC_Rahmen2.endadresse[0]; 
+		fprintf(stderr,"%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X",
+		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
+		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
+		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
+		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14]);
+		break;
+	    case 3: print_endaddr = kopf_DC[0].DC_Rahmen3.endadresse[0]; 
+		fprintf(stderr,"%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X",
+		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
+		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
+		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
+		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15]);
+		break;
+	    case 4: print_endaddr = kopf_DC[0].DC_Rahmen4.endadresse[0]; 
+		fprintf(stderr,"%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X",
+		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
+		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
+		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
+		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15],
+		kopf_DC[0].all_bytes[16]);
+		break;
+	    case 5: print_endaddr = kopf_DC[0].DC_Rahmen5.endadresse[0]; 
+		fprintf(stderr,"%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X",
+		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
+		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
+		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
+		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15],
+		kopf_DC[0].all_bytes[16],kopf_DC[0].all_bytes[17]);
+		break;
+	    case 6: print_endaddr = kopf_DC[0].DC_Rahmen6.endadresse[0]; 
+		fprintf(stderr,"%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X",
+		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
+		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
+		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
+		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15],
+		kopf_DC[0].all_bytes[16],kopf_DC[0].all_bytes[17],kopf_DC[0].all_bytes[18]);
+		break;
+	    case 7: print_endaddr = kopf_DC[0].DC_Rahmen7.endadresse[0]; 
+		fprintf(stderr,"%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X",
+		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
+		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
+		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
+		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15],
+		kopf_DC[0].all_bytes[16],kopf_DC[0].all_bytes[17],kopf_DC[0].all_bytes[18],kopf_DC[0].all_bytes[19]);
+		break;
+	    case 8: print_endaddr = kopf_DC[0].DC_Rahmen8.endadresse[0]; 
+		fprintf(stderr,"%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X",
+		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
+		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
+		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
+		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15],
+		kopf_DC[0].all_bytes[16],kopf_DC[0].all_bytes[17],kopf_DC[0].all_bytes[18],kopf_DC[0].all_bytes[19],kopf_DC[0].all_bytes[20]);
+		break;
 	  }
       break;
   }
