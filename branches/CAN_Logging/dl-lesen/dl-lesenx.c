@@ -73,6 +73,7 @@ int datenlesen_D1(int anz_datensaetze);
 int datenlesen_DC(int anz_datensaetze);
 int berechneKopfpruefziffer_D1(KopfsatzD1 derKopf[] );
 int berechneKopfpruefziffer_A8(KopfsatzA8 derKopf[] );
+int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] );
 int berechnepruefziffer_uvr1611(u_DS_UVR1611_UVR61_3 ds_uvr1611[]);
 int berechnepruefziffer_uvr61_3(u_DS_UVR1611_UVR61_3 ds_uvr61_3[]);
 int berechnepruefziffer_uvr1611_CAN(u_DS_CAN ds_uvr1611[], int anzahl_can_rahmen);
@@ -438,7 +439,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 01.02.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 03.02.2010 \n");
         return 0;
       }
       case 'h':
@@ -979,14 +980,30 @@ int kopfsatzlesen(void)
 	    pruefz = berechneKopfpruefziffer_DC( kopf_DC );
 		switch(kopf_DC[0].all_bytes[5])
 		{
-		  case 1: merk_pruefz = kopf_DC[0].DC_Rahmen1.pruefsum; break;
-		  case 2: merk_pruefz = kopf_DC[0].DC_Rahmen2.pruefsum; break;
-		  case 3: merk_pruefz = kopf_DC[0].DC_Rahmen3.pruefsum; break;
-		  case 4: merk_pruefz = kopf_DC[0].DC_Rahmen4.pruefsum; break;
-		  case 5: merk_pruefz = kopf_DC[0].DC_Rahmen5.pruefsum; break;
-		  case 6: merk_pruefz = kopf_DC[0].DC_Rahmen6.pruefsum; break;
-		  case 7: merk_pruefz = kopf_DC[0].DC_Rahmen7.pruefsum; break;
-		  case 8: merk_pruefz = kopf_DC[0].DC_Rahmen8.pruefsum; break;
+		  case 1: merk_pruefz = kopf_DC[0].DC_Rahmen1.pruefsum; 
+		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen1.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen1.pruefsum);
+                break;
+		  case 2: merk_pruefz = kopf_DC[0].DC_Rahmen2.pruefsum; 
+		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen2.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen2.pruefsum);
+		        break;
+		  case 3: merk_pruefz = kopf_DC[0].DC_Rahmen3.pruefsum; 
+		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen3.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen3.pruefsum);
+		        break;
+		  case 4: merk_pruefz = kopf_DC[0].DC_Rahmen4.pruefsum; 
+		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen4.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen4.pruefsum);
+		        break;
+		  case 5: merk_pruefz = kopf_DC[0].DC_Rahmen5.pruefsum; 
+		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen5.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen5.pruefsum);
+		        break;
+		  case 6: merk_pruefz = kopf_DC[0].DC_Rahmen6.pruefsum; 
+		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen6.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen6.pruefsum);
+		        break;
+		  case 7: merk_pruefz = kopf_DC[0].DC_Rahmen7.pruefsum; 
+		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen7.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen7.pruefsum);
+		        break;
+		  case 8: merk_pruefz = kopf_DC[0].DC_Rahmen8.pruefsum; 
+		        printf("  Durchlauf #%d  berechnete pruefziffer:%d DC_Rahmen8.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].DC_Rahmen8.pruefsum);
+		        break;
 		}
         break;
 	}
@@ -1004,14 +1021,12 @@ int kopfsatzlesen(void)
   while (( (pruefz != merk_pruefz )  && (durchlauf < 10)));
 
 
+#ifdef DEBUG
   if (pruefz != merk_pruefz )
     {
-#ifdef DEBUG
       printf(" Durchlauf #%i - falsche Pruefziffer im Kopfsatz\n",durchlauf);
-#endif
       return -1;
     }
-#ifdef DEBUG
   else
     printf("Anzahl Durchlaeufe Pruefziffer Kopfsatz: %i\n",durchlauf);
 #endif
@@ -1048,6 +1063,7 @@ fprintf(stderr, " CAN-Logging-Test: EndAdresse: %x\n",print_endaddr); /*********
     {
       zeitstempel();
       fprintf(fp_varlogfile,"%s - %s -- Falschen Wert im Low-Byte Endadresse gelesen! Wert: %x\n",sDatum, sZeit,print_endaddr);
+      return -1;
     }
   else
     printf(" Anzahl Datensaetze aus Kopfsatz: %i\n",anz_ds);
@@ -2519,156 +2535,155 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
 {
   int i, z;
   z = 0;
-  for (i=0;i++;i<13+derKopf[0].all_bytes[5])
+/*  for (i=0;i++;i<13+derKopf[0].all_bytes[5])
   {
     z = z + derKopf[0].all_bytes[i];
   }
   return z % 0x100;
-  
-/*   switch(derKopf[0].all_bytes[5])
+*/  
+   switch(derKopf[0].all_bytes[5])
   {
     case 1:
-	
-    return  ((derKopf[0].DC_Rahmen1.kennung + derKopf[0].version
-     + derKopf[0].zeitstempel[0]
-     + derKopf[0].zeitstempel[1]
-     + derKopf[0].zeitstempel[2]
-     + derKopf[0].anzahlCAN_Rahmen
-     + derKopf[0].satzlaengeRahmen1
-     + derKopf[0].startadresse[0]
-     + derKopf[0].startadresse[1]
-     + derKopf[0].startadresse[2]
-     + derKopf[0].endadresse[0]
-     + derKopf[0].endadresse[1]
-     + derKopf[0].endadresse[2]) % 0x100);
+    return  ((derKopf[0].DC_Rahmen1.kennung + derKopf[0].DC_Rahmen1.version
+     + derKopf[0].DC_Rahmen1.zeitstempel[0]
+     + derKopf[0].DC_Rahmen1.zeitstempel[1]
+     + derKopf[0].DC_Rahmen1.zeitstempel[2]
+     + derKopf[0].DC_Rahmen1.anzahlCAN_Rahmen
+     + derKopf[0].DC_Rahmen1.satzlaengeRahmen1
+     + derKopf[0].DC_Rahmen1.startadresse[0]
+     + derKopf[0].DC_Rahmen1.startadresse[1]
+     + derKopf[0].DC_Rahmen1.startadresse[2]
+     + derKopf[0].DC_Rahmen1.endadresse[0]
+     + derKopf[0].DC_Rahmen1.endadresse[1]
+     + derKopf[0].DC_Rahmen1.endadresse[2]) % 0x100);
       break;
 	case 2:
-    return  ((derKopf[0].kennung + derKopf[0].version
-     + derKopf[0].zeitstempel[0]
-     + derKopf[0].zeitstempel[1]
-     + derKopf[0].zeitstempel[2]
-     + derKopf[0].anzahlCAN_Rahmen
-     + derKopf[0].satzlaengeRahmen1
-     + derKopf[0].satzlaengeRahmen2
-     + derKopf[0].startadresse[0]
-     + derKopf[0].startadresse[1]
-     + derKopf[0].startadresse[2]
-     + derKopf[0].endadresse[0]
-     + derKopf[0].endadresse[1]
-     + derKopf[0].endadresse[2]) % 0x100);
+    return  ((derKopf[0].DC_Rahmen2.kennung + derKopf[0].DC_Rahmen2.version
+     + derKopf[0].DC_Rahmen2.zeitstempel[0]
+     + derKopf[0].DC_Rahmen2.zeitstempel[1]
+     + derKopf[0].DC_Rahmen2.zeitstempel[2]
+     + derKopf[0].DC_Rahmen2.anzahlCAN_Rahmen
+     + derKopf[0].DC_Rahmen2.satzlaengeRahmen1
+     + derKopf[0].DC_Rahmen2.satzlaengeRahmen2
+     + derKopf[0].DC_Rahmen2.startadresse[0]
+     + derKopf[0].DC_Rahmen2.startadresse[1]
+     + derKopf[0].DC_Rahmen2.startadresse[2]
+     + derKopf[0].DC_Rahmen2.endadresse[0]
+     + derKopf[0].DC_Rahmen2.endadresse[1]
+     + derKopf[0].DC_Rahmen2.endadresse[2]) % 0x100);
       break;
 	case 3:
-    return  ((derKopf[0].kennung + derKopf[0].version
-     + derKopf[0].zeitstempel[0]
-     + derKopf[0].zeitstempel[1]
-     + derKopf[0].zeitstempel[2]
-     + derKopf[0].anzahlCAN_Rahmen
-     + derKopf[0].satzlaengeRahmen1
-     + derKopf[0].satzlaengeRahmen2
-     + derKopf[0].satzlaengeRahmen3
-     + derKopf[0].startadresse[0]
-     + derKopf[0].startadresse[1]
-     + derKopf[0].startadresse[2]
-     + derKopf[0].endadresse[0]
-     + derKopf[0].endadresse[1]
-     + derKopf[0].endadresse[2]) % 0x100);
+    return  ((derKopf[0].DC_Rahmen3.kennung + derKopf[0].DC_Rahmen3.version
+     + derKopf[0].DC_Rahmen3.zeitstempel[0]
+     + derKopf[0].DC_Rahmen3.zeitstempel[1]
+     + derKopf[0].DC_Rahmen3.zeitstempel[2]
+     + derKopf[0].DC_Rahmen3.anzahlCAN_Rahmen
+     + derKopf[0].DC_Rahmen3.satzlaengeRahmen1
+     + derKopf[0].DC_Rahmen3.satzlaengeRahmen2
+     + derKopf[0].DC_Rahmen3.satzlaengeRahmen3
+     + derKopf[0].DC_Rahmen3.startadresse[0]
+     + derKopf[0].DC_Rahmen3.startadresse[1]
+     + derKopf[0].DC_Rahmen3.startadresse[2]
+     + derKopf[0].DC_Rahmen3.endadresse[0]
+     + derKopf[0].DC_Rahmen3.endadresse[1]
+     + derKopf[0].DC_Rahmen3.endadresse[2]) % 0x100);
       break;
 	case 4:
-    return  ((derKopf[0].kennung + derKopf[0].version
-     + derKopf[0].zeitstempel[0]
-     + derKopf[0].zeitstempel[1]
-     + derKopf[0].zeitstempel[2]
-     + derKopf[0].anzahlCAN_Rahmen
-     + derKopf[0].satzlaengeRahmen1
-     + derKopf[0].satzlaengeRahmen2
-     + derKopf[0].satzlaengeRahmen3
-     + derKopf[0].satzlaengeRahmen4
-     + derKopf[0].startadresse[0]
-     + derKopf[0].startadresse[1]
-     + derKopf[0].startadresse[2]
-     + derKopf[0].endadresse[0]
-     + derKopf[0].endadresse[1]
-     + derKopf[0].endadresse[2]) % 0x100);
+    return  ((derKopf[0].DC_Rahmen4.kennung + derKopf[0].DC_Rahmen4.version
+     + derKopf[0].DC_Rahmen4.zeitstempel[0]
+     + derKopf[0].DC_Rahmen4.zeitstempel[1]
+     + derKopf[0].DC_Rahmen4.zeitstempel[2]
+     + derKopf[0].DC_Rahmen4.anzahlCAN_Rahmen
+     + derKopf[0].DC_Rahmen4.satzlaengeRahmen1
+     + derKopf[0].DC_Rahmen4.satzlaengeRahmen2
+     + derKopf[0].DC_Rahmen4.satzlaengeRahmen3
+     + derKopf[0].DC_Rahmen4.satzlaengeRahmen4
+     + derKopf[0].DC_Rahmen4.startadresse[0]
+     + derKopf[0].DC_Rahmen4.startadresse[1]
+     + derKopf[0].DC_Rahmen4.startadresse[2]
+     + derKopf[0].DC_Rahmen4.endadresse[0]
+     + derKopf[0].DC_Rahmen4.endadresse[1]
+     + derKopf[0].DC_Rahmen4.endadresse[2]) % 0x100);
       break;
 	case 5:
-    return  ((derKopf[0].kennung + derKopf[0].version
-     + derKopf[0].zeitstempel[0]
-     + derKopf[0].zeitstempel[1]
-     + derKopf[0].zeitstempel[2]
-     + derKopf[0].anzahlCAN_Rahmen
-     + derKopf[0].satzlaengeRahmen1
-     + derKopf[0].satzlaengeRahmen2
-     + derKopf[0].satzlaengeRahmen3
-     + derKopf[0].satzlaengeRahmen4
-     + derKopf[0].satzlaengeRahmen5
-     + derKopf[0].startadresse[0]
-     + derKopf[0].startadresse[1]
-     + derKopf[0].startadresse[2]
-     + derKopf[0].endadresse[0]
-     + derKopf[0].endadresse[1]
-     + derKopf[0].endadresse[2]) % 0x100);
+    return  ((derKopf[0].DC_Rahmen5.kennung + derKopf[0].DC_Rahmen5.version
+     + derKopf[0].DC_Rahmen5.zeitstempel[0]
+     + derKopf[0].DC_Rahmen5.zeitstempel[1]
+     + derKopf[0].DC_Rahmen5.zeitstempel[2]
+     + derKopf[0].DC_Rahmen5.anzahlCAN_Rahmen
+     + derKopf[0].DC_Rahmen5.satzlaengeRahmen1
+     + derKopf[0].DC_Rahmen5.satzlaengeRahmen2
+     + derKopf[0].DC_Rahmen5.satzlaengeRahmen3
+     + derKopf[0].DC_Rahmen5.satzlaengeRahmen4
+     + derKopf[0].DC_Rahmen5.satzlaengeRahmen5
+     + derKopf[0].DC_Rahmen5.startadresse[0]
+     + derKopf[0].DC_Rahmen5.startadresse[1]
+     + derKopf[0].DC_Rahmen5.startadresse[2]
+     + derKopf[0].DC_Rahmen5.endadresse[0]
+     + derKopf[0].DC_Rahmen5.endadresse[1]
+     + derKopf[0].DC_Rahmen5.endadresse[2]) % 0x100);
       break;
 	case 6:
-    return  ((derKopf[0].kennung + derKopf[0].version
-     + derKopf[0].zeitstempel[0]
-     + derKopf[0].zeitstempel[1]
-     + derKopf[0].zeitstempel[2]
-     + derKopf[0].anzahlCAN_Rahmen
-     + derKopf[0].satzlaengeRahmen1
-     + derKopf[0].satzlaengeRahmen2
-     + derKopf[0].satzlaengeRahmen3
-     + derKopf[0].satzlaengeRahmen4
-     + derKopf[0].satzlaengeRahmen5
-     + derKopf[0].satzlaengeRahmen6
-     + derKopf[0].startadresse[0]
-     + derKopf[0].startadresse[1]
-     + derKopf[0].startadresse[2]
-     + derKopf[0].endadresse[0]
-     + derKopf[0].endadresse[1]
-     + derKopf[0].endadresse[2]) % 0x100);
+    return  ((derKopf[0].DC_Rahmen6.kennung + derKopf[0].DC_Rahmen6.version
+     + derKopf[0].DC_Rahmen6.zeitstempel[0]
+     + derKopf[0].DC_Rahmen6.zeitstempel[1]
+     + derKopf[0].DC_Rahmen6.zeitstempel[2]
+     + derKopf[0].DC_Rahmen6.anzahlCAN_Rahmen
+     + derKopf[0].DC_Rahmen6.satzlaengeRahmen1
+     + derKopf[0].DC_Rahmen6.satzlaengeRahmen2
+     + derKopf[0].DC_Rahmen6.satzlaengeRahmen3
+     + derKopf[0].DC_Rahmen6.satzlaengeRahmen4
+     + derKopf[0].DC_Rahmen6.satzlaengeRahmen5
+     + derKopf[0].DC_Rahmen6.satzlaengeRahmen6
+     + derKopf[0].DC_Rahmen6.startadresse[0]
+     + derKopf[0].DC_Rahmen6.startadresse[1]
+     + derKopf[0].DC_Rahmen6.startadresse[2]
+     + derKopf[0].DC_Rahmen6.endadresse[0]
+     + derKopf[0].DC_Rahmen6.endadresse[1]
+     + derKopf[0].DC_Rahmen6.endadresse[2]) % 0x100);
       break;
 	case 7:
-    return  ((derKopf[0].kennung + derKopf[0].version
-     + derKopf[0].zeitstempel[0]
-     + derKopf[0].zeitstempel[1]
-     + derKopf[0].zeitstempel[2]
-     + derKopf[0].anzahlCAN_Rahmen
-     + derKopf[0].satzlaengeRahmen1
-     + derKopf[0].satzlaengeRahmen2
-     + derKopf[0].satzlaengeRahmen3
-     + derKopf[0].satzlaengeRahmen4
-     + derKopf[0].satzlaengeRahmen5
-     + derKopf[0].satzlaengeRahmen6
-     + derKopf[0].satzlaengeRahmen7
-     + derKopf[0].startadresse[0]
-     + derKopf[0].startadresse[1]
-     + derKopf[0].startadresse[2]
-     + derKopf[0].endadresse[0]
-     + derKopf[0].endadresse[1]
-     + derKopf[0].endadresse[2]) % 0x100);
+    return  ((derKopf[0].DC_Rahmen7.kennung + derKopf[0].DC_Rahmen7.version
+     + derKopf[0].DC_Rahmen7.zeitstempel[0]
+     + derKopf[0].DC_Rahmen7.zeitstempel[1]
+     + derKopf[0].DC_Rahmen7.zeitstempel[2]
+     + derKopf[0].DC_Rahmen7.anzahlCAN_Rahmen
+     + derKopf[0].DC_Rahmen7.satzlaengeRahmen1
+     + derKopf[0].DC_Rahmen7.satzlaengeRahmen2
+     + derKopf[0].DC_Rahmen7.satzlaengeRahmen3
+     + derKopf[0].DC_Rahmen7.satzlaengeRahmen4
+     + derKopf[0].DC_Rahmen7.satzlaengeRahmen5
+     + derKopf[0].DC_Rahmen7.satzlaengeRahmen6
+     + derKopf[0].DC_Rahmen7.satzlaengeRahmen7
+     + derKopf[0].DC_Rahmen7.startadresse[0]
+     + derKopf[0].DC_Rahmen7.startadresse[1]
+     + derKopf[0].DC_Rahmen7.startadresse[2]
+     + derKopf[0].DC_Rahmen7.endadresse[0]
+     + derKopf[0].DC_Rahmen7.endadresse[1]
+     + derKopf[0].DC_Rahmen7.endadresse[2]) % 0x100);
       break;
 	case 8:
-    return  ((derKopf[0].kennung + derKopf[0].version
-     + derKopf[0].zeitstempel[0]
-     + derKopf[0].zeitstempel[1]
-     + derKopf[0].zeitstempel[2]
-     + derKopf[0].anzahlCAN_Rahmen
-     + derKopf[0].satzlaengeRahmen1
-     + derKopf[0].satzlaengeRahmen2
-     + derKopf[0].satzlaengeRahmen3
-     + derKopf[0].satzlaengeRahmen4
-     + derKopf[0].satzlaengeRahmen5
-     + derKopf[0].satzlaengeRahmen6
-     + derKopf[0].satzlaengeRahmen7
-     + derKopf[0].satzlaengeRahmen8
-     + derKopf[0].startadresse[0]
-     + derKopf[0].startadresse[1]
-     + derKopf[0].startadresse[2]
-     + derKopf[0].endadresse[0]
-     + derKopf[0].endadresse[1]
-     + derKopf[0].endadresse[2]) % 0x100);
+    return  ((derKopf[0].DC_Rahmen8.kennung + derKopf[0].DC_Rahmen8.version
+     + derKopf[0].DC_Rahmen8.zeitstempel[0]
+     + derKopf[0].DC_Rahmen8.zeitstempel[1]
+     + derKopf[0].DC_Rahmen8.zeitstempel[2]
+     + derKopf[0].DC_Rahmen8.anzahlCAN_Rahmen
+     + derKopf[0].DC_Rahmen8.satzlaengeRahmen1
+     + derKopf[0].DC_Rahmen8.satzlaengeRahmen2
+     + derKopf[0].DC_Rahmen8.satzlaengeRahmen3
+     + derKopf[0].DC_Rahmen8.satzlaengeRahmen4
+     + derKopf[0].DC_Rahmen8.satzlaengeRahmen5
+     + derKopf[0].DC_Rahmen8.satzlaengeRahmen6
+     + derKopf[0].DC_Rahmen8.satzlaengeRahmen7
+     + derKopf[0].DC_Rahmen8.satzlaengeRahmen8
+     + derKopf[0].DC_Rahmen8.startadresse[0]
+     + derKopf[0].DC_Rahmen8.startadresse[1]
+     + derKopf[0].DC_Rahmen8.startadresse[2]
+     + derKopf[0].DC_Rahmen8.endadresse[0]
+     + derKopf[0].DC_Rahmen8.endadresse[1]
+     + derKopf[0].DC_Rahmen8.endadresse[2]) % 0x100);
       break;
-  } */
+  } 
 }
 
 /* Berechnung der Pruefsumme des Kopfsatz Modus 0xA8 */
