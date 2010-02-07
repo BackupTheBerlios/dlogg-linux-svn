@@ -3066,7 +3066,7 @@ int anzahldatensaetze_D1(KopfsatzD1 kopf[])
 int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 {
   /* UCHAR byte1, byte2, byte3; */
-  int byte1, byte2, byte3;
+  int byte1, byte2, byte3, return_byte;
   switch(kopf[0].all_bytes[5])
   {
     case 1:
@@ -3091,6 +3091,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte2 = ((kopf[0].DC_Rahmen1.endadresse[1] / 0x02) * 0x04);
       /* Byte 3 - highest */
       byte3 = (kopf[0].DC_Rahmen1.endadresse[2] * 0x100)*0x02;
+	  return_byte = byte1 + byte2 + byte3;
       break;
     case 2:
 	  if (kopf[0].DC_Rahmen2.endadresse[0] == kopf[0].DC_Rahmen2.startadresse[0] &&
@@ -3112,6 +3113,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte2 = ((kopf[0].DC_Rahmen2.endadresse[1] / 0x02) * 0x02);
       /* Byte 3 - highest */
       byte3 = (kopf[0].DC_Rahmen2.endadresse[2] * 0x100)*0x02;
+	  return_byte = byte1 + byte2 + byte3;
       break;
     case 3:
 	  if (kopf[0].DC_Rahmen3.endadresse[0] == kopf[0].DC_Rahmen3.startadresse[0] &&
@@ -3122,7 +3124,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen3.endadresse[0] == 0x0)
+      if (kopf[0].DC_Rahmen3.endadresse[0] == 0xc0)
 		byte1 = 1;
 	  else
 	  {
@@ -3133,6 +3135,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte2 = (kopf[0].DC_Rahmen3.endadresse[1] / 0x02);
       /* Byte 3 - highest */
       byte3 = (kopf[0].DC_Rahmen3.endadresse[2] * 0x100)*0x02;
+	  return_byte = byte1 + byte2 + byte3;
       break;
     case 4:
 	  if (kopf[0].DC_Rahmen4.endadresse[0] == kopf[0].DC_Rahmen4.startadresse[0] &&
@@ -3154,6 +3157,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte2 = (kopf[0].DC_Rahmen4.endadresse[1] / 0x02);
       /* Byte 3 - highest */
       byte3 = (kopf[0].DC_Rahmen4.endadresse[2] * 0x100)*0x02;
+	  return_byte = byte2 + byte3;
       break;
     case 5:
 	  if (kopf[0].DC_Rahmen5.endadresse[0] == kopf[0].DC_Rahmen5.startadresse[0] &&
@@ -3164,7 +3168,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen5.endadresse[0] == 0x0)
+      if (kopf[0].DC_Rahmen5.endadresse[0] == 0x40)
 		byte1 = 1;
 	  else
 	  {
@@ -3175,6 +3179,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte2 = (kopf[0].DC_Rahmen5.endadresse[1] / 0x02) ;
       /* Byte 3 - highest */
       byte3 = (kopf[0].DC_Rahmen5.endadresse[2] * 0x200)*0x02;
+	  return_byte = byte2 + byte3;
       break;
     case 6:
 	  if (kopf[0].DC_Rahmen6.endadresse[0] == kopf[0].DC_Rahmen6.startadresse[0] &&
@@ -3185,7 +3190,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen6.endadresse[0] == 0x0)
+      if (kopf[0].DC_Rahmen6.endadresse[0] == 0x80)
 		byte1 = 1;
 	  else
 	  {
@@ -3196,6 +3201,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte2 = (kopf[0].DC_Rahmen6.endadresse[1] / 0x02);
       /* Byte 3 - highest */
       byte3 = (kopf[0].DC_Rahmen6.endadresse[2] * 0x200)*0x02;
+	  return_byte = byte2 + byte3;
       break;
     case 7:
 	  if (kopf[0].DC_Rahmen7.endadresse[0] == kopf[0].DC_Rahmen7.startadresse[0] &&
@@ -3206,7 +3212,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen7.endadresse[0] == 0x0)
+      if (kopf[0].DC_Rahmen7.endadresse[0] == 0xc0)
 		byte1 = 1;
 	  else
 	  {
@@ -3217,6 +3223,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte2 = (kopf[0].DC_Rahmen7.endadresse[1] / 0x02);
       /* Byte 3 - highest */
       byte3 = (kopf[0].DC_Rahmen7.endadresse[2] * 0x200)*0x02;
+	  return_byte = byte2 + byte3;
       break;
     case 8:
 	  if (kopf[0].DC_Rahmen8.endadresse[0] == kopf[0].DC_Rahmen8.startadresse[0] &&
@@ -3238,10 +3245,11 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       byte2 = (kopf[0].DC_Rahmen8.endadresse[1] / 0x02);
       /* Byte 3 - highest */
       byte3 = (kopf[0].DC_Rahmen8.endadresse[2] * 0x200)*0x02;
+	  return_byte = byte2 + byte3;
 	  break;
   }
 
-  return byte1 + byte2 + byte3;
+  return return_byte;
 }
 
 /* Ermittlung Anzahl der Datensaetze Modus 0xA8 */
