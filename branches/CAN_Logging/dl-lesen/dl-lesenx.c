@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 07.02.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 13.02.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -442,7 +442,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 07.02.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 13.02.2010 \n");
         return 0;
       }
       case 'h':
@@ -3067,12 +3067,14 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 {
   /* UCHAR byte1, byte2, byte3; */
   int byte1, byte2, byte3, return_byte;
+  
   switch(kopf[0].all_bytes[5])
   {
     case 1:
 	  if (kopf[0].DC_Rahmen1.endadresse[0] == kopf[0].DC_Rahmen1.startadresse[0] &&
 	  kopf[0].DC_Rahmen1.endadresse[1] == kopf[0].DC_Rahmen1.startadresse[1] &&
-	  kopf[0].DC_Rahmen1.endadresse[2] == kopf[0].DC_Rahmen1.startadresse[2] )
+	  kopf[0].DC_Rahmen1.endadresse[2] == kopf[0].DC_Rahmen1.startadresse[2] && 
+	  kopf[0].DC_Rahmen1.endadresse[0] == 0xFF && kopf[0].DC_Rahmen1.endadresse[1] == 0xFF && kopf[0].DC_Rahmen1.endadresse[2] == 0xFF )
 	  {
 	     printf("Keine geloggten Daten verfuegbar!\n");
 		 return -1;
@@ -3090,7 +3092,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       /* Byte 2 - mitte */
       byte2 = ((kopf[0].DC_Rahmen1.endadresse[1] / 0x02) * 0x04);
       /* Byte 3 - highest */
-      byte3 = (kopf[0].DC_Rahmen1.endadresse[2] * 0x100)*0x02;
+      byte3 = (kopf[0].DC_Rahmen1.endadresse[2] * 0x200);
 	  return_byte = byte1 + byte2 + byte3;
       break;
     case 2:
@@ -3112,7 +3114,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       /* Byte 2 - mitte */
       byte2 = ((kopf[0].DC_Rahmen2.endadresse[1] / 0x02) * 0x02);
       /* Byte 3 - highest */
-      byte3 = (kopf[0].DC_Rahmen2.endadresse[2] * 0x100)*0x02;
+      byte3 = (kopf[0].DC_Rahmen2.endadresse[2] * 0x200);
 	  return_byte = byte1 + byte2 + byte3;
       break;
     case 3:
@@ -3124,18 +3126,16 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen3.endadresse[0] == 0xc0)
-		byte1 = 1;
-	  else
-	  {
-        printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
-        return -1;
+      switch (kopf[0].DC_Rahmen3.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x40 : byte1 = 2; break;
+        case 0x80 : byte1 = 3; break;
+        case 0xc0 : byte1 = 4; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
       }
-      /* Byte 2 - mitte */
-      byte2 = (kopf[0].DC_Rahmen3.endadresse[1] / 0x02);
-      /* Byte 3 - highest */
-      byte3 = (kopf[0].DC_Rahmen3.endadresse[2] * 0x100)*0x02;
-	  return_byte = byte1 + byte2 + byte3;
+	  return_byte = ((kopf[0].DC_Rahmen3.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen3.endadresse[1] /2 )* 4 + (byte1 -1)) / 3 + 1;
       break;
     case 4:
 	  if (kopf[0].DC_Rahmen4.endadresse[0] == kopf[0].DC_Rahmen4.startadresse[0] &&
@@ -3146,18 +3146,16 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen4.endadresse[0] == 0x0)
-		byte1 = 1;
-	  else
-	  {
-        printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
-        return -1;
+      switch (kopf[0].DC_Rahmen4.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x40 : byte1 = 2; break;
+        case 0x80 : byte1 = 3; break;
+        case 0xc0 : byte1 = 4; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
       }
-      /* Byte 2 - mitte */
-      byte2 = (kopf[0].DC_Rahmen4.endadresse[1] / 0x02);
-      /* Byte 3 - highest */
-      byte3 = (kopf[0].DC_Rahmen4.endadresse[2] * 0x100)*0x02;
-	  return_byte = byte2 + byte3;
+	  return_byte = ((kopf[0].DC_Rahmen4.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen4.endadresse[1] /2 )* 4 + (byte1 -1)) / 4 + 1;
       break;
     case 5:
 	  if (kopf[0].DC_Rahmen5.endadresse[0] == kopf[0].DC_Rahmen5.startadresse[0] &&
@@ -3168,18 +3166,16 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen5.endadresse[0] == 0x40)
-		byte1 = 1;
-	  else
-	  {
-        printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
-        return -1;
+      switch (kopf[0].DC_Rahmen5.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x40 : byte1 = 2; break;
+        case 0x80 : byte1 = 3; break;
+        case 0xc0 : byte1 = 4; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
       }
-      /* Byte 2 - mitte */
-      byte2 = (kopf[0].DC_Rahmen5.endadresse[1] / 0x02) ;
-      /* Byte 3 - highest */
-      byte3 = (kopf[0].DC_Rahmen5.endadresse[2] * 0x200)*0x02;
-	  return_byte = byte2 + byte3;
+	  return_byte = ((kopf[0].DC_Rahmen5.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen5.endadresse[1] /2 )* 4 + (byte1 -1)) / 5 + 1;
       break;
     case 6:
 	  if (kopf[0].DC_Rahmen6.endadresse[0] == kopf[0].DC_Rahmen6.startadresse[0] &&
@@ -3190,18 +3186,16 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen6.endadresse[0] == 0x80)
-		byte1 = 1;
-	  else
-	  {
-        printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
-        return -1;
+      switch (kopf[0].DC_Rahmen6.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x40 : byte1 = 2; break;
+        case 0x80 : byte1 = 3; break;
+        case 0xc0 : byte1 = 4; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
       }
-      /* Byte 2 - mitte */
-      byte2 = (kopf[0].DC_Rahmen6.endadresse[1] / 0x02);
-      /* Byte 3 - highest */
-      byte3 = (kopf[0].DC_Rahmen6.endadresse[2] * 0x200)*0x02;
-	  return_byte = byte2 + byte3;
+	  return_byte = ((kopf[0].DC_Rahmen6.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen6.endadresse[1] /2 )* 4 + (byte1 -1)) / 6 + 1;
       break;
     case 7:
 	  if (kopf[0].DC_Rahmen7.endadresse[0] == kopf[0].DC_Rahmen7.startadresse[0] &&
@@ -3212,18 +3206,16 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen7.endadresse[0] == 0xc0)
-		byte1 = 1;
-	  else
-	  {
-        printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
-        return -1;
+      switch (kopf[0].DC_Rahmen7.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x40 : byte1 = 2; break;
+        case 0x80 : byte1 = 3; break;
+        case 0xc0 : byte1 = 4; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
       }
-      /* Byte 2 - mitte */
-      byte2 = (kopf[0].DC_Rahmen7.endadresse[1] / 0x02);
-      /* Byte 3 - highest */
-      byte3 = (kopf[0].DC_Rahmen7.endadresse[2] * 0x200)*0x02;
-	  return_byte = byte2 + byte3;
+	  return_byte = ((kopf[0].DC_Rahmen7.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen7.endadresse[1] /2 )* 4 + (byte1 -1)) / 7 + 1;
       break;
     case 8:
 	  if (kopf[0].DC_Rahmen8.endadresse[0] == kopf[0].DC_Rahmen8.startadresse[0] &&
@@ -3234,18 +3226,16 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 		 return -1;
 	  }
       /* Byte 1 - lowest */
-      if (kopf[0].DC_Rahmen8.endadresse[0] == 0x0)
-		byte1 = 1;
-	  else
-	  {
-        printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
-        return -1;
+      switch (kopf[0].DC_Rahmen8.endadresse[0])
+      {
+        case 0x0  : byte1 = 1; break;
+        case 0x40 : byte1 = 2; break;
+        case 0x80 : byte1 = 3; break;
+        case 0xc0 : byte1 = 4; break;
+        default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
+          return -1;
       }
-      /* Byte 2 - mitte */
-      byte2 = (kopf[0].DC_Rahmen8.endadresse[1] / 0x02);
-      /* Byte 3 - highest */
-      byte3 = (kopf[0].DC_Rahmen8.endadresse[2] * 0x200)*0x02;
-	  return_byte = byte2 + byte3;
+	  return_byte = ((kopf[0].DC_Rahmen8.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen8.endadresse[1] /2 )* 4 + (byte1 -1)) / 8 + 1;
 	  break;
   }
 
