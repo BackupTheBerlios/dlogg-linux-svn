@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 13.02.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 14.02.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -442,7 +442,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 13.02.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 14.02.2010 \n");
         return 0;
       }
       case 'h':
@@ -1048,6 +1048,7 @@ int kopfsatzlesen(void)
       break;
 	case 0xDC:
       anz_ds = anzahldatensaetze_DC(kopf_DC);
+// #if DEBUG > 3
 	  switch(kopf_DC[0].all_bytes[5])
 	  {
 	    case 1: print_endaddr = kopf_DC[0].DC_Rahmen1.endadresse[0]; 
@@ -1112,10 +1113,13 @@ int kopfsatzlesen(void)
 		kopf_DC[0].all_bytes[16],kopf_DC[0].all_bytes[17],kopf_DC[0].all_bytes[18],kopf_DC[0].all_bytes[19],kopf_DC[0].all_bytes[20]);
 		break;
 	  }
+// #endif
       break;
   }
 
+#if DEBUG > 3
 fprintf(stderr," CAN-Logging-Test: EndAdresse: %x\n",print_endaddr); /********************/
+#endif
 
   if ( anz_ds == -1 )
     {
@@ -3098,7 +3102,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
     case 2:
 	  if (kopf[0].DC_Rahmen2.endadresse[0] == kopf[0].DC_Rahmen2.startadresse[0] &&
 	  kopf[0].DC_Rahmen2.endadresse[1] == kopf[0].DC_Rahmen2.startadresse[1] &&
-	  kopf[0].DC_Rahmen2.endadresse[2] == kopf[0].DC_Rahmen2.startadresse[2] )
+	  kopf[0].DC_Rahmen2.endadresse[2] == kopf[0].DC_Rahmen2.startadresse[2]  && 
+	  kopf[0].DC_Rahmen2.endadresse[0] == 0xFF && kopf[0].DC_Rahmen2.endadresse[1] == 0xFF && kopf[0].DC_Rahmen2.endadresse[2] == 0xFF )
 	  {
 	     printf("Keine geloggten Daten verfuegbar!\n");
 		 return -1;
@@ -3107,20 +3112,19 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       switch (kopf[0].DC_Rahmen2.endadresse[0])
       {
         case 0x0  : byte1 = 1; break;
-        case 0x80 : byte1 = 2; break;
+        case 0x40 : byte1 = 2; break;
+        case 0x80 : byte1 = 3; break;
+        case 0xc0 : byte1 = 4; break;
         default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
           return -1;
       }
-      /* Byte 2 - mitte */
-      byte2 = ((kopf[0].DC_Rahmen2.endadresse[1] / 0x02) * 0x02);
-      /* Byte 3 - highest */
-      byte3 = (kopf[0].DC_Rahmen2.endadresse[2] * 0x200);
-	  return_byte = byte1 + byte2 + byte3;
+	  return_byte = ((kopf[0].DC_Rahmen2.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen2.endadresse[1] /2 )* 4 + (byte1 -1)) / 2 + 1;
       break;
     case 3:
 	  if (kopf[0].DC_Rahmen3.endadresse[0] == kopf[0].DC_Rahmen3.startadresse[0] &&
 	  kopf[0].DC_Rahmen3.endadresse[1] == kopf[0].DC_Rahmen3.startadresse[1] &&
-	  kopf[0].DC_Rahmen3.endadresse[2] == kopf[0].DC_Rahmen3.startadresse[2] )
+	  kopf[0].DC_Rahmen3.endadresse[2] == kopf[0].DC_Rahmen3.startadresse[2]  && 
+	  kopf[0].DC_Rahmen3.endadresse[0] == 0xFF && kopf[0].DC_Rahmen3.endadresse[1] == 0xFF && kopf[0].DC_Rahmen3.endadresse[2] == 0xFF )
 	  {
 	     printf("Keine geloggten Daten verfuegbar!\n");
 		 return -1;
@@ -3140,7 +3144,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
     case 4:
 	  if (kopf[0].DC_Rahmen4.endadresse[0] == kopf[0].DC_Rahmen4.startadresse[0] &&
 	  kopf[0].DC_Rahmen4.endadresse[1] == kopf[0].DC_Rahmen4.startadresse[1] &&
-	  kopf[0].DC_Rahmen4.endadresse[2] == kopf[0].DC_Rahmen4.startadresse[2] )
+	  kopf[0].DC_Rahmen4.endadresse[2] == kopf[0].DC_Rahmen4.startadresse[2]  && 
+	  kopf[0].DC_Rahmen4.endadresse[0] == 0xFF && kopf[0].DC_Rahmen4.endadresse[1] == 0xFF && kopf[0].DC_Rahmen4.endadresse[2] == 0xFF )
 	  {
 	     printf("Keine geloggten Daten verfuegbar!\n");
 		 return -1;
@@ -3160,7 +3165,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
     case 5:
 	  if (kopf[0].DC_Rahmen5.endadresse[0] == kopf[0].DC_Rahmen5.startadresse[0] &&
 	  kopf[0].DC_Rahmen5.endadresse[1] == kopf[0].DC_Rahmen5.startadresse[1] &&
-	  kopf[0].DC_Rahmen5.endadresse[2] == kopf[0].DC_Rahmen5.startadresse[2] )
+	  kopf[0].DC_Rahmen5.endadresse[2] == kopf[0].DC_Rahmen5.startadresse[2]  && 
+	  kopf[0].DC_Rahmen5.endadresse[0] == 0xFF && kopf[0].DC_Rahmen5.endadresse[1] == 0xFF && kopf[0].DC_Rahmen5.endadresse[2] == 0xFF )
 	  {
 	     printf("Keine geloggten Daten verfuegbar!\n");
 		 return -1;
@@ -3180,7 +3186,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
     case 6:
 	  if (kopf[0].DC_Rahmen6.endadresse[0] == kopf[0].DC_Rahmen6.startadresse[0] &&
 	  kopf[0].DC_Rahmen6.endadresse[1] == kopf[0].DC_Rahmen6.startadresse[1] &&
-	  kopf[0].DC_Rahmen6.endadresse[2] == kopf[0].DC_Rahmen6.startadresse[2] )
+	  kopf[0].DC_Rahmen6.endadresse[2] == kopf[0].DC_Rahmen6.startadresse[2]  && 
+	  kopf[0].DC_Rahmen6.endadresse[0] == 0xFF && kopf[0].DC_Rahmen6.endadresse[1] == 0xFF && kopf[0].DC_Rahmen6.endadresse[2] == 0xFF )
 	  {
 	     printf("Keine geloggten Daten verfuegbar!\n");
 		 return -1;
@@ -3200,7 +3207,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
     case 7:
 	  if (kopf[0].DC_Rahmen7.endadresse[0] == kopf[0].DC_Rahmen7.startadresse[0] &&
 	  kopf[0].DC_Rahmen7.endadresse[1] == kopf[0].DC_Rahmen7.startadresse[1] &&
-	  kopf[0].DC_Rahmen7.endadresse[2] == kopf[0].DC_Rahmen7.startadresse[2] )
+	  kopf[0].DC_Rahmen7.endadresse[2] == kopf[0].DC_Rahmen7.startadresse[2]  && 
+	  kopf[0].DC_Rahmen7.endadresse[0] == 0xFF && kopf[0].DC_Rahmen7.endadresse[1] == 0xFF && kopf[0].DC_Rahmen7.endadresse[2] == 0xFF )
 	  {
 	     printf("Keine geloggten Daten verfuegbar!\n");
 		 return -1;
@@ -3220,7 +3228,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
     case 8:
 	  if (kopf[0].DC_Rahmen8.endadresse[0] == kopf[0].DC_Rahmen8.startadresse[0] &&
 	  kopf[0].DC_Rahmen8.endadresse[1] == kopf[0].DC_Rahmen8.startadresse[1] &&
-	  kopf[0].DC_Rahmen8.endadresse[2] == kopf[0].DC_Rahmen8.startadresse[2] )
+	  kopf[0].DC_Rahmen8.endadresse[2] == kopf[0].DC_Rahmen8.startadresse[2]  && 
+	  kopf[0].DC_Rahmen8.endadresse[0] == 0xFF && kopf[0].DC_Rahmen8.endadresse[1] == 0xFF && kopf[0].DC_Rahmen8.endadresse[2] == 0xFF )
 	  {
 	     printf("Keine geloggten Daten verfuegbar!\n");
 		 return -1;
