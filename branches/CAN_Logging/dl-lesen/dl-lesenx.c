@@ -59,6 +59,7 @@ int do_cleanup(void);
 int check_arg(int arg_c, char *arg_v[]);
 int check_arg_getopt(int arg_c, char *arg_v[]);
 int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr);
+int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen);
 int open_logfile(char LogFile[], int geraet);
 int close_logfile(void);
 int get_modulmodus(void);
@@ -103,11 +104,13 @@ struct sockaddr_in SERVER_sockaddr_in;
 
 int csv_header_done=-1;
 
-FILE *fp_logfile=NULL, *fp_logfile_2=NULL, *fp_varlogfile=NULL ; /* pointer IMMER initialisieren und vor benutzung pruefen */
-FILE *fp_csvfile=NULL ;
+FILE *fp_logfile=NULL, *fp_logfile_2=NULL,  *fp_logfile_3=NULL, *fp_logfile_4=NULL,
+     *fp_logfile_5=NULL, *fp_logfile_6=NULL,  *fp_logfile_7=NULL, *fp_logfile_8=NULL,
+     *fp_varlogfile=NULL, *fp_csvfile=NULL ; /* pointer IMMER initialisieren und vor benutzung pruefen */
 
 char dlport[13]; /* Uebergebener Parameter USB-Port */
-char LogFileName[12], LogFileName_2[14];
+char LogFileName[12], LogFileName_2[14], LogFileName_3[14], LogFileName_4[14], LogFileName_5[14], 
+     LogFileName_6[14], LogFileName_7[14], LogFileName_8[14];
 char varLogFile[22];
 char DirName[255];
 char sDatum[11], sZeit[11];
@@ -135,7 +138,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 14.02.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 18.02.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -295,9 +298,9 @@ int main(int argc, char *argv[])
     printf(" UVR Typ: UVR61-3\n");
 
 /* Abbruch - Test CAN */
-  fprintf(stderr, " CAN-Logging-Test: hier erst einmal Abbruch.\n");
-  do_cleanup();
-  return ( -1 );
+//  fprintf(stderr, " CAN-Logging-Test: hier erst einmal Abbruch.\n");
+//  do_cleanup();
+//  return ( -1 );
 /* Abbruch - Test CAN */
 	
   zeitstempel();
@@ -442,7 +445,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 14.02.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 18.02.2010 \n");
         return 0;
       }
       case 'h':
@@ -572,6 +575,110 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
       erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
       if (uvr_modus == 0xD1)
         erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
+    }
+
+  return erg;
+}
+
+/* Der Name der Logfiles wird aus dem eigelesenen Wert fuer Jahr und Monat erzeugt */
+int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
+{
+  int erg = 0;
+  char csv_endung[] = ".csv", winsol_endung[] = ".log";
+  char *pLogFileName=NULL, *pLogFileName_2=NULL, *pLogFileName_3=NULL, *pLogFileName_4=NULL, *pLogFileName_5=NULL,
+  *pLogFileName_6=NULL, *pLogFileName_7=NULL, *pLogFileName_8=NULL;
+  pLogFileName = LogFileName;
+  pLogFileName_2 = LogFileName_2;
+  pLogFileName_3 = LogFileName_3;
+  pLogFileName_4 = LogFileName_4;
+  pLogFileName_5 = LogFileName_5;
+  pLogFileName_6 = LogFileName_6;
+  pLogFileName_7 = LogFileName_7;
+  pLogFileName_8 = LogFileName_8;
+
+  if (csv ==  1) /* LogDatei im CSV-Format schreiben */
+    {
+	  switch(anzahl_Rahmen) 
+	  {
+	    case 1: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 2: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 3: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 4: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 5: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 6: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 7: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_7%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 8: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_7%s",DirName,ds_jahr,ds_monat,csv_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_8%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+	  }
+    }
+  else  /* LogDatei im Winsol-Format schreiben */
+    {
+	  switch(anzahl_Rahmen) 
+	  {
+	    case 1: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 2: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 3: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		case 4: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		case 5: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		case 6: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 7: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_7%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 8: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_7%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_8%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+	  }
     }
 
   return erg;
@@ -2300,6 +2407,7 @@ int datenlesen_DC(int anz_datensaetze)
   unsigned modTeiler;
   int i, merk_i, fehlerhafte_ds, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
   int Bytes_for_0xDC = 524, monatswechsel = 0, anzahl_can_rahmen = 0;
+  int pruefsum_check = 0;
 u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
   u_DS_CAN u_dsatz_can[1];
   DS_Winsol dsatz_winsol[1];  // 8 Datensaetze moeglich (?)
@@ -2411,33 +2519,46 @@ u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
     if (uvr_typ == UVR1611)
       pruefsumme = berechnepruefziffer_uvr1611_CAN(u_dsatz_can, anzahl_can_rahmen);
 
-// #if DEBUG > 3
   if (uvr_typ == UVR1611)
   {
     switch(anzahl_can_rahmen)
 	{
-	  case 1: printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_1.pruefsum,pruefsumme);
+	  case 1: if (u_dsatz_can[0].DS_CAN_1.pruefsum == pruefsumme )
+	            pruefsum_check = 1;
+	        printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_1.pruefsum,pruefsumme);
 	        break;
-	  case 2: printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_2.pruefsum,pruefsumme);
+	  case 2: if (u_dsatz_can[0].DS_CAN_2.pruefsum == pruefsumme )
+	            pruefsum_check = 1;
+			printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_2.pruefsum,pruefsumme);
 	        break;
-	  case 3: printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_3.pruefsum,pruefsumme);
+	  case 3: if (u_dsatz_can[0].DS_CAN_3.pruefsum == pruefsumme )
+	            pruefsum_check = 1;
+            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_3.pruefsum,pruefsumme);
 	        break;
-	  case 4: printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_4.pruefsum,pruefsumme);
+	  case 4: if (u_dsatz_can[0].DS_CAN_4.pruefsum == pruefsumme )
+	            pruefsum_check = 1;
+            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_4.pruefsum,pruefsumme);
 	        break;
-	  case 5: printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_5.pruefsum,pruefsumme);
+	  case 5: if (u_dsatz_can[0].DS_CAN_5.pruefsum == pruefsumme )
+	            pruefsum_check = 1;
+            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_5.pruefsum,pruefsumme);
 	        break;
-	  case 6: printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_6.pruefsum,pruefsumme);
+	  case 6: if (u_dsatz_can[0].DS_CAN_6.pruefsum == pruefsumme )
+	            pruefsum_check = 1;
+            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_6.pruefsum,pruefsumme);
 	        break;
-	  case 7: printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_7.pruefsum,pruefsumme);
+	  case 7: if (u_dsatz_can[0].DS_CAN_7.pruefsum == pruefsumme )
+	            pruefsum_check = 1;
+            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_7.pruefsum,pruefsumme);
 	        break;
-	  case 8: printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_8.pruefsum,pruefsumme);
+	  case 8: if (u_dsatz_can[0].DS_CAN_8.pruefsum == pruefsumme )
+	            pruefsum_check = 1;
+            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_8.pruefsum,pruefsumme);
 	        break;
 	}
   }	  
-  return 999;	 
-// #endif
-
-    if (u_dsatz_uvr[0].DS_UVR1611.pruefsum == pruefsumme || u_dsatz_uvr[0].DS_UVR61_3.pruefsum == pruefsumme)
+  
+    if ( pruefsum_check )
     {  /*Aenderung: 02.09.06 - Hochzaehlen der Startadresse erst dann, wenn korrekt gelesen wurde (eventuell endlosschleife?) */
 #if DEBUG > 4
     print_dsatz_uvr1611_content(u_dsatz_uvr);
@@ -2446,8 +2567,8 @@ u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
       {
         if (uvr_typ == UVR1611)
         {
-          tmp_erg = (erzeugeLogfileName(u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat,u_dsatz_uvr[0].DS_UVR1611.datum_zeit.jahr));
-          merk_monat = u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat;
+          tmp_erg = ( erzeugeLogfileName_CAN(u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat,u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.jahr,anzahl_can_rahmen) );
+          merk_monat = u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat;
         }
         if ( tmp_erg == 0 )
         {
@@ -2456,45 +2577,412 @@ u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
         }
         else
         {
-          if ( open_logfile(LogFileName, 1) == -1 )
-          {
-            printf("Das LogFile kann nicht geoeffnet werden!\n");
-            exit(-1);
-          }
+			switch(anzahl_can_rahmen)
+			{
+			  case 1: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+			  case 2: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+			  case 3: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+			  case 4: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+			  case 5: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_5);
+				exit(-1);
+				}
+			  case 6: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_5);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_6);
+				exit(-1);
+				}
+			  case 7: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_5);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_6);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_7);
+				exit(-1);
+				}
+			  case 8: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_5);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_6);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_7);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_8);
+				exit(-1);
+				}
+			}
         }
+
       }
       /* Hat der Monat gewechselt? Wenn ja, neues LogFile erstellen. */
-      if ( uvr_typ == UVR1611 && merk_monat != u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat )
+      if ( merk_monat != u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat )
         monatswechsel = 1;
 
 //  printf("Monat: %2d Variable monatswechsel: %1d\n", u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.monat,monatswechsel);
       if ( monatswechsel == 1 )
       {
+	    switch(anzahl_can_rahmen)
+		{
+		  case 1: fclose(fp_logfile); break;
+		  case 2: fclose(fp_logfile); fclose(fp_logfile_2); break;
+		  case 3: fclose(fp_logfile); fclose(fp_logfile_2); fclose(fp_logfile_3); break;
+		  case 4: fclose(fp_logfile); fclose(fp_logfile_2); fclose(fp_logfile_3); fclose(fp_logfile_4); break;
+		  case 5: fclose(fp_logfile); fclose(fp_logfile_2); fclose(fp_logfile_3); fclose(fp_logfile_4);
+		          fclose(fp_logfile_5); break;
+		  case 6: fclose(fp_logfile); fclose(fp_logfile_2); fclose(fp_logfile_3); fclose(fp_logfile_4);
+		          fclose(fp_logfile_5); fclose(fp_logfile_6); break;
+		  case 7: fclose(fp_logfile); fclose(fp_logfile_2); fclose(fp_logfile_3); fclose(fp_logfile_4);
+		          fclose(fp_logfile_5); fclose(fp_logfile_6); fclose(fp_logfile_7); break;
+		  case 8: fclose(fp_logfile); fclose(fp_logfile_2); fclose(fp_logfile_3); fclose(fp_logfile_4);
+		          fclose(fp_logfile_5); fclose(fp_logfile_6); fclose(fp_logfile_7); fclose(fp_logfile_8); break;
+		}
+
         printf("Monatswechsel!\n");
-        if ( close_logfile() == -1)
+
+		if (uvr_typ == UVR1611)
+            tmp_erg = (erzeugeLogfileName_CAN(u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat,u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.jahr,anzahl_can_rahmen));
+        if ( tmp_erg == 0 )
         {
-          printf("Fehler beim Monatswechsel: Cannot close logfile!");
-          exit(-1);
+           printf("Fehler beim Monatswechsel: Der Logfile-Name konnte nicht erzeugt werden!");
+           exit(-1);
         }
         else
         {
-          if (uvr_typ == UVR1611)
-            tmp_erg = (erzeugeLogfileName(u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat,u_dsatz_uvr[0].DS_UVR1611.datum_zeit.jahr));
-          if ( tmp_erg == 0 )
-          {
-            printf("Fehler beim Monatswechsel: Der Logfile-Name konnte nicht erzeugt werden!");
-            exit(-1);
-          }
-          else
-          {
-            if ( open_logfile(LogFileName, 1) == -1 )
-            {
-              printf("Fehler beim Monatswechsel: Das LogFile kann nicht geoeffnet werden!\n");
-              exit(-1);
-            }
-          }
+			switch(anzahl_can_rahmen)
+			{
+			  case 1: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+			  case 2: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+			  case 3: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+			  case 4: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+			  case 5: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_5);
+				exit(-1);
+				}
+			  case 6: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_5);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_6);
+				exit(-1);
+				}
+			  case 7: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_5);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_6);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_7);
+				exit(-1);
+				}
+			  case 8: if ( open_logfile(LogFileName, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_2, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_3, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_5);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_6);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_7);
+				exit(-1);
+				}
+				if ( open_logfile(LogFileName_4, 1) == -1 )
+				{
+				printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_8);
+				exit(-1);
+				}
+			}
         }
       } /* Ende: if ( merk_monat != dsatz_uvr1611[0].datum_zeit.monat ) */
+return 999;
 
       if (uvr_typ == UVR1611)
         merk_monat = u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat;
