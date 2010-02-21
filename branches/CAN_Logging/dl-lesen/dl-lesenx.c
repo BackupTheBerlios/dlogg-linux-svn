@@ -2516,11 +2516,14 @@ u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
     } /* if (ip_zugriff) */
 
 //**************************************************************************************** !!!!!!!!
+fprintf(stderr,"-> Funktionsaufruf berechnepruefziffer, Anzahl Rahmen: $i\n",anzahl_can_rahmen);
     if (uvr_typ == UVR1611)
       pruefsumme = berechnepruefziffer_uvr1611_CAN(u_dsatz_can, anzahl_can_rahmen);
+fprintf(stderr,"-> Funktionsende berechnepruefziffer, Pruefsumme: $i\n",pruefsumme);
 
   if (uvr_typ == UVR1611)
   {
+fprintf(stderr,"-> Pruefsummencheck\n");  
     switch(anzahl_can_rahmen)
 	{
 	  case 1: if (u_dsatz_can[0].DS_CAN_1.pruefsum == pruefsumme )
@@ -2557,14 +2560,18 @@ u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
 	        break;
 	}
   }	  
+fprintf(stderr,"-> Pruefsummencheck fertig. pruefsum_check: %i\n",pruefsum_check);  
   
-    if ( pruefsum_check )
+    if ( pruefsum_check == 1 )
     {  /*Aenderung: 02.09.06 - Hochzaehlen der Startadresse erst dann, wenn korrekt gelesen wurde (eventuell endlosschleife?) */
 #if DEBUG > 4
     print_dsatz_uvr1611_content(u_dsatz_uvr);
 #endif
+
+fprintf(stderr,"-> Pruefsummencheck war ok.\n");
       if ( i == 0 ) /* erster Datenssatz wurde gelesen - Logfile oeffnen / erstellen */
       {
+fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
         if (uvr_typ == UVR1611)
         {
           tmp_erg = ( erzeugeLogfileName_CAN(u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat,u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.jahr,anzahl_can_rahmen) );
@@ -2577,6 +2584,7 @@ u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
         }
         else
         {
+fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oeffnen.\n");
 			switch(anzahl_can_rahmen)
 			{
 			  case 1: if ( open_logfile(LogFileName, 1) == -1 )
@@ -2982,7 +2990,11 @@ u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
 			}
         }
       } /* Ende: if ( merk_monat != dsatz_uvr1611[0].datum_zeit.monat ) */
+	  
+fprintf(stderr,"-> hier eigentlich Abbruch von datenlesen_DC().\n");
+	  
 return 999;
+fprintf(stderr,"-> Diese Zeile hier darf nicht zu lesen sein!!!!\n");
 
       if (uvr_typ == UVR1611)
         merk_monat = u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat;
