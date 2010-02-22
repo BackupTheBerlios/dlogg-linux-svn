@@ -2408,6 +2408,7 @@ int datenlesen_DC(int anz_datensaetze)
   int i=0, merk_i=0, fehlerhafte_ds=0, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
   int Bytes_for_0xDC = 524, monatswechsel = 0, anzahl_can_rahmen = 0;
   int pruefsum_check = 0;
+u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
   u_DS_CAN u_dsatz_can[1];
   DS_Winsol dsatz_winsol[1];  // 8 Datensaetze moeglich (?)
   DS_Winsol *puffer_dswinsol = &dsatz_winsol[0];
@@ -2565,7 +2566,7 @@ fprintf(stderr,"-> Pruefsummencheck fertig. pruefsum_check: %i\n",pruefsum_check
     if ( pruefsum_check == 1 )
     {  /*Aenderung: 02.09.06 - Hochzaehlen der Startadresse erst dann, wenn korrekt gelesen wurde (eventuell endlosschleife?) */
 #if DEBUG > 4
-    print_dsatz_uvr1611_content(u_dsatz_uvr);
+    //print_dsatz_uvr1611_content(u_dsatz_uvr);
 #endif
 
 fprintf(stderr,"-> Pruefsummencheck war ok.\n");
