@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 21.02.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 22.02.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
   }
   while((anz_ds == -1) && (i < 6));
   
-  fprintf(stderr, " CAN-Logging-Test: Kopfsatzlesen fertig, Anzahl Datensaetze: %u\n",anz_ds); /********************/
+  fprintf(stderr, " CAN-Logging-Test: Kopfsatzlesen fertig, Anzahl Datensaetze: %d\n",anz_ds); /********************/
   
   if ( anz_ds == -1 )
   {
@@ -445,7 +445,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 21.02.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 22.02.2010 \n");
         return 0;
       }
       case 'h':
@@ -2405,10 +2405,9 @@ int datenlesen_D1(int anz_datensaetze)
 int datenlesen_DC(int anz_datensaetze)
 {
   unsigned modTeiler;
-  int i, merk_i, fehlerhafte_ds, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
+  int i=0, merk_i=0, fehlerhafte_ds=0, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
   int Bytes_for_0xDC = 524, monatswechsel = 0, anzahl_can_rahmen = 0;
   int pruefsum_check = 0;
-u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
   u_DS_CAN u_dsatz_can[1];
   DS_Winsol dsatz_winsol[1];  // 8 Datensaetze moeglich (?)
   DS_Winsol *puffer_dswinsol = &dsatz_winsol[0];
@@ -2479,7 +2478,7 @@ u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
   sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
 
-  for(;i<anz_datensaetze;i++)
+  for(i=0;i<anz_datensaetze;i++)
   {
     sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
 
@@ -2516,10 +2515,11 @@ u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
     } /* if (ip_zugriff) */
 
 //**************************************************************************************** !!!!!!!!
-fprintf(stderr,"-> Funktionsaufruf berechnepruefziffer, Anzahl Rahmen: $i\n",anzahl_can_rahmen);
+fprintf(stderr,"-> Funktionsaufruf berechnepruefziffer, Anzahl Rahmen: %d\n",anzahl_can_rahmen);
     if (uvr_typ == UVR1611)
       pruefsumme = berechnepruefziffer_uvr1611_CAN(u_dsatz_can, anzahl_can_rahmen);
-fprintf(stderr,"-> Funktionsende berechnepruefziffer, Pruefsumme: $i\n",pruefsumme);
+fprintf(stderr,"-> Funktionsende berechnepruefziffer, Pruefsumme: %d\n",pruefsumme);
+fprintf(stderr,"-> uvr_typ = %x\n",uvr_typ);
 
   if (uvr_typ == UVR1611)
   {
