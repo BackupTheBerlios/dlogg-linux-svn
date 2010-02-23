@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 22.02.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 23.02.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -445,7 +445,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 22.02.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 23.02.2010 \n");
         return 0;
       }
       case 'h':
@@ -3331,25 +3331,24 @@ int berechnepruefziffer_uvr1611_CAN(u_DS_CAN dsatz_can[], int anzahl_can_rahmen)
 	       for (i=0;i<2;i++)
 		   {
              for (k=0;k<16;k++)
-               retval+= (dsatz_can[0].DS_CAN_2.DS_CAN[i].sensT[k][0]+dsatz_can[0].DS_CAN_2.DS_CAN[i].sensT[k][1]);
-             retval += dsatz_can[0].DS_CAN_2.DS_CAN[i].ausgbyte1+dsatz_can[0].DS_CAN_2.DS_CAN[i].ausgbyte2+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].dza[0]+dsatz_can[0].DS_CAN_2.DS_CAN[i].dza[1]+dsatz_can[0].DS_CAN_2.DS_CAN[i].dza[2]+dsatz_can[0].DS_CAN_2.DS_CAN[i].dza[3]+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].wmzaehler_reg+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg1[0]+dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg1[1]+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg1[2]+dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg1[3]+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].kwh1[0]+dsatz_can[0].DS_CAN_2.DS_CAN[i].kwh1[1]+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].mwh1[0]+dsatz_can[0].DS_CAN_2.DS_CAN[i].mwh1[1]+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg2[0]+dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg2[1]+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg2[2]+dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg2[3]+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].kwh2[0]+dsatz_can[0].DS_CAN_2.DS_CAN[i].kwh2[1]+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].mwh2[0]+dsatz_can[0].DS_CAN_2.DS_CAN[i].mwh2[1]+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.sek+dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.min+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.std+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.tag+dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.monat+
-             dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.jahr+
-             dsatz_can[0].DS_CAN_2.zeitstempel[0]+dsatz_can[0].DS_CAN_2.zeitstempel[1]+
-             dsatz_can[0].DS_CAN_2.zeitstempel[2];
+               retval+= (dsatz_can[0].DS_CAN_2.DS_CAN[i].sensT[k][0] + dsatz_can[0].DS_CAN_2.DS_CAN[i].sensT[k][1]);
+             retval += dsatz_can[0].DS_CAN_2.DS_CAN[i].ausgbyte1 + dsatz_can[0].DS_CAN_2.DS_CAN[i].ausgbyte2 +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].dza[0] + dsatz_can[0].DS_CAN_2.DS_CAN[i].dza[1] + dsatz_can[0].DS_CAN_2.DS_CAN[i].dza[2] + dsatz_can[0].DS_CAN_2.DS_CAN[i].dza[3] +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].wmzaehler_reg +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg1[0] + dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg1[1] +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg1[2] + dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg1[3] +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].kwh1[0] + dsatz_can[0].DS_CAN_2.DS_CAN[i].kwh1[1] +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].mwh1[0] + dsatz_can[0].DS_CAN_2.DS_CAN[i].mwh1[1] +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg2[0] + dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg2[1] +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg2[2] + dsatz_can[0].DS_CAN_2.DS_CAN[i].mlstg2[3] +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].kwh2[0] + dsatz_can[0].DS_CAN_2.DS_CAN[i].kwh2[1] +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].mwh2[0] + dsatz_can[0].DS_CAN_2.DS_CAN[i].mwh2[1] +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.sek + dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.min +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.std +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.tag+dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.monat +
+             dsatz_can[0].DS_CAN_2.DS_CAN[i].datum_zeit.jahr;
 		   }
+             retval += dsatz_can[0].DS_CAN_2.zeitstempel[0] + dsatz_can[0].DS_CAN_2.zeitstempel[1] + dsatz_can[0].DS_CAN_2.zeitstempel[2];
            return retval % modTeiler;
 	case 3:
 	       for (i=0;i<3;i++)
@@ -3370,10 +3369,9 @@ int berechnepruefziffer_uvr1611_CAN(u_DS_CAN dsatz_can[], int anzahl_can_rahmen)
              dsatz_can[0].DS_CAN_3.DS_CAN[i].datum_zeit.sek+dsatz_can[0].DS_CAN_3.DS_CAN[i].datum_zeit.min+
              dsatz_can[0].DS_CAN_3.DS_CAN[i].datum_zeit.std+
              dsatz_can[0].DS_CAN_3.DS_CAN[i].datum_zeit.tag+dsatz_can[0].DS_CAN_3.DS_CAN[i].datum_zeit.monat+
-             dsatz_can[0].DS_CAN_3.DS_CAN[i].datum_zeit.jahr+
-             dsatz_can[0].DS_CAN_3.zeitstempel[0]+dsatz_can[0].DS_CAN_3.zeitstempel[1]+
-             dsatz_can[0].DS_CAN_3.zeitstempel[2];
+             dsatz_can[0].DS_CAN_3.DS_CAN[i].datum_zeit.jahr;
 		   }
+		   retval += dsatz_can[0].DS_CAN_3.zeitstempel[0]+dsatz_can[0].DS_CAN_3.zeitstempel[1]+dsatz_can[0].DS_CAN_3.zeitstempel[2];
            return retval % modTeiler;
 	case 4:
 	       for (i=0;i<4;i++)
@@ -3394,10 +3392,9 @@ int berechnepruefziffer_uvr1611_CAN(u_DS_CAN dsatz_can[], int anzahl_can_rahmen)
              dsatz_can[0].DS_CAN_4.DS_CAN[i].datum_zeit.sek+dsatz_can[0].DS_CAN_4.DS_CAN[i].datum_zeit.min+
              dsatz_can[0].DS_CAN_4.DS_CAN[i].datum_zeit.std+
              dsatz_can[0].DS_CAN_4.DS_CAN[i].datum_zeit.tag+dsatz_can[0].DS_CAN_4.DS_CAN[i].datum_zeit.monat+
-             dsatz_can[0].DS_CAN_4.DS_CAN[i].datum_zeit.jahr+
-             dsatz_can[0].DS_CAN_4.zeitstempel[0]+dsatz_can[0].DS_CAN_4.zeitstempel[1]+
-             dsatz_can[0].DS_CAN_4.zeitstempel[2];
-		   }
+             dsatz_can[0].DS_CAN_4.DS_CAN[i].datum_zeit.jahr;
+		   } 
+		   retval += dsatz_can[0].DS_CAN_4.zeitstempel[0]+dsatz_can[0].DS_CAN_4.zeitstempel[1]+dsatz_can[0].DS_CAN_4.zeitstempel[2];
            return retval % modTeiler;
 	case 5:
 	       for (i=0;i<5;i++)
@@ -3418,10 +3415,9 @@ int berechnepruefziffer_uvr1611_CAN(u_DS_CAN dsatz_can[], int anzahl_can_rahmen)
              dsatz_can[0].DS_CAN_5.DS_CAN[i].datum_zeit.sek+dsatz_can[0].DS_CAN_5.DS_CAN[i].datum_zeit.min+
              dsatz_can[0].DS_CAN_5.DS_CAN[i].datum_zeit.std+
              dsatz_can[0].DS_CAN_5.DS_CAN[i].datum_zeit.tag+dsatz_can[0].DS_CAN_5.DS_CAN[i].datum_zeit.monat+
-             dsatz_can[0].DS_CAN_5.DS_CAN[i].datum_zeit.jahr+
-             dsatz_can[0].DS_CAN_5.zeitstempel[0]+dsatz_can[0].DS_CAN_5.zeitstempel[1]+
-             dsatz_can[0].DS_CAN_5.zeitstempel[2];
-		   }
+             dsatz_can[0].DS_CAN_5.DS_CAN[i].datum_zeit.jahr;
+}
+		   retval += dsatz_can[0].DS_CAN_5.zeitstempel[0]+dsatz_can[0].DS_CAN_5.zeitstempel[1]+dsatz_can[0].DS_CAN_5.zeitstempel[2];
            return retval % modTeiler;
 	case 6:
 	       for (i=0;i<6;i++)
@@ -3466,10 +3462,9 @@ int berechnepruefziffer_uvr1611_CAN(u_DS_CAN dsatz_can[], int anzahl_can_rahmen)
              dsatz_can[0].DS_CAN_7.DS_CAN[i].datum_zeit.sek+dsatz_can[0].DS_CAN_7.DS_CAN[i].datum_zeit.min+
              dsatz_can[0].DS_CAN_7.DS_CAN[i].datum_zeit.std+
              dsatz_can[0].DS_CAN_7.DS_CAN[i].datum_zeit.tag+dsatz_can[0].DS_CAN_7.DS_CAN[i].datum_zeit.monat+
-             dsatz_can[0].DS_CAN_7.DS_CAN[i].datum_zeit.jahr+
-             dsatz_can[0].DS_CAN_7.zeitstempel[0]+dsatz_can[0].DS_CAN_7.zeitstempel[1]+
-             dsatz_can[0].DS_CAN_7.zeitstempel[2];
+             dsatz_can[0].DS_CAN_7.DS_CAN[i].datum_zeit.jahr;
 		   }
+		   retval += dsatz_can[0].DS_CAN_7.zeitstempel[0]+dsatz_can[0].DS_CAN_7.zeitstempel[1]+dsatz_can[0].DS_CAN_7.zeitstempel[2];
            return retval % modTeiler;
 	case 8:
 	       for (i=0;i<8;i++)
@@ -3490,10 +3485,9 @@ int berechnepruefziffer_uvr1611_CAN(u_DS_CAN dsatz_can[], int anzahl_can_rahmen)
              dsatz_can[0].DS_CAN_8.DS_CAN[i].datum_zeit.sek+dsatz_can[0].DS_CAN_8.DS_CAN[i].datum_zeit.min+
              dsatz_can[0].DS_CAN_8.DS_CAN[i].datum_zeit.std+
              dsatz_can[0].DS_CAN_8.DS_CAN[i].datum_zeit.tag+dsatz_can[0].DS_CAN_8.DS_CAN[i].datum_zeit.monat+
-             dsatz_can[0].DS_CAN_8.DS_CAN[i].datum_zeit.jahr+
-             dsatz_can[0].DS_CAN_8.zeitstempel[0]+dsatz_can[0].DS_CAN_8.zeitstempel[1]+
-             dsatz_can[0].DS_CAN_8.zeitstempel[2];
+             dsatz_can[0].DS_CAN_8.DS_CAN[i].datum_zeit.jahr;
 		   }
+		   retval += dsatz_can[0].DS_CAN_8.zeitstempel[0]+dsatz_can[0].DS_CAN_8.zeitstempel[1]+dsatz_can[0].DS_CAN_8.zeitstempel[2];
            return retval % modTeiler;
   }
 }
