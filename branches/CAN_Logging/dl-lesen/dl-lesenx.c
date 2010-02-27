@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 26.02.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 27.02.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -442,7 +442,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 26.02.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 27.02.2010 \n");
         return 0;
       }
       case 'h':
@@ -2592,6 +2592,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
 				  exit(-1);
 				}
+				break;
 			  case 2: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2602,6 +2603,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Das LogFile 2 %s kann nicht geoeffnet werden!\n",LogFileName_2);
 				  exit(-1);
 				}
+				break;
 			  case 3: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2617,6 +2619,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Das LogFile 3 %s kann nicht geoeffnet werden!\n",LogFileName_3);
 				  exit(-1);
 				}
+				break;
 			  case 4: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2637,6 +2640,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Das LogFile 4 %s kann nicht geoeffnet werden!\n",LogFileName_4);
 				  exit(-1);
 				}
+				break;
 			  case 5: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2662,6 +2666,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Das LogFile 5 %s kann nicht geoeffnet werden!\n",LogFileName_5);
 				  exit(-1);
 				}
+				break;
 			  case 6: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2692,6 +2697,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Das LogFile 6 %s kann nicht geoeffnet werden!\n",LogFileName_6);
 				  exit(-1);
 				}
+				break;
 			  case 7: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2727,6 +2733,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Das LogFile 7 %s kann nicht geoeffnet werden!\n",LogFileName_7);
 				  exit(-1);
 				}
+				break;
 			  case 8: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2812,6 +2819,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
 				  exit(-1);
 				}
+				break;
 			  case 2: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2822,6 +2830,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_2);
 				  exit(-1);
 				}
+				break;
 			  case 3: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2837,6 +2846,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_3);
 				  exit(-1);
 				}
+				break;
 			  case 4: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2857,6 +2867,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_4);
 				  exit(-1);
 				}
+				break;
 			  case 5: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2882,6 +2893,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_5);
 				  exit(-1);
 				}
+				break;
 			  case 6: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2912,6 +2924,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_6);
 				  exit(-1);
 				}
+				break;
 			  case 7: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
@@ -2947,6 +2960,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_7);
 				  exit(-1);
 				}
+				break;
 			  case 8: if ( open_logfile(LogFileName, 1) == -1 )
 				{
 				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
