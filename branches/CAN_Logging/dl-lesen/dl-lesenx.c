@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 28.02.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 04.03.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -444,7 +444,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 28.02.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 04.03.2010 \n");
         return 0;
       }
       case 'h':
@@ -659,7 +659,7 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 4: erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - $s\n",erg,LogFileName);
+	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName);
 	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -2744,6 +2744,11 @@ fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
         else
         {
 fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oeffnen.\n");
+            if (anzahl_can_rahmen > 3)
+			{
+                fprintf(stderr,"-> %d Datenrahmen - Variableninhalt der ersten 4 Logdateinamen:\n",anzahl_can_rahmen);
+			    fprintf(stderr,"-> %s - %s - %s - %s\n",LogFileName,LogFileName_2,LogFileName_3,LogFileName_4);
+			}
 			switch(anzahl_can_rahmen)
 			{
 			  case 1: if ( open_logfile_CAN(LogFileName, 1) == -1 )
@@ -2779,8 +2784,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 4: fprintf(stderr,"-> 4 Datenrahmen - Variableninhalt Logdateinamen:\n");
-			          fprintf(stderr,"-> %s - %s - %s - %s\n",LogFileName,LogFileName_2,LogFileName_3,LogFileName_4);
+			  case 4: 
 			    if ( open_logfile_CAN(LogFileName, 1) == -1 )
 				{
 				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
