@@ -111,8 +111,8 @@ FILE *fp_logfile=NULL, *fp_logfile_2=NULL,  *fp_logfile_3=NULL, *fp_logfile_4=NU
      *fp_varlogfile=NULL, *fp_csvfile=NULL ; /* pointer IMMER initialisieren und vor benutzung pruefen */
 
 char dlport[13]; /* Uebergebener Parameter USB-Port */
-char LogFileName[12], LogFileName_2[14], LogFileName_3[14], LogFileName_4[14], LogFileName_5[14], 
-     LogFileName_6[14], LogFileName_7[14], LogFileName_8[14];
+char LogFileName[12], LogFileName_1[12], LogFileName_2[14], LogFileName_3[14], LogFileName_4[14],
+     LogFileName_5[14], LogFileName_6[14], LogFileName_7[14], LogFileName_8[14];
 char varLogFile[22];
 char DirName[255];
 char sDatum[11], sZeit[11];
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 04.03.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 08.03.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -444,7 +444,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 04.03.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 08.03.2010 \n");
         return 0;
       }
       case 'h':
@@ -584,10 +584,10 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 {
   int erg = 0;
   char csv_endung[] = ".csv", winsol_endung[] = ".log";
-  char *pLogFileName=NULL, *pLogFileName_2=NULL, *pLogFileName_3=NULL, *pLogFileName_4=NULL, *pLogFileName_5=NULL,
+  char *pLogFileName_1=NULL, *pLogFileName_2=NULL, *pLogFileName_3=NULL, *pLogFileName_4=NULL, *pLogFileName_5=NULL,
   *pLogFileName_6=NULL, *pLogFileName_7=NULL, *pLogFileName_8=NULL;
   
-  pLogFileName = LogFileName;
+  pLogFileName_1 = LogFileName_1;
   pLogFileName_2 = LogFileName_2;
   pLogFileName_3 = LogFileName_3;
   pLogFileName_4 = LogFileName_4;
@@ -600,34 +600,34 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
     {
 	  switch(anzahl_Rahmen) 
 	  {
-	    case 1: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+	    case 1: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung); break;
 		
-		case 2: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 2: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 3: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 3: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 4: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 4: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 5: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 5: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_5,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 6: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 6: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_5,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_6,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 7: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 7: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
@@ -635,7 +635,7 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_6,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_7,"%s2%03d%02d_7%s",DirName,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 8: erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+		case 8: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
 		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
@@ -649,36 +649,36 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
     {
 	  switch(anzahl_Rahmen) 
 	  {
-	    case 1: erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+	    case 1: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 		
-		case 2: erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		case 2: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 3: erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		case 3: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 4: erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName);
+		case 4: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
 	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 5: erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		case 5: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 6: erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		case 6: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 7: erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		case 7: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -686,7 +686,7 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_7,"%sY2%03d%02d_7%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 8: erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+		case 8: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -2747,19 +2747,19 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
             if (anzahl_can_rahmen > 3)
 			{
                 fprintf(stderr,"-> %d Datenrahmen - Variableninhalt der ersten 4 Logdateinamen:\n",anzahl_can_rahmen);
-			    fprintf(stderr,"-> %s - %s - %s - %s\n",LogFileName,LogFileName_2,LogFileName_3,LogFileName_4);
+			    fprintf(stderr,"-> %s - %s - %s - %s\n",LogFileName_1,LogFileName_2,LogFileName_3,LogFileName_4);
 			}
 			switch(anzahl_can_rahmen)
 			{
-			  case 1: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 1: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				break;
-			  case 2: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 2: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -2768,9 +2768,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 3: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 3: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -2785,9 +2785,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				}
 				break;
 			  case 4: 
-			    if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			    if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -2806,9 +2806,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 5: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 5: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -2832,9 +2832,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 6: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 6: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -2899,9 +2899,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 8: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 8: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
