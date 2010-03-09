@@ -2740,9 +2740,10 @@ fprintf(stderr,"-> Pruefsummencheck fertig. pruefsum_check: %i\n",pruefsum_check
 //fprintf(stderr,"-> Pruefsummencheck war ok.\n");
       if ( i == 0 ) /* erster Datenssatz wurde gelesen - Logfile oeffnen / erstellen */
       {
-//fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
+fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
         if (uvr_typ == UVR1611)
         {
+fprintf(stderr," --> vorbelegte Variable LogFileName_1: %s\n",LogFileName_1);
           tmp_erg = ( erzeugeLogfileName_CAN(u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat,u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.jahr,anzahl_can_rahmen) );
           merk_monat = u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat;
         }
