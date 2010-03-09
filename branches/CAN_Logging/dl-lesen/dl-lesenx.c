@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 08.03.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 09.03.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -444,7 +444,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 08.03.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 09.03.2010 \n");
         return 0;
       }
       case 'h':
@@ -827,6 +827,8 @@ int open_logfile_CAN(char LogFile[], int datenrahmen)
   UCHAR kopf_winsol_1611[59]={0x01, 0x02, 0x01, 0x03, 0xF0, 0x0F, 0x00, 0x07, 0xAA, 0xAA, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00,
             0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00,
             0xAA, 0x00, 0xFF, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00};
+
+fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s\n",LogFile);
 
   if ((fp_logfile_tmp=fopen(LogFile,"r")) == NULL) /* wenn Logfile noch nicht existiert */
   {
@@ -2727,10 +2729,10 @@ fprintf(stderr,"-> Pruefsummencheck fertig. pruefsum_check: %i\n",pruefsum_check
     //print_dsatz_uvr1611_content(u_dsatz_uvr);
 #endif
 
-fprintf(stderr,"-> Pruefsummencheck war ok.\n");
+//fprintf(stderr,"-> Pruefsummencheck war ok.\n");
       if ( i == 0 ) /* erster Datenssatz wurde gelesen - Logfile oeffnen / erstellen */
       {
-fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
+//fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
         if (uvr_typ == UVR1611)
         {
           tmp_erg = ( erzeugeLogfileName_CAN(u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat,u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.jahr,anzahl_can_rahmen) );
