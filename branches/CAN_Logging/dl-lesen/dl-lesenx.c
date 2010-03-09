@@ -111,7 +111,7 @@ FILE *fp_logfile=NULL, *fp_logfile_2=NULL,  *fp_logfile_3=NULL, *fp_logfile_4=NU
      *fp_varlogfile=NULL, *fp_csvfile=NULL ; /* pointer IMMER initialisieren und vor benutzung pruefen */
 
 char dlport[13]; /* Uebergebener Parameter USB-Port */
-char LogFileName[12], LogFileName_1[12], LogFileName_2[14], LogFileName_3[14], LogFileName_4[14],
+char LogFileName[12], LogFileName_1[12] = "0123456789AB", LogFileName_2[14], LogFileName_3[14], LogFileName_4[14],
      LogFileName_5[14], LogFileName_6[14], LogFileName_7[14], LogFileName_8[14];
 char varLogFile[22];
 char DirName[255];
@@ -666,12 +666,16 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 5: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
+	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 6: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
+	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -679,6 +683,8 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 7: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
+	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -687,6 +693,8 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_7,"%sY2%03d%02d_7%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 8: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
+	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -828,7 +836,7 @@ int open_logfile_CAN(char LogFile[], int datenrahmen)
             0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00,
             0xAA, 0x00, 0xFF, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00};
 
-fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
+//fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
 
   if ((fp_logfile_tmp=fopen(LogFile,"r")) == NULL) /* wenn Logfile noch nicht existiert */
   {
@@ -2568,7 +2576,7 @@ int datenlesen_DC(int anz_datensaetze)
   int i=0, merk_i=0, fehlerhafte_ds=0, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
   int Bytes_for_0xDC = 524, monatswechsel = 0, anzahl_can_rahmen = 0;
   int pruefsum_check = 0;
-u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
+// u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
   u_DS_CAN u_dsatz_can[1];
   DS_Winsol dsatz_winsol[8];  /* 8 Datensaetze moeglich */
   DS_Winsol *puffer_dswinsol = &dsatz_winsol[0];
@@ -3356,13 +3364,12 @@ int berechneKopfpruefziffer_D1(KopfsatzD1 derKopf[] )
 /* Berechnung der Pruefsumme des Kopfsatz Modus 0xDC */
 int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
 {
-  int i, z;
-  z = 0;
+  int retval=0;
   
    switch(derKopf[0].all_bytes[5])
   {
     case 1:
-    return  ((derKopf[0].DC_Rahmen1.kennung + derKopf[0].DC_Rahmen1.version
+    retval = ((derKopf[0].DC_Rahmen1.kennung + derKopf[0].DC_Rahmen1.version
      + derKopf[0].DC_Rahmen1.zeitstempel[0]
      + derKopf[0].DC_Rahmen1.zeitstempel[1]
      + derKopf[0].DC_Rahmen1.zeitstempel[2]
@@ -3376,7 +3383,7 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
      + derKopf[0].DC_Rahmen1.endadresse[2]) % 0x100);
       break;
 	case 2:
-    return  ((derKopf[0].DC_Rahmen2.kennung + derKopf[0].DC_Rahmen2.version
+    retval = ((derKopf[0].DC_Rahmen2.kennung + derKopf[0].DC_Rahmen2.version
      + derKopf[0].DC_Rahmen2.zeitstempel[0]
      + derKopf[0].DC_Rahmen2.zeitstempel[1]
      + derKopf[0].DC_Rahmen2.zeitstempel[2]
@@ -3391,7 +3398,7 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
      + derKopf[0].DC_Rahmen2.endadresse[2]) % 0x100);
       break;
 	case 3:
-    return  ((derKopf[0].DC_Rahmen3.kennung + derKopf[0].DC_Rahmen3.version
+    retval = ((derKopf[0].DC_Rahmen3.kennung + derKopf[0].DC_Rahmen3.version
      + derKopf[0].DC_Rahmen3.zeitstempel[0]
      + derKopf[0].DC_Rahmen3.zeitstempel[1]
      + derKopf[0].DC_Rahmen3.zeitstempel[2]
@@ -3407,7 +3414,7 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
      + derKopf[0].DC_Rahmen3.endadresse[2]) % 0x100);
       break;
 	case 4:
-    return  ((derKopf[0].DC_Rahmen4.kennung + derKopf[0].DC_Rahmen4.version
+    retval = ((derKopf[0].DC_Rahmen4.kennung + derKopf[0].DC_Rahmen4.version
      + derKopf[0].DC_Rahmen4.zeitstempel[0]
      + derKopf[0].DC_Rahmen4.zeitstempel[1]
      + derKopf[0].DC_Rahmen4.zeitstempel[2]
@@ -3424,7 +3431,7 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
      + derKopf[0].DC_Rahmen4.endadresse[2]) % 0x100);
       break;
 	case 5:
-    return  ((derKopf[0].DC_Rahmen5.kennung + derKopf[0].DC_Rahmen5.version
+    retval = ((derKopf[0].DC_Rahmen5.kennung + derKopf[0].DC_Rahmen5.version
      + derKopf[0].DC_Rahmen5.zeitstempel[0]
      + derKopf[0].DC_Rahmen5.zeitstempel[1]
      + derKopf[0].DC_Rahmen5.zeitstempel[2]
@@ -3442,7 +3449,7 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
      + derKopf[0].DC_Rahmen5.endadresse[2]) % 0x100);
       break;
 	case 6:
-    return  ((derKopf[0].DC_Rahmen6.kennung + derKopf[0].DC_Rahmen6.version
+    retval = ((derKopf[0].DC_Rahmen6.kennung + derKopf[0].DC_Rahmen6.version
      + derKopf[0].DC_Rahmen6.zeitstempel[0]
      + derKopf[0].DC_Rahmen6.zeitstempel[1]
      + derKopf[0].DC_Rahmen6.zeitstempel[2]
@@ -3461,7 +3468,7 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
      + derKopf[0].DC_Rahmen6.endadresse[2]) % 0x100);
       break;
 	case 7:
-    return  ((derKopf[0].DC_Rahmen7.kennung + derKopf[0].DC_Rahmen7.version
+    retval = ((derKopf[0].DC_Rahmen7.kennung + derKopf[0].DC_Rahmen7.version
      + derKopf[0].DC_Rahmen7.zeitstempel[0]
      + derKopf[0].DC_Rahmen7.zeitstempel[1]
      + derKopf[0].DC_Rahmen7.zeitstempel[2]
@@ -3481,7 +3488,7 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
      + derKopf[0].DC_Rahmen7.endadresse[2]) % 0x100);
       break;
 	case 8:
-    return  ((derKopf[0].DC_Rahmen8.kennung + derKopf[0].DC_Rahmen8.version
+    retval = ((derKopf[0].DC_Rahmen8.kennung + derKopf[0].DC_Rahmen8.version
      + derKopf[0].DC_Rahmen8.zeitstempel[0]
      + derKopf[0].DC_Rahmen8.zeitstempel[1]
      + derKopf[0].DC_Rahmen8.zeitstempel[2]
@@ -3502,6 +3509,7 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
      + derKopf[0].DC_Rahmen8.endadresse[2]) % 0x100);
       break;
   } 
+  return retval;
 }
 
 /* Berechnung der Pruefsumme des Kopfsatz Modus 0xA8 */
@@ -3744,6 +3752,8 @@ int berechnepruefziffer_uvr1611_CAN(u_DS_CAN dsatz_can[], int anzahl_can_rahmen)
 		   retval += dsatz_can[0].DS_CAN_8.zeitstempel[0]+dsatz_can[0].DS_CAN_8.zeitstempel[1]+dsatz_can[0].DS_CAN_8.zeitstempel[2];
            return retval % modTeiler;
   }
+  
+  return retval;  
 }
 
 /* Berechnung der Pruefsumme fuer UVR61-3 */
