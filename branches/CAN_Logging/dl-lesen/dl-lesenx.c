@@ -111,13 +111,11 @@ FILE *fp_logfile=NULL, *fp_logfile_2=NULL,  *fp_logfile_3=NULL, *fp_logfile_4=NU
      *fp_varlogfile=NULL, *fp_csvfile=NULL ; /* pointer IMMER initialisieren und vor benutzung pruefen */
 
 char dlport[13]; /* Uebergebener Parameter USB-Port */
-char LogFileName[12] = "0123456789AB", LogFileName_1[12] = "123456789ABC", 
-     LogFileName_2[14] = "23456789ABCDEF", LogFileName_3[14] = "3456789ABCDEF0",
-	 LogFileName_4[14] = "456789ABCDEF01", LogFileName_5[14] = "56789ABCDEF012", 
-	 LogFileName_6[14] = "6789ABCDEF0123", LogFileName_7[14] = "789ABCDEF01234", 
-	 LogFileName_8[14] = "89ABCDEF012345";
+char LogFileName[255], LogFileName_1[255], LogFileName_2[255], LogFileName_3[255],
+	 LogFileName_4[255], LogFileName_5[255], LogFileName_6[255], LogFileName_7[255], 
+	 LogFileName_8[255];
 char varLogFile[22];
-char DirName[255];
+char DirName[241];
 char sDatum[11], sZeit[11];
 u_DS_UVR1611_UVR61_3 structDLdatensatz;
 
@@ -143,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 11.03.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 12.03.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -447,7 +445,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 11.03.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 12.03.2010 \n");
         return 0;
       }
       case 'h':
