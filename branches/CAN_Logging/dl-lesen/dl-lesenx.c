@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 12.03.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 13.03.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -445,7 +445,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 12.03.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 13.03.2010 \n");
         return 0;
       }
       case 'h':
@@ -660,23 +660,23 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 4: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
+//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
+//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 5: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
+//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
+//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 6: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
+//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
+//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -694,8 +694,8 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_7,"%sY2%03d%02d_7%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 8: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
+//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
+//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -837,7 +837,7 @@ int open_logfile_CAN(char LogFile[], int datenrahmen)
             0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00,
             0xAA, 0x00, 0xFF, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00};
 
-//fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
+fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
 
   if ((fp_logfile_tmp=fopen(LogFile,"r")) == NULL) /* wenn Logfile noch nicht existiert */
   {
@@ -867,6 +867,7 @@ int open_logfile_CAN(char LogFile[], int datenrahmen)
   }
   else /* das Logfile existiert schon */
   {
+  fprintf(stderr,"--> open_logfile_CAN() Logfile existiert, LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
     fclose(fp_logfile_tmp);
     if ((fp_logfile_tmp=fopen(LogFile,"a")) == NULL) /* schreiben ab Dateiende */
     {
@@ -2577,7 +2578,6 @@ int datenlesen_DC(int anz_datensaetze)
   int i=0, merk_i=0, fehlerhafte_ds=0, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
   int Bytes_for_0xDC = 524, monatswechsel = 0, anzahl_can_rahmen = 0;
   int pruefsum_check = 0;
-// u_DS_UVR1611_UVR61_3 u_dsatz_uvr[1];  // <- loeschen
   u_DS_CAN u_dsatz_can[1];
   DS_Winsol dsatz_winsol[8];  /* 8 Datensaetze moeglich */
   DS_Winsol *puffer_dswinsol = &dsatz_winsol[0];
@@ -2744,7 +2744,7 @@ fprintf(stderr,"-> Pruefsummencheck fertig. pruefsum_check: %i\n",pruefsum_check
 fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
         if (uvr_typ == UVR1611)
         {
-fprintf(stderr," --> vorbelegte Variable LogFileName_1: %s\n",LogFileName_1);
+//fprintf(stderr," --> vorbelegte Variable LogFileName_1: %s\n",LogFileName_1);
           tmp_erg = ( erzeugeLogfileName_CAN(u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat,u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.jahr,anzahl_can_rahmen) );
           merk_monat = u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat;
         }
@@ -2756,11 +2756,12 @@ fprintf(stderr," --> vorbelegte Variable LogFileName_1: %s\n",LogFileName_1);
         else
         {
 fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oeffnen.\n");
-            if (anzahl_can_rahmen > 3)
+/*            if (anzahl_can_rahmen > 3)
 			{
                 fprintf(stderr,"-> %d Datenrahmen - Variableninhalt der ersten 4 Logdateinamen:\n",anzahl_can_rahmen);
 			    fprintf(stderr,"-> %s - %s - %s - %s\n",LogFileName_1,LogFileName_2,LogFileName_3,LogFileName_4);
 			}
+*/			
 			switch(anzahl_can_rahmen)
 			{
 			  case 1: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
@@ -2875,9 +2876,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 7: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 7: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Das LogFile 1 %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
