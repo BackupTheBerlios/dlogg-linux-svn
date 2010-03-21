@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 13.03.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 21.03.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -445,7 +445,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 13.03.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 21.03.2010 \n");
         return 0;
       }
       case 'h':
@@ -2756,12 +2756,6 @@ fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
         else
         {
 fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oeffnen.\n");
-/*            if (anzahl_can_rahmen > 3)
-			{
-                fprintf(stderr,"-> %d Datenrahmen - Variableninhalt der ersten 4 Logdateinamen:\n",anzahl_can_rahmen);
-			    fprintf(stderr,"-> %s - %s - %s - %s\n",LogFileName_1,LogFileName_2,LogFileName_3,LogFileName_4);
-			}
-*/			
 			switch(anzahl_can_rahmen)
 			{
 			  case 1: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
@@ -3274,10 +3268,12 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
       
 fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
 
-fprintf(stderr,"-> hier eigentlich Abbruch von datenlesen_DC().\n");
-return 999;
-fprintf(stderr,"-> Diese Zeile hier darf nicht zu lesen sein!!!!\n");
-
+if (anzahl_can_rahmen > 2)
+{
+  fprintf(stderr,"-> hier eigentlich Abbruch von datenlesen_DC().\n");
+  return 999;
+  fprintf(stderr,"-> Diese Zeile hier darf nicht zu lesen sein!!!!\n");
+}
 /*
       if ( csv==1 && fp_csvfile != NULL )
       {
@@ -3300,13 +3296,23 @@ fprintf(stderr,"-> Diese Zeile hier darf nicht zu lesen sein!!!!\n");
         middlebyte++;
       }
 
-      switch (lowbyte)
-      {
-        case 0: sendbuf[1] = 0x00; break;
-        case 1: sendbuf[1] = 0x40; break;
-        case 2: sendbuf[1] = 0x80; break;
-        case 3: sendbuf[1] = 0xc0; break;
-      }
+	  switch (anzahl_can_rahmen)
+	  {
+	    case 1: switch (lowbyte)
+                {
+                   case 0: sendbuf[1] = 0x00; break;
+                   case 1: sendbuf[1] = 0x40; break;
+                   case 2: sendbuf[1] = 0x80; break;
+                   case 3: sendbuf[1] = 0xc0; break;
+                }
+				break;
+		case 2: switch (lowbyte)
+                {
+                   case 0: sendbuf[1] = 0x00; break;
+                   case 1: sendbuf[1] = 0x80; break;
+                }
+				break;
+	  }
 
       if (middlebyte > merkmiddlebyte)   /* das mittlere Byte muss erhoeht werden */
       {
