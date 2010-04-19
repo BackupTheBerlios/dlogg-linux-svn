@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 16.04.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 19.04.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -450,7 +450,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 16.04.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 19.04.2010 \n");
         return 0;
       }
       case 'h':
@@ -2597,7 +2597,7 @@ int datenlesen_D1(int anz_datensaetze)
 int datenlesen_DC(int anz_datensaetze)
 {
   unsigned modTeiler;
-  int i=0, merk_i=0, fehlerhafte_ds=0, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
+  int i=0, y=0, merk_i=0, fehlerhafte_ds=0, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
   int Bytes_for_0xDC = 524, monatswechsel = 0, anzahl_can_rahmen = 0;
   int pruefsum_check = 0;
   u_DS_CAN u_dsatz_can[1];
@@ -3315,14 +3315,14 @@ if (anzahl_can_rahmen > 2)
       else
       {
         lowbyte = 0;
-        middlebyte++;
+//        middlebyte++;
       }
 
 	  switch (anzahl_can_rahmen)
 	  {
 	    case 1: switch (lowbyte)
                 {
-                   case 0: sendbuf[1] = 0x00; break;
+                   case 0: sendbuf[1] = 0x00; middlebyte++; break;
                    case 1: sendbuf[1] = 0x40; break;
                    case 2: sendbuf[1] = 0x80; break;
                    case 3: sendbuf[1] = 0xc0; break;
@@ -3330,12 +3330,134 @@ if (anzahl_can_rahmen > 2)
 				break;
 		case 2: switch (lowbyte)
                 {
+                   case 0: sendbuf[1] = 0x00; middlebyte++; break;
+                   case 1: sendbuf[1] = 0x80; lowbyte = 3; break;
+                }
+				break;
+	    case 3: switch (lowbyte)
+                {
                    case 0: sendbuf[1] = 0x00; break;
-                   case 1: sendbuf[1] = 0x80; break;
+                   case 1: sendbuf[1] = 0xc0; break;
+                   case 2: sendbuf[1] = 0x80; break;
+                   case 3: sendbuf[1] = 0x40; break;
+                }
+                if ( sendbuf[2] != 0xFE )
+				{
+				   if ( y == 0 )
+				      y++;
+				   else
+				   {
+				      sendbuf[2] = sendbuf[2] + 0x02;
+					  y++;
+				   }
+				}
+                else /* das highbyte muss erhoeht werden */
+                {
+                   sendbuf[2] = 0x00;
+                   sendbuf[3] = sendbuf[3] + 0x01;
+                }
+				break;
+		case 4: sendbuf[1] = 0x00;
+                if ( sendbuf[2] != 0xFE )
+                {
+                    sendbuf[2] = sendbuf[2] + 0x02;
+                }
+                else /* das highbyte muss erhoeht werden */
+                {
+                    sendbuf[2] = 0x00;
+                    sendbuf[3] = sendbuf[3] + 0x01;
+                }
+				break;
+	    case 5: switch (lowbyte)
+                {
+                   case 0: sendbuf[1] = 0x00; break;
+                   case 1: sendbuf[1] = 0x40; break;
+                   case 2: sendbuf[1] = 0x80; break;
+                   case 3: sendbuf[1] = 0xc0; break;
+                }
+                if ( sendbuf[2] != 0xFE )
+				{
+				   if ( y == 3 )
+				   {
+				      sendbuf[2] = sendbuf[2] + 0x04;
+				      y++;
+				   }
+				   else
+				   {
+				      sendbuf[2] = sendbuf[2] + 0x02;
+					  y++;
+				   }
+				}
+                else /* das highbyte muss erhoeht werden */
+                {
+                   sendbuf[2] = 0x00;
+                   sendbuf[3] = sendbuf[3] + 0x01;
+                }
+				break;
+		case 6: switch (lowbyte)
+                {
+                   case 0: sendbuf[1] = 0x00;
+				           if ( sendbuf[2] != 0xFE )
+                               sendbuf[2] = sendbuf[2] + 0x04;
+                           else /* das highbyte muss erhoeht werden */
+                           {
+                               sendbuf[2] = 0x00;
+                               sendbuf[3] = sendbuf[3] + 0x01;
+                           }
+             				break;
+                   case 1: sendbuf[1] = 0x80;
+				           if ( sendbuf[2] != 0xFE )
+                               sendbuf[2] = sendbuf[2] + 0x02;
+                           else /* das highbyte muss erhoeht werden */
+                           {
+                               sendbuf[2] = 0x00;
+                               sendbuf[3] = sendbuf[3] + 0x01;
+                           }
+             				break;
+                }
+				break;
+	    case 7: switch (lowbyte)
+                {
+                   case 0: sendbuf[1] = 0x00; break;
+                   case 1: sendbuf[1] = 0xc0; break;
+                   case 2: sendbuf[1] = 0x80; break;
+                   case 3: sendbuf[1] = 0x40; break;
+                }
+                if ( sendbuf[2] != 0xFE )
+				{
+				   if ( y == 0 )
+				   {
+				      sendbuf[2] = sendbuf[2] + 0x02;
+				      y++;
+				   }
+				   else
+				   {
+				      sendbuf[2] = sendbuf[2] + 0x04;
+					  y++;
+				   }
+				}
+                else /* das highbyte muss erhoeht werden */
+                {
+                   sendbuf[2] = 0x00;
+                   sendbuf[3] = sendbuf[3] + 0x01;
+                }
+				break;
+		case 8: sendbuf[1] = 0x00;
+                if ( sendbuf[2] != 0xFE )
+                {
+                    sendbuf[2] = sendbuf[2] + 0x04;
+                }
+                else /* das highbyte muss erhoeht werden */
+                {
+                    sendbuf[2] = 0x00;
+                    sendbuf[3] = sendbuf[3] + 0x01;
                 }
 				break;
 	  }
 
+      if ( y == 4 )
+	    y = 0;
+		
       if (middlebyte > merkmiddlebyte)   /* das mittlere Byte muss erhoeht werden */
       {
         if ( sendbuf[2] != 0xFE )
