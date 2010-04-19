@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 21.03.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 16.04.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -224,7 +224,8 @@ int main(int argc, char *argv[])
     /* save current port settings */
     tcgetattr(fd_serialport,&oldtio);
     /* initialize the port settings structure to all zeros */
-    bzero( &newtio, sizeof(newtio));
+    //bzero( &newtio, sizeof(newtio));
+    memset( &newtio, 0, sizeof(newtio) );
     /* then set the baud rate, handshaking and a few other settings */
     newtio.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
     newtio.c_iflag = IGNPAR;
@@ -391,7 +392,7 @@ static int print_usage()
   fprintf(stderr,"\ndl-lesenx (-p USB-Port | -i IP:Port)  [--csv] [--res] [--dir] [-h] [-v]\n");
   fprintf(stderr,"    -p USB-Port -> Angabe des USB-Portes,\n");
   fprintf(stderr,"                   an dem der D-LOGG angeschlossen ist.\n");
-  fprintf(stderr,"    -i IP:Port  -> Angabe der IP-Adresse und des Ports,\n");
+  fprintf(stderr,"    -i IP:Port  -> Angabe der IP-Adresse / Hostname und des Ports,\n");
   fprintf(stderr,"                   an dem der BL-Net angeschlossen ist.\n");
   fprintf(stderr,"          --csv -> im CSV-Format speichern (wird noch nicht unterstuetzt)\n");
   fprintf(stderr,"                   Standard: ist WINSOL-Format\n");
@@ -403,6 +404,10 @@ static int print_usage()
   fprintf(stderr,"\n");
   fprintf(stderr,"Beispiel: dl-lesenx -p /dev/ttyUSB0 -res\n");
   fprintf(stderr,"          Liest die Daten vom USB-Port 0 und setzt den D-LOGG zurueck.\n");
+  fprintf(stderr,"          dl-lesenx -i blnetz:40000 -res\n");
+  fprintf(stderr,"          Liest die Daten vom Host blnetz und setzt den D-LOGG zurueck.\n");
+  fprintf(stderr,"          dl-lesenx -i 192.168.0.10:40000 \n");
+  fprintf(stderr,"          Liest die Daten von der IP-Adresse 192.168.0.10 und setzt den D-LOGG nicht zurueck.\n");
   fprintf(stderr,"\n");
   return 0;
 
@@ -445,7 +450,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 21.03.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 16.04.2010 \n");
         return 0;
       }
       case 'h':
@@ -471,22 +476,39 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       }
       case 'i':
       {
-        if ( strlen(optarg) < 22)
+        struct hostent* hostinfo = gethostbyname(strtok(optarg,trennzeichen));
+        if(0 == hostinfo)
         {
-          SERVER_sockaddr_in.sin_addr.s_addr = inet_addr(strtok(optarg,trennzeichen));
+          fprintf(stderr," IP-Adresse konnte nicht aufgeloest werden: %s\n",optarg);
+          print_usage();
+          return -1;
+        } 
+        else 
+        {
+          SERVER_sockaddr_in.sin_addr = *(struct in_addr*)*hostinfo->h_addr_list;
           SERVER_sockaddr_in.sin_port = htons((unsigned short int) atol(strtok(NULL,trennzeichen)));
           SERVER_sockaddr_in.sin_family = AF_INET;
           fprintf(stderr,"\n Adresse:port gesetzt: %s:%d\n", inet_ntoa(SERVER_sockaddr_in.sin_addr),
           ntohs(SERVER_sockaddr_in.sin_port));
           i_is_set=1;
           ip_zugriff = 1;
-        }
-        else
-        {
-          fprintf(stderr," IP-Adresse zu lang: %s\n",optarg);
-          print_usage();
-          return -1;
-        }
+	}
+        //~ if ( strlen(optarg) < 22)
+        //~ {
+          //~ SERVER_sockaddr_in.sin_addr.s_addr = inet_addr(strtok(optarg,trennzeichen));
+          //~ SERVER_sockaddr_in.sin_port = htons((unsigned short int) atol(strtok(NULL,trennzeichen)));
+          //~ SERVER_sockaddr_in.sin_family = AF_INET;
+          //~ fprintf(stderr,"\n Adresse:port gesetzt: %s:%d\n", inet_ntoa(SERVER_sockaddr_in.sin_addr),
+          //~ ntohs(SERVER_sockaddr_in.sin_port));
+          //~ i_is_set=1;
+          //~ ip_zugriff = 1;
+        //~ }
+        //~ else
+        //~ {
+          //~ fprintf(stderr," IP-Adresse zu lang: %s\n",optarg);
+          //~ print_usage();
+          //~ return -1;
+        //~ }
         break;
       }
       case 0:

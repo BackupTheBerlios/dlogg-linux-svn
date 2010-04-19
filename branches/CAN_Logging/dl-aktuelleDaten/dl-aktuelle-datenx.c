@@ -269,7 +269,8 @@ int main(int argc, char *argv[])
     /* save current port settings */
     tcgetattr(fd,&oldtio);
     /* initialize the port settings structure to all zeros */
-    bzero(&newtio, sizeof(newtio));
+    //bzero(&newtio, sizeof(newtio));
+    memset( &newtio, 0, sizeof(newtio) );
     /* then set the baud rate, handshaking and a few other settings */
     newtio.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
     newtio.c_iflag = IGNPAR;
@@ -307,7 +308,8 @@ int main(int argc, char *argv[])
     kennung_ok = 1;
     sendbuf[0]=AKTUELLEDATENLESEN;   /* Senden Request aktuelle Daten */
 //    bzero(akt_daten,58); /* auf 116 Byte für 2DL erweitert */
-    bzero(akt_daten,116);
+    //bzero(akt_daten,116);
+    memset( akt_daten, 0, 116 );
     /* select um rauszufinden ob ready to read !  siehe man select */
     fd_set rfds;
     struct timeval tv;
@@ -2749,7 +2751,8 @@ int lies_conf(void)
         continue;
 
       char * tmpstr = (char *) malloc(length + 1);
-      bzero(tmpstr,length+1);
+      //bzero(tmpstr,length+1);
+      memset( tmpstr, 0, length+1 );
       strncpy(tmpstr,zielstring,length+1);
 
 #if DEBUG>2
