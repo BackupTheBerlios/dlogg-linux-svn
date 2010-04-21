@@ -3290,12 +3290,12 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
       
 fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
 
-if (anzahl_can_rahmen > 2)
-{
-  fprintf(stderr,"-> hier eigentlich Abbruch von datenlesen_DC().\n");
-  return 999;
-  fprintf(stderr,"-> Diese Zeile hier darf nicht zu lesen sein!!!!\n");
-}
+// if (anzahl_can_rahmen > 2)
+// {
+  // fprintf(stderr,"-> hier eigentlich Abbruch von datenlesen_DC().\n");
+  // return 999;
+  // fprintf(stderr,"-> Diese Zeile hier darf nicht zu lesen sein!!!!\n");
+// }
 /*
       if ( csv==1 && fp_csvfile != NULL )
       {
