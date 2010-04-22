@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 19.04.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 22.04.2010 \n");
   
 #if  DEBUG>1
   printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -450,7 +450,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 19.04.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 22.04.2010 \n");
         return 0;
       }
       case 'h':
@@ -3315,7 +3315,6 @@ fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
       else
       {
         lowbyte = 0;
-//        middlebyte++;
       }
 
 	  switch (anzahl_can_rahmen)
@@ -3327,12 +3326,34 @@ fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
                    case 2: sendbuf[1] = 0x80; break;
                    case 3: sendbuf[1] = 0xc0; break;
                 }
+				if (middlebyte > merkmiddlebyte)   /* das mittlere Byte muss erhoeht werden */
+				{
+					sendbuf[2] = sendbuf[2] + 0x02;
+					merkmiddlebyte = middlebyte;
+				}
+                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+				{
+					sendbuf[2] = 0x00;
+					sendbuf[3] = sendbuf[3] + 0x01;
+					merkmiddlebyte = middlebyte;
+				}
 				break;
 		case 2: switch (lowbyte)
                 {
                    case 0: sendbuf[1] = 0x00; middlebyte++; break;
                    case 1: sendbuf[1] = 0x80; lowbyte = 3; break;
                 }
+				if (middlebyte > merkmiddlebyte)   /* das mittlere Byte muss erhoeht werden */
+				{
+					sendbuf[2] = sendbuf[2] + 0x02;
+					merkmiddlebyte = middlebyte;
+				}
+                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+				{
+					sendbuf[2] = 0x00;
+					sendbuf[3] = sendbuf[3] + 0x01;
+					merkmiddlebyte = middlebyte;
+				}
 				break;
 	    case 3: switch (lowbyte)
                 {
@@ -3341,28 +3362,22 @@ fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
                    case 2: sendbuf[1] = 0x80; break;
                    case 3: sendbuf[1] = 0x40; break;
                 }
-                if ( sendbuf[2] != 0xFE )
+				if ( y == 0 )
+				    y++;
+				else
 				{
-				   if ( y == 0 )
-				      y++;
-				   else
-				   {
-				      sendbuf[2] = sendbuf[2] + 0x02;
-					  y++;
-				   }
+				    sendbuf[2] = sendbuf[2] + 0x02;
+					y++;
 				}
-                else /* das highbyte muss erhoeht werden */
+                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
                 {
-                   sendbuf[2] = 0x00;
-                   sendbuf[3] = sendbuf[3] + 0x01;
+                    sendbuf[2] = 0x00;
+                    sendbuf[3] = sendbuf[3] + 0x01;
                 }
 				break;
 		case 4: sendbuf[1] = 0x00;
-                if ( sendbuf[2] != 0xFE )
-                {
-                    sendbuf[2] = sendbuf[2] + 0x02;
-                }
-                else /* das highbyte muss erhoeht werden */
+                sendbuf[2] = sendbuf[2] + 0x02;
+                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
                 {
                     sendbuf[2] = 0x00;
                     sendbuf[3] = sendbuf[3] + 0x01;
@@ -3375,20 +3390,17 @@ fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
                    case 2: sendbuf[1] = 0x80; break;
                    case 3: sendbuf[1] = 0xc0; break;
                 }
-                if ( sendbuf[2] != 0xFE )
-				{
-				   if ( y == 3 )
-				   {
-				      sendbuf[2] = sendbuf[2] + 0x04;
-				      y++;
-				   }
-				   else
-				   {
-				      sendbuf[2] = sendbuf[2] + 0x02;
-					  y++;
-				   }
-				}
-                else /* das highbyte muss erhoeht werden */
+			    if ( y == 3 )
+			    {
+			      sendbuf[2] = sendbuf[2] + 0x04;
+			      y++;
+			    }
+			    else
+			    {
+			      sendbuf[2] = sendbuf[2] + 0x02;
+				  y++;
+			    }
+                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
                 {
                    sendbuf[2] = 0x00;
                    sendbuf[3] = sendbuf[3] + 0x01;
@@ -3397,23 +3409,17 @@ fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
 		case 6: switch (lowbyte)
                 {
                    case 0: sendbuf[1] = 0x00;
-				           if ( sendbuf[2] != 0xFE )
-                               sendbuf[2] = sendbuf[2] + 0x04;
-                           else /* das highbyte muss erhoeht werden */
-                           {
-                               sendbuf[2] = 0x00;
-                               sendbuf[3] = sendbuf[3] + 0x01;
-                           }
-             				break;
+                           sendbuf[2] = sendbuf[2] + 0x04;
+           				break;
                    case 1: sendbuf[1] = 0x80;
-				           if ( sendbuf[2] != 0xFE )
-                               sendbuf[2] = sendbuf[2] + 0x02;
-                           else /* das highbyte muss erhoeht werden */
-                           {
-                               sendbuf[2] = 0x00;
-                               sendbuf[3] = sendbuf[3] + 0x01;
-                           }
-             				break;
+                           sendbuf[2] = sendbuf[2] + 0x02;
+						   lowbyte = 3;
+           				break;
+                }
+                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+                {
+                    sendbuf[2] = 0x00;
+                    sendbuf[3] = sendbuf[3] + 0x01;
                 }
 				break;
 	    case 7: switch (lowbyte)
@@ -3423,31 +3429,25 @@ fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
                    case 2: sendbuf[1] = 0x80; break;
                    case 3: sendbuf[1] = 0x40; break;
                 }
-                if ( sendbuf[2] != 0xFE )
+    		    if ( y == 0 )
 				{
-				   if ( y == 0 )
-				   {
-				      sendbuf[2] = sendbuf[2] + 0x02;
-				      y++;
-				   }
-				   else
-				   {
-				      sendbuf[2] = sendbuf[2] + 0x04;
-					  y++;
-				   }
+				    sendbuf[2] = sendbuf[2] + 0x02;
+				    y++;
 				}
-                else /* das highbyte muss erhoeht werden */
+				else
+				{
+				    sendbuf[2] = sendbuf[2] + 0x04;
+				    y++;
+				}
+                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
                 {
-                   sendbuf[2] = 0x00;
-                   sendbuf[3] = sendbuf[3] + 0x01;
+                    sendbuf[2] = 0x00;
+                    sendbuf[3] = sendbuf[3] + 0x01;
                 }
 				break;
 		case 8: sendbuf[1] = 0x00;
-                if ( sendbuf[2] != 0xFE )
-                {
-                    sendbuf[2] = sendbuf[2] + 0x04;
-                }
-                else /* das highbyte muss erhoeht werden */
+                sendbuf[2] = sendbuf[2] + 0x04;
+                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
                 {
                     sendbuf[2] = 0x00;
                     sendbuf[3] = sendbuf[3] + 0x01;
@@ -3458,20 +3458,6 @@ fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
       if ( y == 4 )
 	    y = 0;
 		
-      if (middlebyte > merkmiddlebyte)   /* das mittlere Byte muss erhoeht werden */
-      {
-        if ( sendbuf[2] != 0xFE )
-        {
-          sendbuf[2] = sendbuf[2] + 0x02;
-          merkmiddlebyte = middlebyte;
-        }
-        else /* das highbyte muss erhoeht werden */
-        {
-          sendbuf[2] = 0x00;
-          sendbuf[3] = sendbuf[3] + 0x01;
-          merkmiddlebyte = middlebyte;
-        }
-      }
       monatswechsel = 0;
     } /* Ende: if (dsatz_uvr1611[0].pruefsum == pruefsumme) */
     else
