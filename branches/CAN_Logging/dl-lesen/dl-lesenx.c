@@ -86,10 +86,6 @@ int anzahldatensaetze_A8(KopfsatzA8 kopf[]);
 int anzahldatensaetze_DC(KOPFSATZ_DC kopf[]);
 int reset_datenpuffer_usb(int do_reset );
 int reset_datenpuffer_ip(int do_reset );
-void berechne_werte(int anz_regler);
-void ausgaengeanz(void);
-void drehzahlstufenanz(void);
-void waermemengenanz(void);
 void zeitstempel(void);
 float berechnetemp(UCHAR lowbyte, UCHAR highbyte);
 float berechnevol(UCHAR lowbyte, UCHAR highbyte);
@@ -141,11 +137,11 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 22.04.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 03.05.2010 \n");
   
 #if  DEBUG>1
-  printf("Ergebnis vom Argumente-Check %d\n",erg_check_arg);
-  printf("angegebener Port: %s Variablen: reset = %d csv = %d \n",dlport,reset,csv);
+  fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
+  fprintf(stderr, "angegebener Port: %s Variablen: reset = %d csv = %d \n",dlport,reset,csv);
 #endif
 
   if ( erg_check_arg != 1 )
@@ -279,7 +275,7 @@ int main(int argc, char *argv[])
   do                        /* max. 5 durchlgaenge */
   {
 #ifdef DEBUG
-      printf("\n Kopfsatzlesen - Versuch%d\n",i);
+      fprintf(stderr, "\n Kopfsatzlesen - Versuch%d\n",i);
 #endif
       anz_ds = kopfsatzlesen();
       i++;
@@ -450,7 +446,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 22.04.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 03.05.2010 \n");
         return 0;
       }
       case 'h':
@@ -706,8 +702,8 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 7: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
+//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
+//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -1022,7 +1018,7 @@ void writeWINSOLlogfile2CSV(FILE * fp_WSLOGcsvfile, const DS_Winsol  *dsatz_wins
       temp_highbyte = dsatz_winsol[0].dza[index];
 
 #ifdef DEBUG
-         printf(" Drehz.-Stufe highbyte: %X  \n", temp_highbyte);
+         fprintf(stderr, " Drehz.-Stufe highbyte: %X  \n", temp_highbyte);
 #endif
       int jj=0;
       for(jj=5;jj<9;jj++)
@@ -1240,11 +1236,11 @@ int kopfsatzlesen(void)
     durchlauf++;
    #ifdef DEBUG
     if ( uvr_modus == 0xD1 )
-      printf("  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_D1[0].pruefsum);
+      fprintf(stderr, "  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_D1[0].pruefsum);
     if ( uvr_modus == 0xA8 )
-      printf("  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_A8[0].pruefsum);
+      fprintf(stderr, "  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_A8[0].pruefsum);
     if ( uvr_modus == 0xDC )
-      printf("  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].pruefsum);
+      fprintf(stderr, "  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].pruefsum);
    #endif
   }
   while (( (pruefz != merk_pruefz )  && (durchlauf < 10)));
@@ -1252,11 +1248,11 @@ int kopfsatzlesen(void)
 #ifdef DEBUG
   if (pruefz != merk_pruefz )
     {
-      printf(" Durchlauf #%i - falsche Pruefziffer im Kopfsatz\n",durchlauf);
+      fprintf(stderr, " Durchlauf #%i - falsche Pruefziffer im Kopfsatz\n",durchlauf);
       return -1;
     }
   else
-    printf("Anzahl Durchlaeufe Pruefziffer Kopfsatz: %i\n",durchlauf);
+    fprintf(stderr, "Anzahl Durchlaeufe Pruefziffer Kopfsatz: %i\n",durchlauf);
 #endif
 
 //fprintf(stderr," switch uvr_modus... \n");
@@ -1357,20 +1353,20 @@ fprintf(stderr," CAN-Logging-Test: EndAdresse: %x\n",print_endaddr); /**********
   }
 
 #if  DEBUG>5
-  printf("  Errechnete Pruefsumme: %x\n", berechneKopfpruefziffer(kopf) ); printf(" empfangene Pruefsumme: %x\n",kopf[0].pruefsum);
-  printf("empfangen von DL/BL:\n Kennung: %X\n",kopf[0].kennung);
-  printf(" Version: %X\n",kopf[0].version);
-  printf(" Zeitstempel (hex): %x %x %x\n",kopf[0].zeitstempel[0],kopf[0].zeitstempel[1],kopf[0].zeitstempel[2]);
-  printf(" Zeitstempel (int): %d %d %d\n",kopf[0].zeitstempel[0],kopf[0].zeitstempel[1],kopf[0].zeitstempel[2]);
+  fprintf(stderr, "  Errechnete Pruefsumme: %x\n", berechneKopfpruefziffer(kopf) ); printf(" empfangene Pruefsumme: %x\n",kopf[0].pruefsum);
+  fprintf(stderr, "empfangen von DL/BL:\n Kennung: %X\n",kopf[0].kennung);
+  fprintf(stderr, " Version: %X\n",kopf[0].version);
+  fprintf(stderr, " Zeitstempel (hex): %x %x %x\n",kopf[0].zeitstempel[0],kopf[0].zeitstempel[1],kopf[0].zeitstempel[2]);
+  fprintf(stderr, " Zeitstempel (int): %d %d %d\n",kopf[0].zeitstempel[0],kopf[0].zeitstempel[1],kopf[0].zeitstempel[2]);
 
   long secs = (long)(kopf[0].zeitstempel[0]) * 32768 + (long)(kopf[0].zeitstempel[1]) * 256 + (long)(kopf[0].zeitstempel[2]);
   long secsinv = (long)(kopf[0].zeitstempel[0]) + (long)(kopf[0].zeitstempel[1]) * 256 + (long)(kopf[0].zeitstempel[2]) * 32768;
 
-  printf(" Zeitstempel : %ld  %ld\n", secs,secsinv);
+  fprintf(stderr, " Zeitstempel : %ld  %ld\n", secs,secsinv);
 
-  printf(" Satzlaenge: %x\n",kopf[0].satzlaenge);
-  printf(" Startadresse: %x %x %x\n",kopf[0].startadresse[0],kopf[0].startadresse[1],kopf[0].startadresse[2]);
-  printf(" Endadresse: %x %x %x\n",kopf[0].endadresse[0],kopf[0].endadresse[1],kopf[0].endadresse[2]);
+  fprintf(stderr, " Satzlaenge: %x\n",kopf[0].satzlaenge);
+  fprintf(stderr, " Startadresse: %x %x %x\n",kopf[0].startadresse[0],kopf[0].startadresse[1],kopf[0].startadresse[2]);
+  fprintf(stderr, " Endadresse: %x %x %x\n",kopf[0].endadresse[0],kopf[0].endadresse[1],kopf[0].endadresse[2]);
 #endif
 
   if ( uvr_modus == 0xD1 )
@@ -2093,9 +2089,9 @@ int datenlesen_A8(int anz_datensaetze)
       pruefsumme = berechnepruefziffer_uvr61_3(u_dsatz_uvr);
 #if DEBUG > 3
   if (uvr_typ == UVR1611)
-      printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR1611.pruefsum,pruefsumme);
+      fprintf(stderr, "%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR1611.pruefsum,pruefsumme);
   if (uvr_typ == UVR61_3)
-      printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR61_3.pruefsum,pruefsumme);
+      fprintf(stderr, "%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR61_3.pruefsum,pruefsumme);
 #endif
 
     if (u_dsatz_uvr[0].DS_UVR1611.pruefsum == pruefsumme || u_dsatz_uvr[0].DS_UVR61_3.pruefsum == pruefsumme)
@@ -2239,7 +2235,7 @@ int datenlesen_A8(int anz_datensaetze)
       {
         i--; /* falsche Pruefziffer - also nochmals lesen */
 #ifdef DEBUG
-        printf ( " falsche Pruefsumme - Versuch#%d\n",merk_i);
+        fprintf(stderr, " falsche Pruefsumme - Versuch#%d\n",merk_i);
 #endif
         merk_i++; /* hochzaehlen bis 5 */
       }
@@ -2361,9 +2357,9 @@ int datenlesen_D1(int anz_datensaetze)
 //      printf("Pruefsumme berechnet: %x in Byte %d erhalten %x\n",pruefsumme,result,u_dsatz_uvr[0].DS_alles.all_bytes[result-1]);
 #if DEBUG > 3
   if (uvr_typ == UVR1611)
-      printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR1611.pruefsum,pruefsumme);
+      fprintf(stderr, "%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR1611.pruefsum,pruefsumme);
   if (uvr_typ == UVR61_3)
-      printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR61_3.pruefsum,pruefsumme);
+      pfprintf(stderr, "%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR61_3.pruefsum,pruefsumme);
 #endif
 
     if (u_dsatz_uvr[0].DS_alles.all_bytes[result-1] == pruefsumme )
@@ -2372,9 +2368,9 @@ int datenlesen_D1(int anz_datensaetze)
     print_dsatz_uvr1611_content(u_dsatz_uvr);
       int zz;
       for (zz=0;zz<result-1;zz++)
-        printf("%2x ",u_dsatz_uvr[0].DS_alles.all_bytes[zz]);
-      printf("\nuvr_typ(1): 0x%x uvr_typ(2): 0x%x \n",uvr_typ,uvr_typ2);
-      printf("%2x \n",u_dsatz_uvr[0].DS_alles.all_bytes[59]);
+        fprintf(stderr, "%2x ",u_dsatz_uvr[0].DS_alles.all_bytes[zz]);
+      fprintf(stderr, "\nuvr_typ(1): 0x%x uvr_typ(2): 0x%x \n",uvr_typ,uvr_typ2);
+      fprintf(stderr, "%2x \n",u_dsatz_uvr[0].DS_alles.all_bytes[59]);
 #endif
       if ( i == 0 ) /* erster Datenssatz wurde gelesen - Logfile oeffnen / erstellen */
       {
@@ -2577,7 +2573,7 @@ int datenlesen_D1(int anz_datensaetze)
       {
         i--; /* falsche Pruefziffer - also nochmals lesen */
 #ifdef DEBUG
-        printf ( " falsche Pruefsumme - Versuch#%d\n",merk_i);
+        fprintf(stderr, " falsche Pruefsumme - Versuch#%d\n",merk_i);
 #endif
         merk_i++; /* hochzaehlen bis 5 */
       }
@@ -2659,9 +2655,9 @@ int datenlesen_DC(int anz_datensaetze)
   }
   
   anzahl_can_rahmen = empfbuf[0];
-// #if DEBUG > 3
-  printf("Anzahl CAN-Datenrahmen: %d. \n",anzahl_can_rahmen); 
-// #endif
+#if DEBUG > 3
+  fprintf(stderr,"Anzahl CAN-Datenrahmen: %d. \n",anzahl_can_rahmen); 
+#endif
 
   /* fuellen des Sendebuffer - 6 Byte */
   sendbuf[0] = DATENBEREICHLESEN;
@@ -2719,35 +2715,35 @@ int datenlesen_DC(int anz_datensaetze)
 	{
 	  case 1: if (u_dsatz_can[0].DS_CAN_1.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-	        printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_1.pruefsum,pruefsumme);
+	        fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_1.pruefsum,pruefsumme);
 	        break;
 	  case 2: if (u_dsatz_can[0].DS_CAN_2.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-			printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_2.pruefsum,pruefsumme);
+			fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_2.pruefsum,pruefsumme);
 	        break;
 	  case 3: if (u_dsatz_can[0].DS_CAN_3.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_3.pruefsum,pruefsumme);
+            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_3.pruefsum,pruefsumme);
 	        break;
 	  case 4: if (u_dsatz_can[0].DS_CAN_4.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_4.pruefsum,pruefsumme);
+            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_4.pruefsum,pruefsumme);
 	        break;
 	  case 5: if (u_dsatz_can[0].DS_CAN_5.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_5.pruefsum,pruefsumme);
+            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_5.pruefsum,pruefsumme);
 	        break;
 	  case 6: if (u_dsatz_can[0].DS_CAN_6.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_6.pruefsum,pruefsumme);
+            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_6.pruefsum,pruefsumme);
 	        break;
 	  case 7: if (u_dsatz_can[0].DS_CAN_7.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_7.pruefsum,pruefsumme);
+            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_7.pruefsum,pruefsumme);
 	        break;
 	  case 8: if (u_dsatz_can[0].DS_CAN_8.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            printf("%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_8.pruefsum,pruefsumme);
+            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_8.pruefsum,pruefsumme);
 	        break;
 	}
   }	  
@@ -2756,14 +2752,10 @@ fprintf(stderr,"-> Pruefsummencheck fertig. pruefsum_check: %i\n",pruefsum_check
   
     if ( pruefsum_check == 1 )
     {  /*Aenderung: 02.09.06 - Hochzaehlen der Startadresse erst dann, wenn korrekt gelesen wurde (eventuell endlosschleife?) */
-#if DEBUG > 4
-    //print_dsatz_uvr1611_content(u_dsatz_uvr);
-#endif
-
 //fprintf(stderr,"-> Pruefsummencheck war ok.\n");
       if ( i == 0 ) /* erster Datenssatz wurde gelesen - Logfile oeffnen / erstellen */
       {
-fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
+//fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
         if (uvr_typ == UVR1611)
         {
 //fprintf(stderr," --> vorbelegte Variable LogFileName_1: %s\n",LogFileName_1);
@@ -3288,14 +3280,8 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 		        break;
 	  }
       
-fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
+fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 
-// if (anzahl_can_rahmen > 2)
-// {
-  // fprintf(stderr,"-> hier eigentlich Abbruch von datenlesen_DC().\n");
-  // return 999;
-  // fprintf(stderr,"-> Diese Zeile hier darf nicht zu lesen sein!!!!\n");
-// }
 /*
       if ( csv==1 && fp_csvfile != NULL )
       {
@@ -3466,7 +3452,7 @@ fprintf(stderr,"-> ersten Datensatz geschrieben (?).\n");
       {
         i--; /* falsche Pruefziffer - also nochmals lesen */
 #ifdef DEBUG
-        printf ( " falsche Pruefsumme - Versuch#%d\n",merk_i);
+        fprintf(stderr, " falsche Pruefsumme - Versuch#%d\n",merk_i);
 #endif
         merk_i++; /* hochzaehlen bis 5 */
       }
@@ -4259,247 +4245,6 @@ int reset_datenpuffer_ip(int do_reset )
     fprintf(fp_varlogfile,"%s - %s -- Kein Data-Reset! \n",sDatum, sZeit);
   }
   return 1;
-}
-
-/* Aufruf der Funktionen zur Berechnung der Werte */
-void berechne_werte(int anz_regler)
-{
-  int i, j, anz_bytes_1 = 0, anz_bytes_2 = 0;
-
-  /* anz_regler = 1 : nur ein Regler vorhanden oder der erste Regler bei 0xD1 */
-  if (anz_regler == 2)
-  {
-    i = 0;
-//!!!!!!!!!!!!!    switch(akt_daten[0])
-    {
-//!!!!!!!!!!!!!      case UVR1611: anz_bytes_1 = 56; break; /* UVR1611 */
-//!!!!!!!!!!!!!      case UVR61_3: anz_bytes_1 = 27; break; /* UVR61-3 */
-    }
-//!!!!!!!!!!!!!    switch(akt_daten[anz_bytes_1])
-    {
-//!!!!!!!!!!!!!      case UVR1611: anz_bytes_2 = 56; break; /* UVR1611 */
-//!!!!!!!!!!!!!      case UVR61_3: anz_bytes_2 = 27; break; /* UVR61-3 */
-    }
-
-#ifdef DEBUG
-    for (i=0;i<(anz_bytes_1+anz_bytes_2);i++) // Testausgabe 2DL
-    {
-        fprintf(stdout,"%2x; ", akt_daten[i]);
-    }
-    fprintf(stdout,"\n");
-#endif
-
-    i = 0;
-    for (j=anz_bytes_1;j<(anz_bytes_1+anz_bytes_2) ;j++)
-    {
-//!!!!!!!!!!!!!      akt_daten[i] = akt_daten[j];
-      i++;
-    }
-//!!!!!!!!!!!!!    akt_daten[i]='\0'; /* mit /000 abschliessen!! */
-  }
-
-//!!!!!!!!!!!!!  temperaturanz();
-  ausgaengeanz();
-  drehzahlstufenanz();
-  waermemengenanz();
-
-}
-
-/* Bearbeitung der Temperatur-Sensoren */
-//!!!!!!!!!!!!!void temperaturanz(void)
-//!!!!!!!!!!!!!{
-//!!!!!!!!!!!!!  int i, j, anzSensoren;
-//!!!!!!!!!!!!!  anzSensoren = 16;
-
-//!!!!!!!!!!!!!  switch(uvr_typ)
-//!!!!!!!!!!!!!  {
-//!!!!!!!!!!!!!    case UVR1611: anzSensoren = 16; break; /* UVR1611 */
-//!!!!!!!!!!!!!    case UVR61_3: anzSensoren = 6; break; /* UVR61-3 */
-//!!!!!!!!!!!!!  }
-
-  /* vor berechnetemp() die oberen 4 Bit des HighByte auswerten!!!! */
-  /* Wichtig fuer Minus-Temp. */
-//!!!!!!!!!!!!!  j=1;
-//!!!!!!!!!!!!!  for(i=1;i<=anzSensoren;i++)
-//!!!!!!!!!!!!!    {
-//!!!!!!!!!!!!!      SENS_Art[i] = eingangsparameter(akt_daten[j+1]);
-//!!!!!!!!!!!!!      switch(SENS_Art[i])
-//!!!!!!!!!!!!!  {
-//!!!!!!!!!!!!!  case 0: SENS[i] = 0; break;
-//!!!!!!!!!!!!!  case 1: SENS[i] = 0; break; // digit. Pegel (AUS)
-//!!!!!!!!!!!!!  case 2: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Temp.
-//!!!!!!!!!!!!!  case 3: SENS[i] = berechnevol(akt_daten[j],akt_daten[j+1]); break;
-//!!!!!!!!!!!!!  case 6: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Strahlung
-//!!!!!!!!!!!!!  case 7: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Raumtemp.
-//!!!!!!!!!!!!!  case 9: SENS[i] = 1; break; // digit. Pegel (EIN)
-//!!!!!!!!!!!!!  case 10: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Minus-Temperaturen
-//!!!!!!!!!!!!!  case 15: SENS[i] = berechnetemp(akt_daten[j],akt_daten[j+1],SENS_Art[i]); break; // Minus-Raumtemp.
-//!!!!!!!!!!!!!  }
-//!!!!!!!!!!!!!      j=j+2;
-//!!!!!!!!!!!!!    }
-//!!!!!!!!!!!!!}
-
-/* Bearbeitung der Ausgaenge */
-void ausgaengeanz(void)
-{
-  //  int ausgaenge[13];
-  // Ausgnge 2byte: low vor high
-  // Bitbelegung:
-  // AAAA AAAA
-  // xxxA AAAA
-  //  x ... dont care
-  // A ... Ausgang (von low nach high zu nummerieren)
-  int z;
-
-  if (uvr_typ == UVR1611) /* UVR1611 */
-  {
-    /* Ausgaenge belegt? */
-    for(z=1;z<9;z++)
-    {
-//!!!!!!!!!!!!!        if (tstbit( akt_daten[33], z-1 ) == 1)
-//!!!!!!!!!!!!!          AUSG[z] = 1;
-//!!!!!!!!!!!!!        else
-//!!!!!!!!!!!!!          AUSG[z] = 0;
-    }
-    for(z=1;z<6;z++)
-    {
-//!!!!!!!!!!!!!      if (tstbit( akt_daten[34], z-1 ) == 1)
-//!!!!!!!!!!!!!        AUSG[z+8] = 1;
-//!!!!!!!!!!!!!      else
-//!!!!!!!!!!!!!        AUSG[z+8] = 0;
-     }
-  }
-  else if (uvr_typ == UVR61_3) /* UVR61-3 */
-  {
-    for(z=1;z<4;z++)
-    {
-//!!!!!!!!!!!!!      if (tstbit( akt_daten[13], z-1 ) == 1)
-//!!!!!!!!!!!!!        AUSG[z] = 1;
-//!!!!!!!!!!!!!      else
-//!!!!!!!!!!!!!        AUSG[z] = 0;
-     }
-  }
-
-}
-
-/* Bearbeitung Drehzahlstufen */
-void drehzahlstufenanz(void)
-{
-//!!!!!!!!!!!!!  if (uvr_typ == UVR1611) /* UVR1611 */
-  {
-//!!!!!!!!!!!!!    if ( ((akt_daten[35] & UVR1611) == 0 ) && (akt_daten[35] != 0 ) ) /* ist das hochwertigste Bit gesetzt ? */
-    {
-//!!!!!!!!!!!!!      DZR[1] = 1;
-//!!!!!!!!!!!!!      DZStufe[1] = akt_daten[35] & 0x1F; /* die drei hochwertigsten Bits loeschen */
-    }
-//!!!!!!!!!!!!!    else
-    {
-//!!!!!!!!!!!!!      DZR[1] = 0;
-//!!!!!!!!!!!!!      DZStufe[1] = 0;
-    }
-//!!!!!!!!!!!!!    if ( ((akt_daten[36] & UVR1611) == 0 )  && (akt_daten[36] != 0 ) )/* ist das hochwertigste Bit gesetzt ? */
-    {
-//!!!!!!!!!!!!!      DZR[2] = 1;
-//!!!!!!!!!!!!!      DZStufe[2] = akt_daten[36] & 0x1F; /* die drei hochwertigsten Bits loeschen */
-    }
-//!!!!!!!!!!!!!    else
-    {
-//!!!!!!!!!!!!!      DZR[2] = 0;
-//!!!!!!!!!!!!!      DZStufe[2] = 0;
-    }
-//!!!!!!!!!!!!!    if ( ((akt_daten[37] & UVR1611) == 0 )  && (akt_daten[37] != 0 ) )/* ist das hochwertigste Bit gesetzt ? */
-    {
-//!!!!!!!!!!!!!      DZR[6] = 1;
-//!!!!!!!!!!!!!      DZStufe[6] = akt_daten[37] & 0x1F; /* die drei hochwertigsten Bits loeschen */
-    }
-//!!!!!!!!!!!!!    else
-    {
-//!!!!!!!!!!!!!      DZR[6] = 0;
-//!!!!!!!!!!!!!      DZStufe[6] = 0;
-    }
-//!!!!!!!!!!!!!    if (akt_daten[38] != UVR1611 ) /* angepasst: bei UVR1611 ist die Pumpe aus! */
-    {
-//!!!!!!!!!!!!!      DZR[7] = 1;
-//!!!!!!!!!!!!!      DZStufe[7] = akt_daten[38] & 0x1F; /* die drei hochwertigsten Bits loeschen */
-    }
-//!!!!!!!!!!!!!    else
-    {
-//!!!!!!!!!!!!!      DZR[7] = 0;
-//!!!!!!!!!!!!!      DZStufe[7] = 0;
-    }
-  }
-//!!!!!!!!!!!!!    else if (uvr_typ == UVR61_3) /* UVR61-3 */
-  {
-//!!!!!!!!!!!!!    if ( ((akt_daten[14] & UVR61_3) == 0 ) && (akt_daten[14] != 0 ) ) /* ist das hochwertigste Bit gesetzt ? */
-    {
-//!!!!!!!!!!!!!      DZR[1] = 1;
-//!!!!!!!!!!!!!      DZStufe[1] = akt_daten[14] & 0x1F; /* die drei hochwertigsten Bits loeschen */
-    }
-//!!!!!!!!!!!!!    else
-    {
-//!!!!!!!!!!!!!      DZR[1] = 0;
-//!!!!!!!!!!!!!      DZStufe[1] = 0;
-    }
-  }
-}
-
-/* Bearbeitung Waermemengen-Register und -Zaehler */
-void waermemengenanz(void)
-{
-  //  float momentLstg1, kwh1, mwh1, momentLstg2, kwh2, mwh2;
-//!!!!!!!!!!!!!  WMReg[1] = 0;
-//!!!!!!!!!!!!!  WMReg[2] = 0;
-//!!!!!!!!!!!!!  int tmp_wert;
-
-  if (uvr_typ == UVR1611) /* UVR1611 */
-  {
-//!!!!!!!!!!!!!    switch(akt_daten[39])
-//!!!!!!!!!!!!!    {
-//!!!!!!!!!!!!!    case 1: WMReg[1] = 1; break; /* Waermemengenzaehler1 */
-//!!!!!!!!!!!!!    case 2: WMReg[2] = 1; break; /* Waermemengenzaehler2 */
-//!!!!!!!!!!!!!    case 3: WMReg[1] = 1;        /* Waermemengenzaehler1 */
-//!!!!!!!!!!!!!      WMReg[2] = 1;  break; /* Waermemengenzaehler2 */
-//!!!!!!!!!!!!!    }
-
-//!!!!!!!!!!!!!    if (WMReg[1] == 1)
-    {
-//!!!!!!!!!!!!!      if ( akt_daten[43] > 0x7f ) /* negtive Wete */
-      {
-//!!!!!!!!!!!!!        tmp_wert = (10*((65536*(float)akt_daten[43]+256*(float)akt_daten[42]+(float)akt_daten[41])-65536)-((float)akt_daten[40]*10)/256);
-//!!!!!!!!!!!!!        tmp_wert = tmp_wert | 0xffff0000;
-//!!!!!!!!!!!!!        Mlstg[1] = tmp_wert / 100;
-      }
-//!!!!!!!!!!!!!      else
-//!!!!!!!!!!!!!        Mlstg[1] = (10*(65536*(float)akt_daten[43]+256*(float)akt_daten[42]+(float)akt_daten[41])+((float)akt_daten[40]*10)/256)/100;
-//!!!!!!!!!!!!!      W_kwh[1] = ( (float)akt_daten[45]*256 + (float)akt_daten[44] )/10;
-//!!!!!!!!!!!!!      W_Mwh[1] = (akt_daten[47]*0x100 + akt_daten[46]);
-    }
-//!!!!!!!!!!!!!    if (WMReg[2] == 1)
-    {
-//!!!!!!!!!!!!!      if ( akt_daten[51] > 0x7f )  /* negtive Wete */
-      {
-//!!!!!!!!!!!!!        tmp_wert = (10*((65536*(float)akt_daten[51]+256*(float)akt_daten[50]+(float)akt_daten[49])-65536)-((float)akt_daten[48]*10)/256);
-//!!!!!!!!!!!!!        tmp_wert = tmp_wert | 0xffff0000;
-//!!!!!!!!!!!!!        Mlstg[2] = tmp_wert / 100;
-      }
-//!!!!!!!!!!!!!      else
-//!!!!!!!!!!!!!        Mlstg[2] = (10*(65536*(float)akt_daten[51]+256*(float)akt_daten[50]+(float)akt_daten[49])+((float)akt_daten[48]*10)/256)/100;
-//!!!!!!!!!!!!!      W_kwh[2] = ((float)akt_daten[53]*256 + (float)akt_daten[52])/10;
-//!!!!!!!!!!!!!      W_Mwh[2] = (akt_daten[55]*0x100 + akt_daten[54]);
-    }
-  }
-
-  if (uvr_typ == UVR61_3) /* UVR61-3 */
-  {
-//!!!!!!!!!!!!!    if (akt_daten[16] == 1) /* ( tstbit(akt_daten[16],0) == 1)  akt_daten[17] und akt_daten[18] sind Volumenstrom */
-//!!!!!!!!!!!!!      WMReg[1] = 1;
-//!!!!!!!!!!!!!    if (WMReg[1] == 1)
-    {
-//!!!!!!!!!!!!!      Mlstg[1] = (256*(float)akt_daten[20]+(float)akt_daten[19])/10;
-//!!!!!!!!!!!!!      W_kwh[1] = ( (float)akt_daten[22]*256 + (float)akt_daten[21] )/10;
-//!!!!!!!!!!!!!      W_Mwh[1] = akt_daten[26]*0x1000000 + akt_daten[25]*0x10000 + akt_daten[24]*0x100 + akt_daten[23];
-    }
-  }
 }
 
 /* aktuelles Datum und aktuelle Zeit als String fuer Log erzeugen*/

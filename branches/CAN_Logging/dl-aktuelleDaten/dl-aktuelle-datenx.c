@@ -443,7 +443,7 @@ int main(int argc, char *argv[])
               else
               {
 #ifdef DEBUG
-                printf("%s - No data within %d seconds.r%d s%d\n",sZeit,retry_interval,retry,send_retry);
+                fprintf(stderr,"%s - No data within %d seconds.r%d s%d\n",sZeit,retry_interval,retry,send_retry);
 #endif
                 sleep(retry_interval);
               }
@@ -565,7 +565,7 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
         if (akt_daten[0] == UVR61_3)
         {
-          printf("\nRohdaten der UVR61-3:\n");
+          fprintf(stderr,"\nRohdaten der UVR61-3:\n");
           for (i=0;i<27;i++)
             printf("%2x; ", akt_daten[i]);
         }
@@ -1326,12 +1326,12 @@ void berechne_werte(int anz_regler)
     }
 
 #ifdef DEBUG
-    printf("Anzahl Bytes Geraet-1: %d Anzahl Bytes Geraet-1: %d\n",anz_bytes_1,anz_bytes_2);
+    fprintf(stderr,"Anzahl Bytes Geraet-1: %d Anzahl Bytes Geraet-1: %d\n",anz_bytes_1,anz_bytes_2);
     for (i=0;i<(anz_bytes_1+anz_bytes_2);i++) // Testausgabe 2DL
     {
-        fprintf(stdout,"%2x; ", akt_daten[i]);
+        fprintf(stderr,"%2x; ", akt_daten[i]);
     }
-    fprintf(stdout,"\n");
+    fprintf(stderr,"\n");
 #endif
     i = 0;
     for (j=anz_bytes_1;j<(anz_bytes_1+anz_bytes_2) ;j++)
@@ -1343,9 +1343,9 @@ void berechne_werte(int anz_regler)
 #ifdef DEBUG
     for (i=0;i<anz_bytes_2;i++) // Testausgabe 2DL
     {
-        fprintf(stdout,"%2x; ", akt_daten[i]);
+        fprintf(stderr,"%2x; ", akt_daten[i]);
     }
-    fprintf(stdout,"\n");
+    fprintf(stderr,"\n");
 #endif
   }
 
@@ -2158,7 +2158,7 @@ int  write_header2CSV(int regler, FILE *fp)
       {
         if(strlen(kommentar) > 16000 || pBez_S[i] == NULL)
         {
-          fprintf(stderr," trouble in logfileheader: S%d - length=%d\n",i,strlen(kommentar));
+          fprintf(stderr," trouble in logfileheader: S%d - length=%d\n",i,(int)strlen(kommentar));
           return -1;
         }
         sprintf(kommentar+strlen(kommentar)," %s;",pBez_S[i]);
@@ -2169,7 +2169,7 @@ int  write_header2CSV(int regler, FILE *fp)
         {
           if ( (strlen(kommentar) > 16000) || (pBez_A[i] == NULL) || (pBez_DZS[i]==NULL) )
           {
-            fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,strlen(kommentar));
+            fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,(int)strlen(kommentar));
             return -1;
           }
           sprintf(kommentar+strlen(kommentar),"%s;%s;",pBez_A[i],pBez_DZS[i]);
@@ -2179,7 +2179,7 @@ int  write_header2CSV(int regler, FILE *fp)
       {
         if((strlen(kommentar) > 16000) || (pBez_A[i] == NULL))
         {
-          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,strlen(kommentar));
+          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,(int)strlen(kommentar));
           return -1;
         }
         sprintf(kommentar+strlen(kommentar),"%s;",pBez_A[i]);
@@ -2188,7 +2188,7 @@ int  write_header2CSV(int regler, FILE *fp)
       {
         if ( (strlen(kommentar) > 16000) || (pBez_A[i] == NULL) || (pBez_DZS[i]==NULL) )
         {
-          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,strlen(kommentar));
+          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,(int)strlen(kommentar));
           return -1;
         }
         sprintf(kommentar+strlen(kommentar),"%s;%s;",pBez_A[i],pBez_DZS[i]);
@@ -2197,7 +2197,7 @@ int  write_header2CSV(int regler, FILE *fp)
       {
         if( (strlen(kommentar) > 16000) || (pBez_A[i] == NULL) )
         {
-          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,strlen(kommentar));
+          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,(int)strlen(kommentar));
           return -1;
         }
         sprintf(kommentar+strlen(kommentar),"%s;",pBez_A[i]);
@@ -2217,7 +2217,7 @@ int  write_header2CSV(int regler, FILE *fp)
       {
         if(strlen(kommentar) > 16000 || pBez_S[i] == NULL)
         {
-          fprintf(stderr," trouble in logfileheader: S%d - length=%d\n",i,strlen(kommentar));
+          fprintf(stderr," trouble in logfileheader: S%d - length=%d\n",i,(int)strlen(kommentar));
           return -1;
         }
         sprintf(kommentar+strlen(kommentar)," %s;",pBez_S[i]);
@@ -2227,7 +2227,7 @@ int  write_header2CSV(int regler, FILE *fp)
       {
         if ( (strlen(kommentar) > 16000) || (pBez_A[1] == NULL) || (pBez_DZS[1]==NULL) )
         {
-          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,strlen(kommentar));
+          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,(int)strlen(kommentar));
           return -1;
         }
         sprintf(kommentar+strlen(kommentar),"%s;%s;",pBez_A[1],pBez_DZS[1]);
@@ -2236,7 +2236,7 @@ int  write_header2CSV(int regler, FILE *fp)
       {
         if((strlen(kommentar) > 16000) || (pBez_A[i] == NULL))
         {
-          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,strlen(kommentar));
+          fprintf(stderr," trouble in logfileheader: A%d - length=%d\n",i,(int)strlen(kommentar));
           return -1;
         }
         sprintf(kommentar+strlen(kommentar),"%s;",pBez_A[i]);
@@ -2439,7 +2439,7 @@ void write_CSVCONSOLE(int regler, time_t datapoint_time)
     for (i=1;i<=2;i++)  /* Ausgangs-Bezeichnungen mit Drehzahl */
     {
 #if DEBUG>3
-      fprintf(stdout,"A%d=%d  dzr=%d  dzs=%d\n",i,AUSG[i],DZR[i],DZStufe[i]);
+      fprintf(stderr,"A%d=%d  dzr=%d  dzs=%d\n",i,AUSG[i],DZR[i],DZStufe[i]);
 #endif
       if (DZR[i] == 1 )
         fprintf(stdout,"%2d;%2d;",AUSG[i],DZStufe[i]);
@@ -2451,7 +2451,7 @@ void write_CSVCONSOLE(int regler, time_t datapoint_time)
     for (i=3;i<=5;i++)  /* Ausgangs-Bezeichnungen */
     {
 #if DEBUG>3
-      fprintf(stdout,"A%2d=%2d\n",i,AUSG[i]);
+      fprintf(stderr,"A%2d=%2d\n",i,AUSG[i]);
 #endif
       fprintf(stdout,"%2d;",AUSG[i]);
     }
@@ -2469,7 +2469,7 @@ void write_CSVCONSOLE(int regler, time_t datapoint_time)
     for (i=8;i<=13;i++)   /* Ausgangs-Bezeichnungen */
     {
 #if DEBUG>3
-      fprintf(stdout,"A%2d=%2d\n",i,AUSG[i]);
+      fprintf(stderr,"A%2d=%2d\n",i,AUSG[i]);
 #endif
       fprintf(stdout,"%2d;",AUSG[i]);
     }
@@ -2549,7 +2549,7 @@ void write_rrd(int regler)
     for (i=1;i<=2;i++)  /* Ausgangs-Bezeichnungen mit Drehzahl */
     {
 #if DEBUG>3
-      fprintf(stdout,"A%d=%d  dzr=%d  dzs=%d\n",i,AUSG[i],DZR[i],DZStufe[i]);
+      fprintf(stderr,"A%d=%d  dzr=%d  dzs=%d\n",i,AUSG[i],DZR[i],DZStufe[i]);
 #endif
       if (DZR[i] == 1 )
         fprintf(stdout,"%d:%d:",AUSG[i],DZStufe[i]);
@@ -2561,7 +2561,7 @@ void write_rrd(int regler)
     for (i=3;i<=5;i++)  /* Ausgangs-Bezeichnungen */
     {
 #if DEBUG>3
-      fprintf(stdout,"A%2d=%2d\n",i,AUSG[i]);
+      fprintf(stderr,"A%2d=%2d\n",i,AUSG[i]);
 #endif
       fprintf(stdout,"%d:",AUSG[i]);
     }
@@ -2579,7 +2579,7 @@ void write_rrd(int regler)
     for (i=8;i<=13;i++)   /* Ausgangs-Bezeichnungen */
     {
 #if DEBUG>3
-      fprintf(stdout,"A%2d=%2d\n",i,AUSG[i]);
+      fprintf(stderr,"A%2d=%2d\n",i,AUSG[i]);
 #endif
       fprintf(stdout,"%d:",AUSG[i]);
     }
