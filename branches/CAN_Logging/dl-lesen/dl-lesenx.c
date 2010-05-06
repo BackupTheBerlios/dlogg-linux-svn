@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 03.05.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 06.05.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -249,25 +249,6 @@ int main(int argc, char *argv[])
   {
     fprintf(stderr, " CAN-Logging erkannt.\n");
   }
-  
-  if ( uvr_modus == 0xAA )
-  {
-    fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
-	sleep(3000);                /* 3 Sekunden warten */
-	uvr_modus = get_modulmodus();
-    if ( uvr_modus == 0xAA )
-    {
-      fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit, nochmal 3 Sekunden warten...\n");
-	  sleep(3000);                /* 3 Sekunden warten */
-	  uvr_modus = get_modulmodus();
-    }
-	  if ( uvr_modus == 0xAA )
-      {
-	    fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
-        do_cleanup();
-        return ( -1 );
-	  }
-  }
 
   /* ************************************************************************   */
   /* Lesen des Kopfsatzes zur Ermittlung der Anzahl der zu lesenden Datensaetze */
@@ -290,6 +271,9 @@ int main(int argc, char *argv[])
              do_cleanup();
              return ( -1 );
     case -2: printf(" Keine Daten vorhanden\n");
+             do_cleanup();
+             return ( -1 );
+    case -3: printf(" CAN-Logging: BL-Net nicht bereit!\n");
              do_cleanup();
              return ( -1 );
   }
@@ -398,9 +382,9 @@ static int print_usage()
   fprintf(stderr,"          -h    -> diesen Hilfetext\n");
   fprintf(stderr,"          -v    -> Versionsangabe\n");
   fprintf(stderr,"\n");
-  fprintf(stderr,"Beispiel: dl-lesenx -p /dev/ttyUSB0 -res\n");
+  fprintf(stderr,"Beispiel: dl-lesenx -p /dev/ttyUSB0 --res\n");
   fprintf(stderr,"          Liest die Daten vom USB-Port 0 und setzt den D-LOGG zurueck.\n");
-  fprintf(stderr,"          dl-lesenx -i blnetz:40000 -res\n");
+  fprintf(stderr,"          dl-lesenx -i blnetz:40000 --res\n");
   fprintf(stderr,"          Liest die Daten vom Host blnetz und setzt den D-LOGG zurueck.\n");
   fprintf(stderr,"          dl-lesenx -i 192.168.0.10:40000 \n");
   fprintf(stderr,"          Liest die Daten von der IP-Adresse 192.168.0.10 und setzt den D-LOGG nicht zurueck.\n");
@@ -446,7 +430,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 03.05.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 06.05.2010 \n");
         return 0;
       }
       case 'h':
@@ -918,10 +902,24 @@ fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s - Datenrahmen: %d\n",
 int close_logfile(void)
 {
   int i = -1;
+  
+  if (fp_logfile == NULL)
+  {
+	fprintf(stderr, " Kein Logfile offen.\n");
+	return(i);
+  }
 
   i=fclose(fp_logfile);
   if (uvr_modus == 0xD1)
-    i=fclose(fp_logfile_2);
+  {
+	if (fp_logfile_2 == NULL)
+    {
+	  fprintf(stderr, " Kein Logfile offen.\n");
+	  return(i);
+    }
+	else
+      i=fclose(fp_logfile_2);
+  }
   return(i);
 }
 
@@ -1154,6 +1152,20 @@ int kopfsatzlesen(void)
           case 0xD1: result=read(fd_serialport,kopf_D1,14); break;
           case 0xA8: result=read(fd_serialport,kopf_A8,13); break;
 		  case 0xDC: result=read(fd_serialport,kopf_DC,21); break;
+		  case 0xAA: fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
+					 sleep(3000); /* 3 Sekunden warten */
+                     write_erg=write(fd_serialport,sendbuf,1);
+                     if (write_erg == 1)    /* Lesen der Antwort*/
+                     {
+						if ( uvr_modus == 0xAA )
+						{
+							fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
+							return ( -3 );
+						}
+						else if ( uvr_modus == 0xAA )
+							result=read(fd_serialport,kopf_DC,21);
+					 }
+					 break;
         }
       }
     }
@@ -1184,6 +1196,20 @@ int kopfsatzlesen(void)
           case 0xD1: result = recv(sock,kopf_D1,14,0); break;
           case 0xA8: result = recv(sock,kopf_A8,13,0); break;
 		  case 0xDC: result = recv(sock,kopf_DC,21,0); break;
+		  case 0xAA: fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
+					 sleep(3000); /* 3 Sekunden warten */
+                     write_erg=write(fd_serialport,sendbuf,1);
+                     if (write_erg == 1)    /* Lesen der Antwort*/
+                     {
+						if ( uvr_modus == 0xAA )
+						{
+							fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
+							return ( -3 );
+						}
+						else if ( uvr_modus == 0xAA )
+							result = recv(sock,kopf_DC,21,0);
+					 }
+					 break;
         }
       }
     }
