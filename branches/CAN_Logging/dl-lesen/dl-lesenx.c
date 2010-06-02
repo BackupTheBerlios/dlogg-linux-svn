@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 06.05.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 02.06.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -430,7 +430,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 06.05.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 02.06.2010 \n");
         return 0;
       }
       case 'h':
@@ -3026,15 +3026,15 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
         {
 			switch(anzahl_can_rahmen)
 			{
-			  case 1: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 1: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				break;
-			  case 2: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 2: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -3043,9 +3043,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 3: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 3: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -3059,9 +3059,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 4: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 4: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -3080,9 +3080,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 5: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 5: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -3106,9 +3106,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 6: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 6: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -3137,9 +3137,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 7: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 7: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
@@ -3173,9 +3173,9 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 				  exit(-1);
 				}
 				break;
-			  case 8: if ( open_logfile_CAN(LogFileName, 1) == -1 )
+			  case 8: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
 				{
-				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName);
+				  printf("Fehler beim Monatswechsel: Das LogFile %s kann nicht geoeffnet werden!\n",LogFileName_1);
 				  exit(-1);
 				}
 				if ( open_logfile_CAN(LogFileName_2, 2) == -1 )
