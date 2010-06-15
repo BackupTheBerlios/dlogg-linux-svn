@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 02.06.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 15.06.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -241,9 +241,7 @@ int main(int argc, char *argv[])
   }
 
   uvr_modus = get_modulmodus(); /* Welcher Modus 
-                                0xA8 (1DL) / 0xD1 (2DL) / 0xDC (CAN) bzw.
-                                0xAA bei CAN -> 3 Sek. warten, 
-                                da BL-Net noch nicht bereit zum auslesen        */
+                                0xA8 (1DL) / 0xD1 (2DL) / 0xDC (CAN) */
 								
   if ( uvr_modus == 0xDC )
   {
@@ -430,7 +428,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 02.06.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 15.06.2010 \n");
         return 0;
       }
       case 'h':
@@ -1151,21 +1149,24 @@ int kopfsatzlesen(void)
 		{
           case 0xD1: result=read(fd_serialport,kopf_D1,14); break;
           case 0xA8: result=read(fd_serialport,kopf_A8,13); break;
-		  case 0xDC: result=read(fd_serialport,kopf_DC,21); break;
-		  case 0xAA: fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
-					 sleep(3000); /* 3 Sekunden warten */
-                     write_erg=write(fd_serialport,sendbuf,1);
-                     if (write_erg == 1)    /* Lesen der Antwort*/
-                     {
-						if ( uvr_modus == 0xAA )
+		  case 0xDC: result=read(fd_serialport,kopf_DC,21); 
+		            if (kopf_DC[0].all_bytes[0] == 0xAA)
+					{
+						fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
+						sleep(3000); /* 3 Sekunden warten */
+						write_erg=write(fd_serialport,sendbuf,1);
+						if (write_erg == 1)    /* Lesen der Antwort*/
 						{
-							fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
-							return ( -3 );
+							if (kopf_DC[0].all_bytes[0] == 0xAA)
+							{
+								fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
+								return ( -3 );
+							}
+							else if (kopf_DC[0].all_bytes[0] != 0xAA)
+								result=read(fd_serialport,kopf_DC,21);
 						}
-						else if ( uvr_modus == 0xAA )
-							result=read(fd_serialport,kopf_DC,21);
-					 }
-					 break;
+					}
+					break;
         }
       }
     }
@@ -1195,21 +1196,24 @@ int kopfsatzlesen(void)
 		{
           case 0xD1: result = recv(sock,kopf_D1,14,0); break;
           case 0xA8: result = recv(sock,kopf_A8,13,0); break;
-		  case 0xDC: result = recv(sock,kopf_DC,21,0); break;
-		  case 0xAA: fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
-					 sleep(3000); /* 3 Sekunden warten */
-                     write_erg=write(fd_serialport,sendbuf,1);
-                     if (write_erg == 1)    /* Lesen der Antwort*/
-                     {
-						if ( uvr_modus == 0xAA )
+		  case 0xDC: result = recv(sock,kopf_DC,21,0);
+		            if (kopf_DC[0].all_bytes[0] == 0xAA)
+					{
+						fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
+						sleep(3000); /* 3 Sekunden warten */
+						write_erg=write(fd_serialport,sendbuf,1);
+						if (write_erg == 1)    /* Lesen der Antwort*/
 						{
-							fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
-							return ( -3 );
+							if (kopf_DC[0].all_bytes[0] == 0xAA)
+							{
+								fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
+								return ( -3 );
+							}
+							else if (kopf_DC[0].all_bytes[0] != 0xAA)
+								result=read(fd_serialport,kopf_DC,21);
 						}
-						else if ( uvr_modus == 0xAA )
-							result = recv(sock,kopf_DC,21,0);
-					 }
-					 break;
+					}
+					break;
         }
       }
     }
@@ -2695,6 +2699,9 @@ int datenlesen_DC(int anz_datensaetze)
   for(i=0;i<anz_datensaetze;i++)
   {
     sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
+
+/* DEBUG */
+fprintf(stderr," CAN-Logging-Test: %04d. Startadresse: %x %x %x\n",i,sendbuf[1],sendbuf[2],sendbuf[3]);
 
     if (usb_zugriff)
     {
