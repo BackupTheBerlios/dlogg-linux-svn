@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 15.06.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 16.06.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -428,7 +428,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 15.06.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 16.06.2010 \n");
         return 0;
       }
       case 'h':
@@ -3350,7 +3350,7 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 					sendbuf[2] = sendbuf[2] + 0x02;
 					merkmiddlebyte = middlebyte;
 				}
-                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
 				{
 					sendbuf[2] = 0x00;
 					sendbuf[3] = sendbuf[3] + 0x01;
@@ -3367,7 +3367,7 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 					sendbuf[2] = sendbuf[2] + 0x02;
 					merkmiddlebyte = middlebyte;
 				}
-                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
 				{
 					sendbuf[2] = 0x00;
 					sendbuf[3] = sendbuf[3] + 0x01;
@@ -3388,7 +3388,7 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 				    sendbuf[2] = sendbuf[2] + 0x02;
 					y++;
 				}
-                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
                 {
                     sendbuf[2] = 0x00;
                     sendbuf[3] = sendbuf[3] + 0x01;
@@ -3396,7 +3396,7 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 				break;
 		case 4: sendbuf[1] = 0x00;
                 sendbuf[2] = sendbuf[2] + 0x02;
-                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
                 {
                     sendbuf[2] = 0x00;
                     sendbuf[3] = sendbuf[3] + 0x01;
@@ -3419,7 +3419,7 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 			      sendbuf[2] = sendbuf[2] + 0x02;
 				  y++;
 			    }
-                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
                 {
                    sendbuf[2] = 0x00;
                    sendbuf[3] = sendbuf[3] + 0x01;
@@ -3435,7 +3435,7 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 						   lowbyte = 3;
            				break;
                 }
-                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
                 {
                     sendbuf[2] = 0x00;
                     sendbuf[3] = sendbuf[3] + 0x01;
@@ -3458,7 +3458,7 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 				    sendbuf[2] = sendbuf[2] + 0x04;
 				    y++;
 				}
-                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
                 {
                     sendbuf[2] = 0x00;
                     sendbuf[3] = sendbuf[3] + 0x01;
@@ -3466,7 +3466,7 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 				break;
 		case 8: sendbuf[1] = 0x00;
                 sendbuf[2] = sendbuf[2] + 0x04;
-                if ( sendbuf[2] > 0xFE ) /* das highbyte muss erhoeht werden */
+                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
                 {
                     sendbuf[2] = 0x00;
                     sendbuf[3] = sendbuf[3] + 0x01;
