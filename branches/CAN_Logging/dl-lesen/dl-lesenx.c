@@ -120,6 +120,7 @@ struct termios oldtio; /* will be used to save old port settings */
 int ip_zugriff, ip_first;
 int usb_zugriff;
 UCHAR uvr_modus, uvr_typ, uvr_typ2;  /* uvr_typ2 -> 2. Geraet bei 2DL */
+UCHAR *start_adresse;
 int sock;
 
 
@@ -137,7 +138,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 16.06.2010 \n");
+  printf("    Version 0.8.1 -CAN_Test- vom 06.07.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -428,7 +429,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 16.06.2010 \n");
+        printf("    Version 0.8.1 -CAN_Test- vom 06.07.2010 \n");
         return 0;
       }
       case 'h':
@@ -1412,7 +1413,36 @@ fprintf(stderr," CAN-Logging-Test: EndAdresse: %x\n",print_endaddr); /**********
   {
     uvr_typ = 0x76; /* CAN-Logging nur mit UVR1611 */  
   }
-
+  /* Startadresse der Daten */
+  switch(uvr_modus)
+  {
+    case 0xD1: start_adresse = kopf_D1[0].startadresse;
+      break;
+    case 0xA8: start_adresse = kopf_A8[0].startadresse;
+      break;
+	case 0xDC:
+	  switch(kopf_DC[0].all_bytes[5])
+	  {
+		  case 1: start_adresse = kopf_DC[0].DC_Rahmen1.startadresse; 
+                break;
+		  case 2: start_adresse = kopf_DC[0].DC_Rahmen2.startadresse; 
+		        break;
+		  case 3: start_adresse = kopf_DC[0].DC_Rahmen3.startadresse; 
+		        break;
+		  case 4: start_adresse = kopf_DC[0].DC_Rahmen4.startadresse; 
+		        break;
+		  case 5: start_adresse = kopf_DC[0].DC_Rahmen5.startadresse; 
+		        break;
+		  case 6: start_adresse = kopf_DC[0].DC_Rahmen6.startadresse; 
+		        break;
+		  case 7: start_adresse = kopf_DC[0].DC_Rahmen7.startadresse; 
+		        break;
+		  case 8: start_adresse = kopf_DC[0].DC_Rahmen8.startadresse; 
+		        break;
+	  }
+      break;
+  }
+	  
   return anz_ds;
 }
 
@@ -2070,11 +2100,19 @@ int datenlesen_A8(int anz_datensaetze)
 
   /* fuellen des Sendebuffer - 6 Byte */
   sendbuf[0] = DATENBEREICHLESEN;
-  sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  // alt:
+  //sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  //sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  //sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  // neu -> Startadressen von Kopfsatzlesen:
+  sendbuf[1] = *start_adresse;
+  sendbuf[2] = *(start_adresse+1);
+  sendbuf[3] = *(start_adresse+2);
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
 
+ #if DEBUG
+fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
+#endif
   for(;i<anz_datensaetze;i++)
   {
     sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
@@ -2341,9 +2379,14 @@ int datenlesen_D1(int anz_datensaetze)
 
   /* fuellen des Sendebuffer - 6 Byte */
   sendbuf[0] = DATENBEREICHLESEN;
-  sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  // alt:
+  //sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  //sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  //sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  // neu -> Startadressen von Kopfsatzlesen:
+  sendbuf[1] = *start_adresse;
+  sendbuf[2] = *(start_adresse+1);
+  sendbuf[3] = *(start_adresse+2);
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
 
   for(;i<anz_datensaetze;i++)
@@ -2691,9 +2734,14 @@ int datenlesen_DC(int anz_datensaetze)
 
   /* fuellen des Sendebuffer - 6 Byte */
   sendbuf[0] = DATENBEREICHLESEN;
-  sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  // alt:
+  //sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  //sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  //sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
+  // neu -> Startadressen von Kopfsatzlesen:
+  sendbuf[1] = *start_adresse;
+  sendbuf[2] = *(start_adresse+1);
+  sendbuf[3] = *(start_adresse+2);
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
 
   for(i=0;i<anz_datensaetze;i++)
