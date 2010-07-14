@@ -120,7 +120,10 @@ struct termios oldtio; /* will be used to save old port settings */
 int ip_zugriff, ip_first;
 int usb_zugriff;
 UCHAR uvr_modus, uvr_typ, uvr_typ2;  /* uvr_typ2 -> 2. Geraet bei 2DL */
-UCHAR *start_adresse;
+UCHAR *start_adresse=NULL, *end_adresse=NULL;
+KopfsatzD1 kopf_D1[1];
+KopfsatzA8 kopf_A8[1];
+KOPFSATZ_DC kopf_DC[1];
 int sock;
 
 
@@ -138,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.8.1 -CAN_Test- vom 06.07.2010 \n");
+  printf("    Version 0.9.0 -CAN_Test- vom 14.07.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -429,7 +432,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.8.1 -CAN_Test- vom 06.07.2010 \n");
+        printf("    Version 0.9.0 -CAN_Test- vom 14.07.2010 \n");
         return 0;
       }
       case 'h':
@@ -1131,10 +1134,6 @@ int kopfsatzlesen(void)
 {
   int result, anz_ds, pruefz, merk_pruefz, durchlauf;
   int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
-  UCHAR print_endaddr;
-  KopfsatzD1 kopf_D1[1];
-  KopfsatzA8 kopf_A8[1];
-  KOPFSATZ_DC kopf_DC[1];
   durchlauf=0;
 
   do
@@ -1286,16 +1285,54 @@ int kopfsatzlesen(void)
     fprintf(stderr, "Anzahl Durchlaeufe Pruefziffer Kopfsatz: %i\n",durchlauf);
 #endif
 
+  /* Startadresse der Daten */
+  switch(uvr_modus)
+  {
+    case 0xD1: start_adresse = kopf_D1[0].startadresse;
+			   end_adresse = kopf_D1[0].endadresse;
+      break;
+    case 0xA8: start_adresse = kopf_A8[0].startadresse;
+	           end_adresse = kopf_A8[0].endadresse;
+      break;
+	case 0xDC:
+	  switch(kopf_DC[0].all_bytes[5])
+	  {
+		  case 1: start_adresse = kopf_DC[0].DC_Rahmen1.startadresse;
+				  end_adresse = kopf_DC[0].DC_Rahmen1.endadresse;
+                break;
+		  case 2: start_adresse = kopf_DC[0].DC_Rahmen2.startadresse; 
+				  end_adresse = kopf_DC[0].DC_Rahmen2.endadresse;
+		        break;
+		  case 3: start_adresse = kopf_DC[0].DC_Rahmen3.startadresse; 
+				  end_adresse = kopf_DC[0].DC_Rahmen3.endadresse;
+		        break;
+		  case 4: start_adresse = kopf_DC[0].DC_Rahmen4.startadresse; 
+				  end_adresse = kopf_DC[0].DC_Rahmen4.endadresse;
+		        break;
+		  case 5: start_adresse = kopf_DC[0].DC_Rahmen5.startadresse; 
+				  end_adresse = kopf_DC[0].DC_Rahmen5.endadresse;
+		        break;
+		  case 6: start_adresse = kopf_DC[0].DC_Rahmen6.startadresse; 
+				  end_adresse = kopf_DC[0].DC_Rahmen6.endadresse;
+		        break;
+		  case 7: start_adresse = kopf_DC[0].DC_Rahmen7.startadresse; 
+				  end_adresse = kopf_DC[0].DC_Rahmen7.endadresse;
+		        break;
+		  case 8: start_adresse = kopf_DC[0].DC_Rahmen8.startadresse; 
+				  end_adresse = kopf_DC[0].DC_Rahmen8.endadresse;
+		        break;
+	  }
+      break;
+  }
+
 //fprintf(stderr," switch uvr_modus... \n");
   switch(uvr_modus)
   {
     case 0xD1: 
       anz_ds = anzahldatensaetze_D1(kopf_D1);
-      print_endaddr = kopf_D1[0].endadresse[0];
       break;
     case 0xA8: 
       anz_ds = anzahldatensaetze_A8(kopf_A8);
-      print_endaddr = kopf_A8[0].endadresse[0];
       break;
 	case 0xDC:
       anz_ds = anzahldatensaetze_DC(kopf_DC);
@@ -1368,21 +1405,6 @@ int kopfsatzlesen(void)
       break;
   }
 
-#if DEBUG > 3
-fprintf(stderr," CAN-Logging-Test: EndAdresse: %x\n",print_endaddr); /********************/
-#endif
-
-  switch( anz_ds)
-  {
-    case -1: zeitstempel();
-            fprintf(fp_varlogfile,"%s - %s -- Falschen Wert im Low-Byte Endadresse gelesen! Wert: %x\n",sDatum, sZeit,print_endaddr);
-            return -1;
-	case -2: zeitstempel();
-            fprintf(fp_varlogfile,"%s - %s -- Keine Daten vorhanden.\n",sDatum, sZeit);
-            return -1;
-    default: printf(" Anzahl Datensaetze aus Kopfsatz: %i\n",anz_ds); break;
-  }
-
 #if  DEBUG>5
   fprintf(stderr, "  Errechnete Pruefsumme: %x\n", berechneKopfpruefziffer(kopf) ); printf(" empfangene Pruefsumme: %x\n",kopf[0].pruefsum);
   fprintf(stderr, "empfangen von DL/BL:\n Kennung: %X\n",kopf[0].kennung);
@@ -1413,36 +1435,18 @@ fprintf(stderr," CAN-Logging-Test: EndAdresse: %x\n",print_endaddr); /**********
   {
     uvr_typ = 0x76; /* CAN-Logging nur mit UVR1611 */  
   }
-  /* Startadresse der Daten */
-  switch(uvr_modus)
-  {
-    case 0xD1: start_adresse = kopf_D1[0].startadresse;
-      break;
-    case 0xA8: start_adresse = kopf_A8[0].startadresse;
-      break;
-	case 0xDC:
-	  switch(kopf_DC[0].all_bytes[5])
-	  {
-		  case 1: start_adresse = kopf_DC[0].DC_Rahmen1.startadresse; 
-                break;
-		  case 2: start_adresse = kopf_DC[0].DC_Rahmen2.startadresse; 
-		        break;
-		  case 3: start_adresse = kopf_DC[0].DC_Rahmen3.startadresse; 
-		        break;
-		  case 4: start_adresse = kopf_DC[0].DC_Rahmen4.startadresse; 
-		        break;
-		  case 5: start_adresse = kopf_DC[0].DC_Rahmen5.startadresse; 
-		        break;
-		  case 6: start_adresse = kopf_DC[0].DC_Rahmen6.startadresse; 
-		        break;
-		  case 7: start_adresse = kopf_DC[0].DC_Rahmen7.startadresse; 
-		        break;
-		  case 8: start_adresse = kopf_DC[0].DC_Rahmen8.startadresse; 
-		        break;
-	  }
-      break;
-  }
 	  
+  switch( anz_ds)
+  {
+    case -1: zeitstempel();
+            fprintf(fp_varlogfile,"%s - %s -- Falschen Wert im Low-Byte Endadresse gelesen! Wert: %x\n",sDatum, sZeit,*end_adresse);
+            return -1;
+	case -2: zeitstempel();
+            fprintf(fp_varlogfile,"%s - %s -- Keine Daten vorhanden.\n",sDatum, sZeit);
+            return -1;
+    default: printf(" Anzahl Datensaetze aus Kopfsatz: %i\n",anz_ds); break;
+  }
+
   return anz_ds;
 }
 
@@ -2068,6 +2072,7 @@ int datenlesen_A8(int anz_datensaetze)
   middlebyte = 0;
   merkmiddlebyte = middlebyte;
 
+fprintf(stderr, " CAN-Logging: TEST ...\n");
   sendbuf[0]=VERSIONSABFRAGE;   /* Senden der Versionsabfrage */
   if (usb_zugriff)
   {
@@ -2100,19 +2105,15 @@ int datenlesen_A8(int anz_datensaetze)
 
   /* fuellen des Sendebuffer - 6 Byte */
   sendbuf[0] = DATENBEREICHLESEN;
-  // alt:
-  //sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  //sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  //sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  // neu -> Startadressen von Kopfsatzlesen:
-  sendbuf[1] = *start_adresse;
+  // Startadressen von Kopfsatzlesen:
+  sendbuf[1] = *start_adresse;     /* Beginn des Datenbereiches (low vor high) */
   sendbuf[2] = *(start_adresse+1);
   sendbuf[3] = *(start_adresse+2);
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
 
- #if DEBUG
+ //#if DEBUG
 fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
-#endif
+//#endif
   for(;i<anz_datensaetze;i++)
   {
     sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
@@ -2264,6 +2265,9 @@ fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
       if ( ((i%100) == 0) && (i > 0) )
         printf("%d Datensaetze geschrieben.\n",i);
 
+      if ( *end_adresse == sendbuf[1] && *(end_adresse+1) == sendbuf[2] && *(end_adresse+2) == sendbuf[3] )
+	    break;
+		
       /* Hochzaehlen der Startadressen                                      */
       if (lowbyte <= 2)
         lowbyte++;
@@ -2295,6 +2299,14 @@ fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
           merkmiddlebyte = middlebyte;
         }
       }
+	  
+	  if (sendbuf[3] > 0x0F ) // "Speicherueberlauf" im BL-Net
+	  {
+		sendbuf[1] = 0x00;
+		sendbuf[2] = 0x00;
+		sendbuf[3] = 0x00;
+	  }
+	  
       monatswechsel = 0;
     } /* Ende: if (dsatz_uvr1611[0].pruefsum == pruefsumme) */
     else
@@ -2379,12 +2391,8 @@ int datenlesen_D1(int anz_datensaetze)
 
   /* fuellen des Sendebuffer - 6 Byte */
   sendbuf[0] = DATENBEREICHLESEN;
-  // alt:
-  //sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  //sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  //sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  // neu -> Startadressen von Kopfsatzlesen:
-  sendbuf[1] = *start_adresse;
+  // Startadressen von Kopfsatzlesen:
+  sendbuf[1] = *start_adresse;     /* Beginn des Datenbereiches (low vor high) */
   sendbuf[2] = *(start_adresse+1);
   sendbuf[3] = *(start_adresse+2);
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
@@ -2609,6 +2617,9 @@ int datenlesen_D1(int anz_datensaetze)
       if ( ((i%100) == 0) && (i > 0) )
         printf("%d Datensaetze geschrieben.\n",i);
 
+      if ( *end_adresse == sendbuf[1] && *(end_adresse+1) == sendbuf[2] && *(end_adresse+2) == sendbuf[3] )
+	    break;
+		
       /* Hochzaehlen der Startadressen                                      */
       if (lowbyte == 0)
         lowbyte++;
@@ -2638,6 +2649,14 @@ int datenlesen_D1(int anz_datensaetze)
           merkmiddlebyte = middlebyte;
         }
       }
+	  
+	  if (sendbuf[3] > 0x0F ) // "Speicherueberlauf" im BL-Net
+	  {
+		sendbuf[1] = 0x00;
+		sendbuf[2] = 0x00;
+		sendbuf[3] = 0x00;
+	  }
+	  
       monatswechsel = 0;
     } /* Ende: if (dsatz_uvr1611[0].pruefsum == pruefsumme) */
     else
@@ -2734,12 +2753,8 @@ int datenlesen_DC(int anz_datensaetze)
 
   /* fuellen des Sendebuffer - 6 Byte */
   sendbuf[0] = DATENBEREICHLESEN;
-  // alt:
-  //sendbuf[1] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  //sendbuf[2] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  //sendbuf[3] = 0x00;  /* Beginn des Datenbereiches (low vor high) */
-  // neu -> Startadressen von Kopfsatzlesen:
-  sendbuf[1] = *start_adresse;
+  // Startadressen von Kopfsatzlesen:
+  sendbuf[1] = *start_adresse;      /* Beginn des Datenbereiches (low vor high) */
   sendbuf[2] = *(start_adresse+1);
   sendbuf[3] = *(start_adresse+2);
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
@@ -2749,7 +2764,7 @@ int datenlesen_DC(int anz_datensaetze)
     sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
 
 /* DEBUG */
-fprintf(stderr," CAN-Logging-Test: %04d. Startadresse: %x %x %x\n",i,sendbuf[1],sendbuf[2],sendbuf[3]);
+fprintf(stderr," CAN-Logging-Test: %04d. Startadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3]);
 
     if (usb_zugriff)
     {
@@ -3376,6 +3391,9 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
       if ( ((i%100) == 0) && (i > 0) )
         printf("%d Datensaetze geschrieben.\n",i);
 
+      if ( *end_adresse == sendbuf[1] && *(end_adresse+1) == sendbuf[2] && *(end_adresse+2) == sendbuf[3] )
+	    break;
+		
       /* Hochzaehlen der Startadressen                                      */
       if (lowbyte <= 2)
         lowbyte++;
@@ -3524,6 +3542,13 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 
       if ( y == 4 )
 	    y = 0;
+		
+	  if (sendbuf[3] > 0x0F ) // "Speicherueberlauf" im BL-Net
+	  {
+		sendbuf[1] = 0x00;
+		sendbuf[2] = 0x00;
+		sendbuf[3] = 0x00;
+	  }
 		
       monatswechsel = 0;
     } /* Ende: if (dsatz_uvr1611[0].pruefsum == pruefsumme) */
@@ -4028,14 +4053,17 @@ int anzahldatensaetze_D1(KopfsatzD1 kopf[])
   /* Byte 3 - highest */
   byte3 = (kopf[0].endadresse[2] * 0x100)*0x02;
 
-  return byte1 + byte2 + byte3;
+  if ( *end_adresse < *start_adresse || *(end_adresse+1) < *(start_adresse+1) || *(end_adresse+2) < *(start_adresse+2) ) 
+	return 4096; // max. Anzahl Datenrahmen bei UVR1611 bzw. UVR61-3, Speicherueberlauf
+  else
+	return byte1 + byte2 + byte3;
 }
 
 /* Ermittlung Anzahl der Datensaetze Modus 0xDC (CAN-Logging) */
 int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
 {
   /* UCHAR byte1, byte2, byte3; */
-  int byte1, byte2, byte3, return_byte;
+  int byte1, byte2, byte3, return_byte, return_byte_max;
   
   switch(kopf[0].all_bytes[5])
   {
@@ -4063,6 +4091,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
       /* Byte 3 - highest */
       byte3 = (kopf[0].DC_Rahmen1.endadresse[2] * 0x200);
 	  return_byte = byte1 + byte2 + byte3;
+	  return_byte_max = 8192;
       break;
     case 2:
 	  if (kopf[0].DC_Rahmen2.endadresse[0] == kopf[0].DC_Rahmen2.startadresse[0] &&
@@ -4083,7 +4112,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
         default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
           return -1;
       }
-	  return_byte = ((kopf[0].DC_Rahmen2.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen2.endadresse[1] /2 )* 4 + (byte1 -1)) / 2 + 1;
+	  return_byte = ((kopf[0].DC_Rahmen2.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen2.endadresse[1] /2 )* 4 + (byte1 -1)) / 2 ; // + 1;
+	  return_byte_max = 4096;
       break;
     case 3:
 	  if (kopf[0].DC_Rahmen3.endadresse[0] == kopf[0].DC_Rahmen3.startadresse[0] &&
@@ -4104,7 +4134,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
         default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
           return -1;
       }
-	  return_byte = ((kopf[0].DC_Rahmen3.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen3.endadresse[1] /2 )* 4 + (byte1 -1)) / 3 + 1;
+	  return_byte = ((kopf[0].DC_Rahmen3.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen3.endadresse[1] /2 )* 4 + (byte1 -1)) / 3 ; // + 1;
+	  return_byte_max = 2731;
       break;
     case 4:
 	  if (kopf[0].DC_Rahmen4.endadresse[0] == kopf[0].DC_Rahmen4.startadresse[0] &&
@@ -4125,7 +4156,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
         default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
           return -1;
       }
-	  return_byte = ((kopf[0].DC_Rahmen4.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen4.endadresse[1] /2 )* 4 + (byte1 -1)) / 4 + 1;
+	  return_byte = ((kopf[0].DC_Rahmen4.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen4.endadresse[1] /2 )* 4 + (byte1 -1)) / 4 ; // + 1;
+	  return_byte_max = 2048;
       break;
     case 5:
 	  if (kopf[0].DC_Rahmen5.endadresse[0] == kopf[0].DC_Rahmen5.startadresse[0] &&
@@ -4146,7 +4178,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
         default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
           return -1;
       }
-	  return_byte = ((kopf[0].DC_Rahmen5.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen5.endadresse[1] /2 )* 4 + (byte1 -1)) / 5 + 1;
+	  return_byte = ((kopf[0].DC_Rahmen5.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen5.endadresse[1] /2 )* 4 + (byte1 -1)) / 5 ; // + 1;
+	  return_byte_max = 1643;
       break;
     case 6:
 	  if (kopf[0].DC_Rahmen6.endadresse[0] == kopf[0].DC_Rahmen6.startadresse[0] &&
@@ -4167,7 +4200,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
         default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
           return -1;
       }
-	  return_byte = ((kopf[0].DC_Rahmen6.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen6.endadresse[1] /2 )* 4 + (byte1 -1)) / 6 + 1;
+	  return_byte = ((kopf[0].DC_Rahmen6.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen6.endadresse[1] /2 )* 4 + (byte1 -1)) / 6 ; // + 1;
+	  return_byte_max = 1376;
       break;
     case 7:
 	  if (kopf[0].DC_Rahmen7.endadresse[0] == kopf[0].DC_Rahmen7.startadresse[0] &&
@@ -4188,7 +4222,8 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
         default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
           return -1;
       }
-	  return_byte = ((kopf[0].DC_Rahmen7.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen7.endadresse[1] /2 )* 4 + (byte1 -1)) / 7 + 1;
+	  return_byte = ((kopf[0].DC_Rahmen7.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen7.endadresse[1] /2 )* 4 + (byte1 -1)) / 7 ; //+ 1;
+	  return_byte_max = 1174;
       break;
     case 8:
 	  if (kopf[0].DC_Rahmen8.endadresse[0] == kopf[0].DC_Rahmen8.startadresse[0] &&
@@ -4209,11 +4244,15 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
         default: printf("Falschen Wert im Low-Byte Endadresse gelesen!\n");
           return -1;
       }
-	  return_byte = ((kopf[0].DC_Rahmen8.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen8.endadresse[1] /2 )* 4 + (byte1 -1)) / 8 + 1;
+	  return_byte = ((kopf[0].DC_Rahmen8.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen8.endadresse[1] /2 )* 4 + (byte1 -1)) / 8 ; // + 1;
+	  return_byte_max = 1024;
 	  break;
   }
 
-  return return_byte;
+  if ( *end_adresse < *start_adresse || *(end_adresse+1) < *(start_adresse+1) || *(end_adresse+2) < *(start_adresse+2) ) 
+	return return_byte_max; // max. Anzahl Datenrahmen bei UVR1611 bzw. UVR61-3, Speicherueberlauf
+  else
+    return return_byte;
 }
 
 /* Ermittlung Anzahl der Datensaetze Modus 0xA8 */
@@ -4239,7 +4278,10 @@ int anzahldatensaetze_A8(KopfsatzA8 kopf[])
   /* Byte 3 - highest */
   byte3 = (kopf[0].endadresse[2] * 0x100)*0x02;
 
-  return byte1 + byte2 + byte3;
+  if ( *end_adresse < *start_adresse || *(end_adresse+1) < *(start_adresse+1) || *(end_adresse+2) < *(start_adresse+2) ) 
+	return 8192; // max. Anzahl Datenrahmen bei UVR1611 bzw. UVR61-3, Speicherueberlauf
+  else
+	return byte1 + byte2 + byte3;
 }
 
 /* Datenpuffer im D-LOGG zuruecksetzen -USB */
