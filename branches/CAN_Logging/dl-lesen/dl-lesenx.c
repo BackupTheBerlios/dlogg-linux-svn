@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.9.0 -CAN_Test- vom 14.07.2010 \n");
+  printf("    Version 0.9.0 -CAN_Test- vom 15.07.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -432,7 +432,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 -CAN_Test- vom 14.07.2010 \n");
+        printf("    Version 0.9.0 -CAN_Test- vom 15.07.2010 \n");
         return 0;
       }
       case 'h':
@@ -4135,7 +4135,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
           return -1;
       }
 	  return_byte = ((kopf[0].DC_Rahmen3.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen3.endadresse[1] /2 )* 4 + (byte1 -1)) / 3 ; // + 1;
-	  return_byte_max = 2731;
+	  return_byte_max = 2730;
       break;
     case 4:
 	  if (kopf[0].DC_Rahmen4.endadresse[0] == kopf[0].DC_Rahmen4.startadresse[0] &&
@@ -4179,7 +4179,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
           return -1;
       }
 	  return_byte = ((kopf[0].DC_Rahmen5.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen5.endadresse[1] /2 )* 4 + (byte1 -1)) / 5 ; // + 1;
-	  return_byte_max = 1643;
+	  return_byte_max = 1638;
       break;
     case 6:
 	  if (kopf[0].DC_Rahmen6.endadresse[0] == kopf[0].DC_Rahmen6.startadresse[0] &&
@@ -4201,7 +4201,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
           return -1;
       }
 	  return_byte = ((kopf[0].DC_Rahmen6.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen6.endadresse[1] /2 )* 4 + (byte1 -1)) / 6 ; // + 1;
-	  return_byte_max = 1376;
+	  return_byte_max = 1365;
       break;
     case 7:
 	  if (kopf[0].DC_Rahmen7.endadresse[0] == kopf[0].DC_Rahmen7.startadresse[0] &&
@@ -4223,7 +4223,7 @@ int anzahldatensaetze_DC(KOPFSATZ_DC kopf[])
           return -1;
       }
 	  return_byte = ((kopf[0].DC_Rahmen7.endadresse[2] * 0x200) + (kopf[0].DC_Rahmen7.endadresse[1] /2 )* 4 + (byte1 -1)) / 7 ; //+ 1;
-	  return_byte_max = 1174;
+	  return_byte_max = 1170;
       break;
     case 8:
 	  if (kopf[0].DC_Rahmen8.endadresse[0] == kopf[0].DC_Rahmen8.startadresse[0] &&
