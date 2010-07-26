@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.9.0 -CAN_Test- vom 15.07.2010 \n");
+  printf("    Version 0.9.0 -CAN_Test- vom 26.07.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -432,7 +432,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 -CAN_Test- vom 15.07.2010 \n");
+        printf("    Version 0.9.0 -CAN_Test- vom 26.07.2010 \n");
         return 0;
       }
       case 'h':
@@ -871,7 +871,7 @@ fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s - Datenrahmen: %d\n",
   }
   else /* das Logfile existiert schon */
   {
-  fprintf(stderr,"--> open_logfile_CAN() Logfile existiert, LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
+//  fprintf(stderr,"--> open_logfile_CAN() Logfile existiert, LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
     fclose(fp_logfile_tmp);
     if ((fp_logfile_tmp=fopen(LogFile,"a")) == NULL) /* schreiben ab Dateiende */
     {
@@ -2764,7 +2764,7 @@ int datenlesen_DC(int anz_datensaetze)
     sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
 
 /* DEBUG */
-fprintf(stderr," CAN-Logging-Test: %04d. Startadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3]);
+fprintf(stderr," CAN-Logging-Test: %04d. Startadresse: %x %x %x - Endadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3],*end_adresse,*(end_adresse+1),*(end_adresse+2));
 
     if (usb_zugriff)
     {
@@ -2811,40 +2811,40 @@ fprintf(stderr," CAN-Logging-Test: %04d. Startadresse: %x %x %x\n",i+1,sendbuf[1
 	{
 	  case 1: if (u_dsatz_can[0].DS_CAN_1.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-	        fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_1.pruefsum,pruefsumme);
+	        /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_1.pruefsum,pruefsumme); */
 	        break;
 	  case 2: if (u_dsatz_can[0].DS_CAN_2.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-			fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_2.pruefsum,pruefsumme);
+			/* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_2.pruefsum,pruefsumme); */
 	        break;
 	  case 3: if (u_dsatz_can[0].DS_CAN_3.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_3.pruefsum,pruefsumme);
+            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_3.pruefsum,pruefsumme); */
 	        break;
 	  case 4: if (u_dsatz_can[0].DS_CAN_4.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_4.pruefsum,pruefsumme);
+            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_4.pruefsum,pruefsumme); */
 	        break;
 	  case 5: if (u_dsatz_can[0].DS_CAN_5.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_5.pruefsum,pruefsumme);
+            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_5.pruefsum,pruefsumme); */
 	        break;
 	  case 6: if (u_dsatz_can[0].DS_CAN_6.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_6.pruefsum,pruefsumme);
+            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_6.pruefsum,pruefsumme); */
 	        break;
 	  case 7: if (u_dsatz_can[0].DS_CAN_7.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_7.pruefsum,pruefsumme);
+            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_7.pruefsum,pruefsumme); */
 	        break;
 	  case 8: if (u_dsatz_can[0].DS_CAN_8.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_8.pruefsum,pruefsumme);
+            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_8.pruefsum,pruefsumme); */
 	        break;
 	}
   }	  
   
-fprintf(stderr,"-> Pruefsummencheck fertig. pruefsum_check: %i\n",pruefsum_check);  
+/* fprintf(stderr,"-> Pruefsummencheck fertig. pruefsum_check: %i\n",pruefsum_check);  */
   
     if ( pruefsum_check == 1 )
     {  /*Aenderung: 02.09.06 - Hochzaehlen der Startadresse erst dann, wenn korrekt gelesen wurde (eventuell endlosschleife?) */
@@ -3376,7 +3376,7 @@ fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oef
 		        break;
 	  }
       
-fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
+fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i+1);
 
 /*
       if ( csv==1 && fp_csvfile != NULL )
@@ -3423,23 +3423,31 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i);
 					merkmiddlebyte = middlebyte;
 				}
 				break;
-		case 2: switch (lowbyte)
-                {
-                   case 0: sendbuf[1] = 0x00; middlebyte++; break;
-                   case 1: sendbuf[1] = 0x80; lowbyte = 3; break;
-                }
-				if (middlebyte > merkmiddlebyte)   /* das mittlere Byte muss erhoeht werden */
+		case 2: if ( sendbuf[2] == 0xFE && sendbuf[1] == 0x80 ) /* das highbyte muss erhoeht werden */
 				{
-					sendbuf[2] = sendbuf[2] + 0x02;
-					merkmiddlebyte = middlebyte;
-				}
-                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
-				{
+					switch (lowbyte)
+					{
+						case 0: sendbuf[1] = 0x00; middlebyte++; break;
+						case 1: sendbuf[1] = 0x80; lowbyte = 3; break;
+					}
 					sendbuf[2] = 0x00;
 					sendbuf[3] = sendbuf[3] + 0x01;
 					merkmiddlebyte = middlebyte;
 				}
-				break;
+				else
+				{
+					switch (lowbyte)
+					{
+						case 0: sendbuf[1] = 0x00; middlebyte++; break;
+						case 1: sendbuf[1] = 0x80; lowbyte = 3; break;
+					}
+					if (middlebyte > merkmiddlebyte)   /* das mittlere Byte muss erhoeht werden */
+					{
+						sendbuf[2] = sendbuf[2] + 0x02;
+						merkmiddlebyte = middlebyte;
+					}
+				}
+                break;
 	    case 3: switch (lowbyte)
                 {
                    case 0: sendbuf[1] = 0x00; break;
