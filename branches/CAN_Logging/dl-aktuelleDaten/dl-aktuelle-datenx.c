@@ -299,9 +299,6 @@ int main(int argc, char *argv[])
     do_cleanup(fenster1, fenster2);
   }
 
-
-
-
   uvr_modus = get_modulmodus(); /* Welcher Modus 
                                 0xA8 (1DL) / 0xD1 (2DL) / 0xDC (CAN) */
 								
@@ -435,7 +432,7 @@ int main(int argc, char *argv[])
         do
         {
 		  if ( uvr_modus == 0xDC )
-			send_bytes=send(sock,sendbuf,2,0);
+			send_bytes=send(sock,sendbuf_can,2,0);
 		  else
 			send_bytes=send(sock,sendbuf,1,0);
 		  
