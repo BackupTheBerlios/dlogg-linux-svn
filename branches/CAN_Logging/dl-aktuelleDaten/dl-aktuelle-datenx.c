@@ -41,6 +41,7 @@
  * Version 0.8.1	24.01.2008  Fehlerkorrektur Momentanleistung in	         *
  * 								csv-Ausgabe                                  *
  * Version 0.8.2	25.02.2008  --rrd Unterstuetzung                         *
+ * Version 0        xx.xx.2010  CAN-Logging                                  *
  *****************************************************************************/
 
 #include <sys/types.h>
@@ -110,8 +111,9 @@ void keine_neuen_daten(WINDOW *fenster);
 void set_attribut(int zaehler, WINDOW *fenster);
 void test_farbe(void);
 int lies_conf(void);
+int get_modulmodus(void);
 
-FILE *fp_logfile, *fp_varlogfile, *fp_csvfile, *fp_csvfile_2;
+FILE *fp_logfile=NULL, *fp_varlogfile=NULL, *fp_csvfile=NULL, *fp_csvfile_2=NULL;
 struct termios oldtio; /* will be used to save old port settings */
 int fd;
 int write_erg, bool_farbe; /* filediskriptor, anz_datensaetze, Farbe moeglich */
@@ -157,9 +159,9 @@ int main(int argc, char *argv[])
   struct termios newtio;  /* will be used for new port settings */
 
   unsigned char empfbuf[256];
-  int send_bytes = 0, sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+  int send_bytes = 0, sendbuf[1], sendbuf_can[2];       /*  sendebuffer fuer die Request-Commandos*/
   int erg_check_arg ,result, ip_first;
-  int pruefz_ok = 0, t_count;
+  int pruefz_ok = 0, t_count, anzahl_can_rahmen = 0;
   int i, j=2;
 
   WINDOW *fenster1=NULL, *fenster2=NULL;
@@ -297,6 +299,22 @@ int main(int argc, char *argv[])
     do_cleanup(fenster1, fenster2);
   }
 
+
+
+
+  uvr_modus = get_modulmodus(); /* Welcher Modus 
+                                0xA8 (1DL) / 0xD1 (2DL) / 0xDC (CAN) */
+								
+  if ( uvr_modus == 0xDC )
+  {
+	sendbuf[0]=KONFIGCAN;
+    write_erg=send(sock,sendbuf,1,0);
+    if (write_erg == 1)    /* Lesen der Antwort */
+      result  = recv(sock,empfbuf,18,0);
+
+	anzahl_can_rahmen = empfbuf[0];	
+  }
+  
   /********************************************************************/
   /* aktuelle Daten lesen                                             */
   /********************************************************************/
@@ -306,8 +324,10 @@ int main(int argc, char *argv[])
   do
   {
     kennung_ok = 1;
+    sendbuf_can[0]=AKTUELLEDATENLESEN;
+	sendbuf_can[1]=1;
     sendbuf[0]=AKTUELLEDATENLESEN;   /* Senden Request aktuelle Daten */
-//    bzero(akt_daten,58); /* auf 116 Byte für 2DL erweitert */
+//    bzero(akt_daten,58); /* auf 116 Byte fuer 2DL erweitert */
     //bzero(akt_daten,116);
     memset( akt_daten, 0, 116 );
     /* select um rauszufinden ob ready to read !  siehe man select */
@@ -321,6 +341,11 @@ int main(int argc, char *argv[])
 
     if (usb_zugriff)
     {
+		if ( uvr_modus == 0xDC )
+		{
+			fprintf(stderr,"USB-Abfrage bei CAN-Logging nicht implementiert!\n"); 
+			return(1);
+		}
       retry_interval=5;
       write_erg=write(fd,sendbuf,1);
       if (write_erg == 1)    /* Lesen der Antwort*/
@@ -409,8 +434,12 @@ int main(int argc, char *argv[])
       {
         do
         {
-          send_bytes=send(sock,sendbuf,1,0);
-          if (send_bytes == 1)    /* Lesen der Antwort */
+		  if ( uvr_modus == 0xDC )
+			send_bytes=send(sock,sendbuf,2,0);
+		  else
+			send_bytes=send(sock,sendbuf,1,0);
+		  
+          if ( (send_bytes == 1 && uvr_modus != 0xDC) || (send_bytes == 2 && uvr_modus == 0xDC) )    /* Lesen der Antwort */
           {
             do
             {
@@ -772,7 +801,7 @@ int do_cleanup(WINDOW *fenster1, WINDOW *fenster2)
 static int print_usage()
 {
   fprintf(stderr,"\n    UVR1611 / UVR61-3 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
-  fprintf(stderr,"    Version 0.8.2 vom 25.02.2008 \n");
+  fprintf(stderr,"    Version 0.X.X vom 28.07.2010 \n");
   fprintf(stderr,"\ndl-aktuelle-datenx (-p USB-Port | -i IP:Port) [-t sek] [-h] [-v] [--csv] [--rrd] \n");
   fprintf(stderr,"    -p USB-Port -> Angabe des USB-Portes,\n");
   fprintf(stderr,"                   an dem der D-LOGG angeschlossen ist.\n");
@@ -2824,5 +2853,31 @@ int lies_conf(void)
   fprintf(stderr," Config File %s gelesen.\n", confFile);
 #endif
   return i;
+}
+
+/* Modulmoduskennung abfragen */
+int get_modulmodus(void)
+{
+  int result;
+  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+  int empfbuf[1];
+
+  sendbuf[0]=VERSIONSABFRAGE;    /* Senden der Kopfsatz-abfrage */
+
+/* ab hier unterscheiden nach USB und IP */
+  if (usb_zugriff)
+  {
+    write_erg=write(fd,sendbuf,1);
+    if (write_erg == 1)    /* Lesen der Antwort*/
+      result=read(fd,empfbuf,1);
+  }
+  if (ip_zugriff)
+  {
+    write_erg=send(sock,sendbuf,1,0);
+     if ( write_erg == 1)    /* Lesen der Antwort */
+      result  = recv(sock,empfbuf,1,0);
+  }
+
+  return empfbuf[0];
 }
 

@@ -5,11 +5,14 @@ Das Progamm "dl-aktuelle-datenx" liest die aktuellen Daten der UVR1611 oder der
 UVR61-3 aus dem D-LOGG USB bzw. dem BL-Net unter Linux ein. Diese werden am 
 Bildschirm dargestellt oder im csv-Format gespeichert.
 
+Ab Version 0.9.0 wird teilweise CAN-Logging unterstuetzt.
+
 getestete Umgebung:
 debian Linux 3.1 Sarge mit Kernel 2.6 (Standard-Kernel).
 debian Linux 4.0 Etch mit Kernel 2.6 (Standard-Kernel).
 debian linux 5.0 Lenny mit Kernel 2.6 (Standard-Kernel).
 Kubuntu 7.04, 7.10, 8.04
+ARM-Architektur (S3C2440 ARM9 - FriendlyARM Mini2440)
 
 Kernel 2.4 mit USB-Unterstuetzung lief auch, aber ich empfehle auf jeden Fall 
 den 2.6er Kernel.
@@ -84,4 +87,4 @@ Programmierung von wesentlichen Teilen. Ebenfalls vielen Dank an die Firma
 Technische Alternative Elektronische Steuerungsgeraetegesellschaft m.b.H 
 (Oesterreich) fuer ihre Unterstuetzung.
 
-(c)2006,2007,2008 H. Roemer
+(c)2006,2007,2008,2010 H. Roemer

@@ -10,11 +10,13 @@ Derzeit wird ein anderes Speicherformat nicht unterstuetzt.
 
 Ab Version 0.8.0 wird der Modus 2DL - 2 Regler (das CAN-I/O Modul wird als 2. 
 UVR1611 betrachtet) - unterstuetzt.
+Ab Version 0.9.0 wird CAN-Logging unterstuetzt.
 
 getestete Umgebung:
 debian Linux 4.0 Etch mit Kernel 2.6 (Standard-Kernel).
 debian Linux 5.0 Lenny mit Kernel 2.6 (Standard-Kernel).
 Kubuntu 7.04, 7.10, 8.04
+ARM-Architektur (S3C2440 ARM9 - FriendlyARM Mini2440)
 
 Kernel 2.4 mit USB-Unterstuetzung lief auch, aber ich empfehle auf jeden Fall 
 den 2.6er Kernel.
@@ -71,7 +73,7 @@ dl-lesenx (-p USB-Port | -i IP:Port) [--res] [-h] [-v]
 Beispiel: dl-lesenx -p /dev/ttyUSB0 -res
           Liest die Daten vom USB-Port 0 und setzt den D-LOGG zurueck.
 
-Die aktuellste Version kann unter http://d-logg-linux.roemix.de 
+Die aktuellste Version kann unter http://d-logg-linux.roemix.eu 
 abgerufen werden. Dort befindet sich auch ein Programm zum Einstellen 
 des Speicherkriteriums im Regler UVR1611/UVR61-3 (setup-dlogg).
 
@@ -80,4 +82,4 @@ Unterstuetzung und Programmierung von wesentlichen Teilen. Ebenfalls vielen Dank
 die Firma Technische Alternative Elektronische Steuerungsgeraetegesellschaft m.b.H 
 (Oesterreich) fuer ihre Unterstuetzung.
 
-(c)2006,2007,2008 H. Roemer
+(c)2006,2007,2008,2010 H. Roemer
