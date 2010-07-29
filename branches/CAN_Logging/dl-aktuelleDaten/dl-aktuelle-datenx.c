@@ -301,7 +301,8 @@ int main(int argc, char *argv[])
 
   uvr_modus = get_modulmodus(); /* Welcher Modus 
                                 0xA8 (1DL) / 0xD1 (2DL) / 0xDC (CAN) */
-								
+fprintf(stderr, " CAN-Logging: uvr_modus -> %2X \n", uvr_modus);								
+
   if ( uvr_modus == 0xDC )
   {
 	sendbuf[0]=KONFIGCAN;
@@ -310,6 +311,7 @@ int main(int argc, char *argv[])
       result  = recv(sock,empfbuf,18,0);
 
 	anzahl_can_rahmen = empfbuf[0];	
+fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);	
   }
   
   /********************************************************************/
@@ -453,26 +455,31 @@ int main(int argc, char *argv[])
               if (retval == -1)
                 perror("select(sock)");
               else if (retval)
-              {
+					{
 #ifdef DEBUG
                 fprintf(stderr,"Data is available now. %d.%d\n",(int)tv.tv_sec,(int)tv.tv_usec);
 #endif
-                //result  = recv(sock,akt_daten,57,0);
-                result  = recv(sock,akt_daten,115,0);
+					//result  = recv(sock,akt_daten,57,0);
+					result  = recv(sock,akt_daten,115,0);
+fprintf(stderr, " CAN-Logging: Response Kennung -> %X   Wartezeit -> %d Sec\n", akt_daten[0], akt_daten[1]);	
+
 #ifdef DEBUG
                 fprintf(stderr,"r%d s%d received bytes=%d \n",retry,send_retry,result);
                 if (result == 1)
                   fprintf(stderr," buffer: %X\n",akt_daten[0]);
 #endif
                 /* FD_ISSET(socket, &rfds) will be true. */
-              }
-              else
-              {
+					}
+					else
+					{
 #ifdef DEBUG
                 fprintf(stderr,"%s - No data within %d seconds.r%d s%d\n",sZeit,retry_interval,retry,send_retry);
 #endif
-                sleep(retry_interval);
-              }
+						if ( akt_daten[0] == 0xBA )
+							sleep(akt_daten[1]);
+						else
+							sleep(retry_interval);
+					}
               retry++;
             }
             while( retry < 3 && result < 28);
@@ -798,7 +805,7 @@ int do_cleanup(WINDOW *fenster1, WINDOW *fenster2)
 static int print_usage()
 {
   fprintf(stderr,"\n    UVR1611 / UVR61-3 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
-  fprintf(stderr,"    Version 0.X.X vom 28.07.2010 \n");
+  fprintf(stderr,"    Version 0.X.X vom 29.07.2010 \n");
   fprintf(stderr,"\ndl-aktuelle-datenx (-p USB-Port | -i IP:Port) [-t sek] [-h] [-v] [--csv] [--rrd] \n");
   fprintf(stderr,"    -p USB-Port -> Angabe des USB-Portes,\n");
   fprintf(stderr,"                   an dem der D-LOGG angeschlossen ist.\n");
