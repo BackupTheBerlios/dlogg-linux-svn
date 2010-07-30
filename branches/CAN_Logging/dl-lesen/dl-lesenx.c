@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.9.0 -CAN_Test- vom 29.07.2010 \n");
+  printf("    Version 0.9.0 -CAN_Test- vom 31.07.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -432,7 +432,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 -CAN_Test- vom 29.07.2010 \n");
+        printf("    Version 0.9.0 -CAN_Test- vom 31.07.2010 \n");
         return 0;
       }
       case 'h':
@@ -3579,7 +3579,7 @@ fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i+1);
     }
   }
 
-  return 1 + i - fehlerhafte_ds;
+  return anz_datensaetze - fehlerhafte_ds;
 }
 
 
