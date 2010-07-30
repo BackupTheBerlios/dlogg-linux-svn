@@ -324,7 +324,7 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
   {
     kennung_ok = 1;
     sendbuf_can[0]=AKTUELLEDATENLESEN;
-	sendbuf_can[1]=1;
+	sendbuf_can[1]=1;                /* 1. Datenrahmen vorbelegt */
     sendbuf[0]=AKTUELLEDATENLESEN;   /* Senden Request aktuelle Daten */
 //    bzero(akt_daten,58); /* auf 116 Byte fuer 2DL erweitert */
     //bzero(akt_daten,116);
@@ -440,49 +440,61 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
 		  
           if ( (send_bytes == 1 && uvr_modus != 0xDC) || (send_bytes == 2 && uvr_modus == 0xDC) )    /* Lesen der Antwort */
           {
-            do
-            {
-              /* muss jedesmal gesetzt werden! */
-              FD_ZERO(&rfds);
-              FD_SET(sock, &rfds);
-              /* Wait up to five seconds. */
-              tv.tv_sec = retry_interval;
-              tv.tv_usec = 0;
-              retval = select(sock+1, &rfds, NULL, NULL, &tv);
-              /* Don't rely on the value of tv now -  will contain remaining time or so */
-              zeitstempel();
-
-              if (retval == -1)
-                perror("select(sock)");
-              else if (retval)
-					{
-#ifdef DEBUG
-                fprintf(stderr,"Data is available now. %d.%d\n",(int)tv.tv_sec,(int)tv.tv_usec);
-#endif
-					//result  = recv(sock,akt_daten,57,0);
+			  if ( uvr_modus == 0xDC )
+			  {
+				do
+				{
 					result  = recv(sock,akt_daten,115,0);
-fprintf(stderr, " CAN-Logging: Response Kennung -> %X   Wartezeit -> %d Sec\n", akt_daten[0], akt_daten[1]);	
+					fprintf(stderr, " CAN-Logging: Response Kennung -> %X   Wartezeit -> %d Sec\n", akt_daten[0], akt_daten[1]);	
+					if ( akt_daten[0] == 0xBA )
+					{
+					        fprintf(stderr, " CAN-Logging: Schlafenszeit fuer %d Sekunden\n", akt_daten[1]);	
+							sleep(akt_daten[1]);
+					}
+				}
+					while( akt_daten[0] == 0xBA );
+			  }
+			  else
+			  {
+				do
+				{
+					/* muss jedesmal gesetzt werden! */
+					FD_ZERO(&rfds);
+					FD_SET(sock, &rfds);
+					/* Wait up to five seconds. */
+					tv.tv_sec = retry_interval;
+					tv.tv_usec = 0;
+					retval = select(sock+1, &rfds, NULL, NULL, &tv);
+					/* Don't rely on the value of tv now -  will contain remaining time or so */
+					zeitstempel();
+
+					if (retval == -1)
+						perror("select(sock)");
+					else if (retval)
+						{
+#ifdef DEBUG
+						fprintf(stderr,"Data is available now. %d.%d\n",(int)tv.tv_sec,(int)tv.tv_usec);
+#endif
+						result  = recv(sock,akt_daten,115,0);
 
 #ifdef DEBUG
-                fprintf(stderr,"r%d s%d received bytes=%d \n",retry,send_retry,result);
-                if (result == 1)
-                  fprintf(stderr," buffer: %X\n",akt_daten[0]);
+						fprintf(stderr,"r%d s%d received bytes=%d \n",retry,send_retry,result);
+						if (result == 1)
+							fprintf(stderr," buffer: %X\n",akt_daten[0]);
 #endif
                 /* FD_ISSET(socket, &rfds) will be true. */
-					}
+						}
 					else
 					{
 #ifdef DEBUG
-                fprintf(stderr,"%s - No data within %d seconds.r%d s%d\n",sZeit,retry_interval,retry,send_retry);
+						fprintf(stderr,"%s - No data within %d seconds.r%d s%d\n",sZeit,retry_interval,retry,send_retry);
 #endif
-						if ( akt_daten[0] == 0xBA )
-							sleep(akt_daten[1]);
-						else
-							sleep(retry_interval);
+						sleep(retry_interval);
 					}
-              retry++;
-            }
-            while( retry < 3 && result < 28);
+				retry++;
+				}
+				while( retry < 3 && result < 28);
+			  }
 
             retry=0;
           }
@@ -805,7 +817,7 @@ int do_cleanup(WINDOW *fenster1, WINDOW *fenster2)
 static int print_usage()
 {
   fprintf(stderr,"\n    UVR1611 / UVR61-3 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
-  fprintf(stderr,"    Version 0.X.X vom 29.07.2010 \n");
+  fprintf(stderr,"    Version 0.X.X vom 30.07.2010 \n");
   fprintf(stderr,"\ndl-aktuelle-datenx (-p USB-Port | -i IP:Port) [-t sek] [-h] [-v] [--csv] [--rrd] \n");
   fprintf(stderr,"    -p USB-Port -> Angabe des USB-Portes,\n");
   fprintf(stderr,"                   an dem der D-LOGG angeschlossen ist.\n");
