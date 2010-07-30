@@ -158,9 +158,9 @@ int main(int argc, char *argv[])
   csv_output=0;rrd_output=0;
   struct termios newtio;  /* will be used for new port settings */
 
+  UCHAR uvr_modus_tmp, sendbuf[1], sendbuf_can[2];    /*  sendebuffer fuer die Request-Commandos*/
   unsigned char empfbuf[256];
-  int send_bytes = 0, sendbuf[1], sendbuf_can[2];       /*  sendebuffer fuer die Request-Commandos*/
-  int erg_check_arg ,result, ip_first;
+  int send_bytes = 0, erg_check_arg ,result, ip_first;
   int pruefz_ok = 0, t_count, anzahl_can_rahmen = 0;
   int i, j=2;
 
@@ -324,7 +324,7 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
   {
     kennung_ok = 1;
     sendbuf_can[0]=AKTUELLEDATENLESEN;
-	sendbuf_can[1]=1;                /* 1. Datenrahmen vorbelegt */
+	sendbuf_can[1]=0x02;                /* 1. Datenrahmen vorbelegt */
     sendbuf[0]=AKTUELLEDATENLESEN;   /* Senden Request aktuelle Daten */
 //    bzero(akt_daten,58); /* auf 116 Byte fuer 2DL erweitert */
     //bzero(akt_daten,116);
@@ -415,6 +415,7 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
     {
       if (!ip_first)
       {
+	  fprintf(stderr, " CAN-Logging: IP initialisieren.\n");
         sock = socket(PF_INET, SOCK_STREAM, 0);
         if (sock == -1)
         {
@@ -428,13 +429,27 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
           do_cleanup(fenster1, fenster2);
           return 3;
         }
+		if (ip_handling(sock) == -1)
+		{
+			fprintf(stderr, "%s: Fehler im Initialisieren der IP-Kommunikation\n", argv[0]);
+			do_cleanup(fenster1, fenster2);
+			return 4;
+		}
       }
       do
       {
         do
         {
+		  uvr_modus = get_modulmodus();
 		  if ( uvr_modus == 0xDC )
+		  {
+			sendbuf[0]=KONFIGCAN;
+			write_erg=send(sock,sendbuf,1,0);
+			if (write_erg == 1)    /* Lesen der Antwort */
+				result  = recv(sock,empfbuf,18,0);
+			uvr_modus_tmp = get_modulmodus();	
 			send_bytes=send(sock,sendbuf_can,2,0);
+		  }
 		  else
 			send_bytes=send(sock,sendbuf,1,0);
 		  
@@ -442,17 +457,27 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
           {
 			  if ( uvr_modus == 0xDC )
 			  {
+			    i = 1;
 				do
 				{
 					result  = recv(sock,akt_daten,115,0);
-					fprintf(stderr, " CAN-Logging: Response Kennung -> %X   Wartezeit -> %d Sec\n", akt_daten[0], akt_daten[1]);	
+					fprintf(stderr, " CAN-Logging: Response Kennung -> %02X  Wartezeit -> %02d Sec  Byte3: %02X \n", akt_daten[0], akt_daten[1], akt_daten[2]);
 					if ( akt_daten[0] == 0xBA )
 					{
-					        fprintf(stderr, " CAN-Logging: Schlafenszeit fuer %d Sekunden\n", akt_daten[1]);	
+					        fprintf(stderr, " CAN-Logging: %d. Schlafenszeit fuer %d Sekunden\n",i , akt_daten[1]);
+							i++;
 							sleep(akt_daten[1]);
+							uvr_modus_tmp = get_modulmodus();
+							if ( uvr_modus_tmp == 0xDC )
+								send_bytes=send(sock,sendbuf_can,2,0);
+					}
+					if ( i > 3 )
+					{
+						fprintf(stderr, " CAN-Logging: keine Daten empfangen.\n");
+						return -1;
 					}
 				}
-					while( akt_daten[0] == 0xBA );
+				while( akt_daten[0] == 0xBA && i < 4 );
 			  }
 			  else
 			  {
