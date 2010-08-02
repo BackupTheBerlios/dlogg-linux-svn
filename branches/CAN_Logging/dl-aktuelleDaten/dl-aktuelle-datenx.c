@@ -465,12 +465,15 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
 					fprintf(stderr, " CAN-Logging: Response Kennung -> %02X  Wartezeit -> %02d Sec  Byte3: %02X \n", akt_daten[0], akt_daten[1], akt_daten[2]);
 					if ( akt_daten[0] == 0xBA )
 					{
-					        fprintf(stderr, " CAN-Logging: %d. Schlafenszeit fuer %d Sekunden\n",i , akt_daten[1]);
+						if ( akt_daten[2] == (akt_daten[0] + akt_daten[1]) % 0x100 )
+						{
+							fprintf(stderr, " CAN-Logging: %d. Schlafenszeit fuer %d Sekunden\n",i , akt_daten[1]);
 							i++;
 							sleep(akt_daten[1]);
 							uvr_modus_tmp = get_modulmodus();
 							if ( uvr_modus_tmp == 0xDC )
 								send_bytes=send(sock,sendbuf_can,2,0);
+						}
 					}
 					if ( i > 3 )
 					{
