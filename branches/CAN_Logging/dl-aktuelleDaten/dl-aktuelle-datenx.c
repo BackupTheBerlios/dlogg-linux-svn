@@ -448,7 +448,13 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
 			write_erg=send(sock,sendbuf,1,0);
 			if (write_erg == 1)    /* Lesen der Antwort */
 				result  = recv(sock,empfbuf,18,0);
-			uvr_modus_tmp = get_modulmodus();	
+			uvr_modus_tmp = get_modulmodus();
+			if ( anzahl_can_rahmen < datenrahmen )
+			{
+				fprintf(stderr,"Falsche Parameterangabe: -r %d , setze auf 1. Datenrahmen!\n",datenrahmen);
+				datenrahmen = 1;
+				sendbuf_can[1] = datenrahmen;
+			}
 			send_bytes=send(sock,sendbuf_can,2,0);
 		  }
 		  else
