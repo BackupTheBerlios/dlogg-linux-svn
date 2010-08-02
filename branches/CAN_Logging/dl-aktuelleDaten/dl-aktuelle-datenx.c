@@ -150,7 +150,7 @@ int sock;
 int c;
 int merk_monat;
 UCHAR uvr_modus, uvr_typ=0, uvr_typ2=0;  /* uvr_typ2 -> 2. Geraet bei 2DL */
-
+UCHAR datenrahmen;
 
 int main(int argc, char *argv[])
 {
@@ -169,6 +169,7 @@ int main(int argc, char *argv[])
 
   time_t beginn, jetzt, diff_zeit;
 
+  datenrahmen=0x01;
   result=0;
   dauer=-1; /* Vorbelegung Anzahl sek zum erneuten Lesen der Daten */
   ip_zugriff = 0;
@@ -324,7 +325,7 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
   {
     kennung_ok = 1;
     sendbuf_can[0]=AKTUELLEDATENLESEN;
-	sendbuf_can[1]=0x02;                /* 1. Datenrahmen vorbelegt */
+	sendbuf_can[1]=datenrahmen;      /* 1. Datenrahmen vorbelegt */
     sendbuf[0]=AKTUELLEDATENLESEN;   /* Senden Request aktuelle Daten */
 //    bzero(akt_daten,58); /* auf 116 Byte fuer 2DL erweitert */
     //bzero(akt_daten,116);
@@ -842,8 +843,8 @@ int do_cleanup(WINDOW *fenster1, WINDOW *fenster2)
 static int print_usage()
 {
   fprintf(stderr,"\n    UVR1611 / UVR61-3 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
-  fprintf(stderr,"    Version 0.X.X vom 30.07.2010 \n");
-  fprintf(stderr,"\ndl-aktuelle-datenx (-p USB-Port | -i IP:Port) [-t sek] [-h] [-v] [--csv] [--rrd] \n");
+  fprintf(stderr,"    Version 0.9.0 vom 02.08.2010 \n");
+  fprintf(stderr,"\ndl-aktuelle-datenx (-p USB-Port | -i IP:Port) [-t sek] [-r DR] [-h] [-v] [--csv] [--rrd] \n");
   fprintf(stderr,"    -p USB-Port -> Angabe des USB-Portes,\n");
   fprintf(stderr,"                   an dem der D-LOGG angeschlossen ist.\n");
   fprintf(stderr,"    -i IP:Port  -> Angabe der IP-Adresse und des Ports,\n");
@@ -854,6 +855,8 @@ static int print_usage()
   fprintf(stderr,"                   Sonderfall 0 Sekunden (-t 0): es wird nur ein Datensatz\n");
   fprintf(stderr,"                   gelesen, das Programm beendet und die Daten im csv-Format\n");
   fprintf(stderr,"                   am Bildschirm ausgegeben.\n\n");
+  fprintf(stderr,"        -r DR   -> Angabe des auszulesenden DatenRahmens (1 - 8, Default: 1)\n");
+  fprintf(stderr,"                   (Nur zutreffend bei CAN-Logging.)\n\n");
   fprintf(stderr,"          --csv -> im CSV-Format speichern\n");
   fprintf(stderr,"          --rrd -> output eines RRD tool strings\n");
   fprintf(stderr,"          -h    -> diesen Hilfetext\n");
@@ -863,6 +866,9 @@ static int print_usage()
   fprintf(stderr,"          Liest alle 30s die aktuellen Daten vom USB-Port 0 .\n");
   fprintf(stderr,"          dl-aktuelle-datenx -i 192.168.1.1:40000 -t 30 \n");
   fprintf(stderr,"          Liest alle 30s die aktuellen Daten von IP 192.168.1.1 Port 40000 .\n");
+  fprintf(stderr,"          dl-aktuelle-datenx -i 192.168.1.1:40000 -t 0 -r 2\n");
+  fprintf(stderr,"          Liest einmal die aktuellen Daten von IP 192.168.1.1 Port 40000,\n");
+  fprintf(stderr,"          2. Datenrahmen.\n");
   fprintf(stderr,"\n");
   return 0;
 }
@@ -887,7 +893,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       {0, 0, 0, 0}
     };
 
-    c = getopt_long(arg_c, arg_v, "hvi:p:t:", long_options, &option_index);
+    c = getopt_long(arg_c, arg_v, "hvi:p:t:r:", long_options, &option_index);
 
     if (c == -1)  /* ende des Parameter-processing */
     {
@@ -904,7 +910,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         fprintf(stderr,"\n    UVR1611 / UVR61-3 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
-        fprintf(stderr,"    Version 0.8.2 vom 25.02.2008 \n");
+        fprintf(stderr,"    Version 0.9.0 vom 02.08.2010 \n");
         printf("\n");
         return -1;
         }
@@ -1002,6 +1008,26 @@ int check_arg_getopt(int arg_c, char *arg_v[])
           rrd_output = 1;  /* RRD */
         }
         break;
+      case 'r':
+      {
+        for(j=0;j<strlen(optarg);j++)
+        {
+          if(isalpha(optarg[j]))
+          {
+            fprintf(stderr," Falsche Parameterangabe bei -t: %s\n", optarg);
+            print_usage();
+            return -1;
+          }
+        }
+        datenrahmen=atoi(optarg);
+        if ( (datenrahmen < 1)  || (datenrahmen > 8) )
+        {
+          fprintf(stderr,"Falsche Parameterangabe:  -r %d \n",(int)datenrahmen);
+          print_usage();
+          return -1;
+        }
+        break;
+      }
       }
       default:
         fprintf(stderr,"?? input mit character code 0%o ??\n", c);
