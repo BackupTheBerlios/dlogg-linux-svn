@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU General Public License         *
  * along with this program; if not, see <http://www.gnu.org/licenses/>.      *
  *                                                                           *
- * Version 0.1        18.04.2006 erste Testversion                             *
- * Version 0.5a        05.10.2006 Protokoll-Log in /var/dl-lesenx.log speichern *
- * Version 0.6        27.01.2006 C. Dolainsky                                  *
- *                     28.01.2006 Anpassung an geaenderte dl-lesen.h.           *
- *                     18.03.2007 IP                                            *
- * Version 0.7        01.04.2007                                               *
+ * Version 0.1      18.04.2006 erste Testversion                             *
+ * Version 0.5a     05.10.2006 Protokoll-Log in /var/dl-lesenx.log speichern *
+ * Version 0.6      27.01.2006 C. Dolainsky                                  *
+ *                  28.01.2006 Anpassung an geaenderte dl-lesen.h.           *
+ *                  18.03.2007 IP                                            *
+ * Version 0.7      01.04.2007                                               *
  * Version 0.7.7    26.12.2007 UVR61-3                                       *
- * Version 0.8        13.01.2008 2DL-Modus                                     *
- * Version 0.8.1     04.12.2009 --dir Parameter aufgenommen                   *
- * Version ?????    ??.01.2010 CAN-Logging                                   *
+ * Version 0.8      13.01.2008 2DL-Modus                                     *
+ * Version 0.8.1    04.12.2009 --dir Parameter aufgenommen                   *
+ * Version 0.9.0    ??.08.2010 CAN-Logging                                   *
  *****************************************************************************/
 
 #include <sys/types.h>
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.9.0 -CAN_Test- vom 31.07.2010 \n");
+  printf("    Version 0.9.0 -CAN_Test- vom 09.08.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -301,7 +301,6 @@ int main(int argc, char *argv[])
 
   printf("\n%d Datensaetze insgesamt geschrieben.\n",erg);
   zeitstempel();
-if (erg != 999) /*  <-- Test CAN, temporaer */
   fprintf(fp_varlogfile,"%s - %s -- Es wurden %d Datensaetze geschrieben.\n",sDatum, sZeit,erg);
 
   /* ************************************************************************ */
@@ -432,7 +431,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 -CAN_Test- vom 31.07.2010 \n");
+        printf("    Version 0.9.0 -CAN_Test- vom 09.08.2010 \n");
         return 0;
       }
       case 'h':
@@ -2758,6 +2757,37 @@ int datenlesen_DC(int anz_datensaetze)
   sendbuf[2] = *(start_adresse+1);
   sendbuf[3] = *(start_adresse+2);
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
+  
+  switch (sendbuf[1])  // vorbelegen lowbyte bei Startadr. > 00 00 00
+  {
+    case 0x00: lowbyte = 0; break;
+	case 0x40: switch(anzahl_can_rahmen)
+			   {
+			    case 1: lowbyte = 1; break;
+				case 3: lowbyte = 3; break;
+			    case 5: lowbyte = 1; break;
+				case 7: lowbyte = 3; break;
+			   }
+			   break;
+	case 0x80: switch(anzahl_can_rahmen)
+			   {
+			    case 1: lowbyte = 2; break;
+				case 2: lowbyte = 3; break;
+				case 3: lowbyte = 2; break;
+			    case 5: lowbyte = 2; break;
+				case 6: lowbyte = 3; break;
+				case 7: lowbyte = 2; break;			   
+			   }
+			   break;
+	case 0xc0: switch(anzahl_can_rahmen)
+			   {
+			    case 1: lowbyte = 3; break;
+				case 3: lowbyte = 1; break;
+			    case 5: lowbyte = 3; break;
+				case 7: lowbyte = 1; break;
+			   }
+			   break;
+  }
 
   for(i=0;i<anz_datensaetze;i++)
   {
