@@ -1,6 +1,7 @@
 /*****************************************************************************
  * Konvertierung Winsol-LogDatei in CVS- oder SQL-Datei                      *
- * (c) 2006 - 2009 H. Roemer                                                 *
+ * (c) 2006 - 2009 H. Roemer,                                                *
+ *     2010        P.L. Steger, H. Roemer                                    *
  *                                                                           *
  * This program is free software; you can redistribute it and/or             *
  * modify it under the terms of the GNU General Public License               *
@@ -19,6 +20,7 @@
  * Version 0.3		11.01.2007                                               *
  * Version 0.4		27.01.2008                                               *
  * Version 0.4.1	19.11.2009  INSERT IGNORE INTO                           *
+ * Version 0.4.2    07.08.2010  SQL-database added			                 *
  *****************************************************************************/
 
 /* unter Windows Absturz bei Eclipse 3.2 + gcc + Build als Release
@@ -139,12 +141,12 @@ struct csv_UVR61_3 {
 
 int main(int argc, char **argv)
 {
-  int i, c, x, y, erg, csv, sql, tmp_i, argv4_laenge=0;
+  int i, c, x, y, erg, csv, sql, tmp_i, argv4_laenge=0, argv5_laenge=0;
   unsigned char buffer[60], temp_byte;
   unsigned char uvr_typ;
   char tmp_kopf1[100], tmp_kopf2[100], tmp_kopf1_uvr61_3[100], tmp_kopf2_uvr61_3[100], sql_kopf[31];
   char *p_tmp_kopf1, *p_tmp_kopf2, *p_tmp_kopf1_uvr61_3, *p_tmp_kopf2_uvr61_3, *p_sql_kopf;
-  char *tabelle;
+  char *database=NULL, *tabelle;
 
   sql = FALSE;
   csv = FALSE;
@@ -159,14 +161,19 @@ int main(int argc, char **argv)
     if ( argc==2 || argc ==3 )
       aufrufhinweis();
 
-    if ((argc < 4) && (argc > 5))
+// Variante 7.08.2010:      if ((argc < 4) && (argc > 5))
+
+    if ((argc < 4) || (argc > 6))
       aufrufhinweis();
     else
     {
       if ( strcmp(argv[3], "-sql") == 0 )
       {
         sql = TRUE;
-        if (argc != 5)
+
+// Variante 7.08.2010       if (argc != 5)
+
+        if (argc == 4)
           aufrufhinweis();
 
         argv4_laenge = strlen(argv[4]);
@@ -177,6 +184,21 @@ int main(int argc, char **argv)
           tabelle = calloc(argv4_laenge+1,sizeof(char));
           strcpy(tabelle,argv[4]);
         }
+// Variante 7.08.2010 --- Start ---
+		if (argc == 6 )
+		{
+			argv5_laenge = strlen(argv[5]);
+			if  (argv5_laenge == 0)
+				aufrufhinweis();
+			else
+			{
+				database = calloc(argv5_laenge+1,sizeof(char));
+				strcpy(database,argv[5]);
+			}
+		}
+
+// --- ENDE ---
+
       }
       else
       {
@@ -243,6 +265,15 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
     else if (uvr_typ == UVR61_3)
       fprintf(fd_out,"%s%s\n",p_tmp_kopf1_uvr61_3, p_tmp_kopf2_uvr61_3);
   }
+
+// Variante 7.08.2010 --- Start ---
+
+  if (database != NULL)
+  {
+      fprintf(fd_out,"USE %s;\n",database);
+  }
+
+// --- Ende ---
 
   i = 1;
   x = 10;
@@ -427,12 +458,26 @@ Ausg1;Drehzst_A1;Ausg2;Ausg3;Analog;";
 
 void aufrufhinweis()
 {
-  printf("\nBenutzung: winsol2csv Logdatei Ausgabedatei -csv | -sql Tabelle \n");
-  printf("-csv          - speichern als CSV-Datei\n");
-  printf("-sql Tabelle  - speichern als SQL-Import-Datei\n");
-  printf("     Tabelle  - Tabellenname der (My)SQL-Dattenbank\n");
+
+// Variante 7.08.2010:   printf("\nBenutzung: winsol2csv Logdatei Ausgabedatei -csv | -sql Tabelle\n");
+
+  printf("\nBenutzung: winsol2csv Logdatei Ausgabedatei -csv | -sql Tabelle [Datenbank]\n");
+  printf("-csv           - speichern als CSV-Datei\n");
+  printf("-sql Tabelle   - speichern als SQL-Import-Datei\n");
+  printf("     Tabelle   - Tabellenname der (My)SQL-Datenbank\n");
+
+// Variante 7.08.2010 --- Start ---
+
+  printf("     Datenbank - Name der (My)SQL-Datenbank\n\n");
+
+// --- Ende ---
+
   printf("Beispiel:  winsol2csv Y200511.log 200511.csv -csv\n");
-  printf("           winsol2csv Y200511.log 200511.sql -sql UVR_1611\n\n");
+
+// Variante 7.08.2010:     printf("           winsol2csv Y200511.log 200511.sql -sql UVR_1611\n\n");
+
+  printf("           winsol2csv Y200511.log 200511.sql -sql UVR_1611 Heizung\n\n");
+
   exit(-1);
 }
 
@@ -550,7 +595,7 @@ void get_JahrMonat(char *logfilename)
     for(i=1;i<5;i++)
         jahr[i-1] = logfilename[i];
 
-    struct_winsol.jahr = atoi(chjahr);
+	struct_winsol.jahr = atoi(chjahr);
     struct_winsol.monat = atoi(chmon);
     struct_csv_UVR61_3.jahr = atoi(chjahr);
     struct_csv_UVR61_3.monat = atoi(chmon);
