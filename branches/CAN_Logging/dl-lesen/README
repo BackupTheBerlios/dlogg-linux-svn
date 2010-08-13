@@ -6,7 +6,7 @@ D-LOGG USB oder BL-Net unter Linux ein und speichert diese Daten in dem Format,
 welches von Winsol erzeugt wird. Somit sind diese Daten mit Winsol und Solstat 
 auswertbar.
 
-Derzeit wird ein anderes Speicherformat nicht unterstuetzt.
+Ein anderes Speicherformat nicht unterstuetzt.
 
 Ab Version 0.8.0 wird der Modus 2DL - 2 Regler (das CAN-I/O Modul wird als 2. 
 UVR1611 betrachtet) - unterstuetzt.
@@ -56,6 +56,10 @@ in dem der angemeldete User sich gerade befindet.
 
 Die 2. Log-Datei (im Modus 2DL) hat den gleichen Aufbau wie die Datei
 im "normalen" Modus plus "_2" nach der Monatsangabe: YJJJJMM_2.log
+  
+Die 2. - 8. Log-Datei (CAN-Logging) hat den gleichen Aufbau wie die Datei
+im "normalen" Modus plus "_x" (x = 2 ... 8) nach der Monatsangabe: 
+YJJJJMM_3.log oder YJJJJMM_8.log
   
 Aufruf des Prgramms:
 --------------------

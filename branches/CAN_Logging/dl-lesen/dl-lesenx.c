@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.9.0 -CAN_Test- vom 09.08.2010 \n");
+  printf("    Version 0.9.0 -CAN_Test- vom 13.08.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -431,7 +431,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 -CAN_Test- vom 09.08.2010 \n");
+        printf("    Version 0.9.0 -CAN_Test- vom 13.08.2010 \n");
         return 0;
       }
       case 'h':
@@ -2110,6 +2110,14 @@ fprintf(stderr, " CAN-Logging: TEST ...\n");
   sendbuf[3] = *(start_adresse+2);
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
 
+  switch (sendbuf[1])  // vorbelegen lowbyte bei Startadr. > 00 00 00
+  {
+    case 0x00: lowbyte = 0; break;
+	case 0x40: lowbyte = 1; break;
+	case 0x80: lowbyte = 2; break;
+	case 0xc0: lowbyte = 3; break;
+  }
+
  //#if DEBUG
 fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
 //#endif
@@ -2395,6 +2403,12 @@ int datenlesen_D1(int anz_datensaetze)
   sendbuf[2] = *(start_adresse+1);
   sendbuf[3] = *(start_adresse+2);
   sendbuf[4] = 0x01;  /* Anzahl der zu lesenden Rahmen */
+
+  switch (sendbuf[1])  // vorbelegen lowbyte bei Startadr. > 00 00 00
+  {
+    case 0x00: lowbyte = 0; break;
+	case 0x80: lowbyte = 1; break;
+  }
 
   for(;i<anz_datensaetze;i++)
   {
