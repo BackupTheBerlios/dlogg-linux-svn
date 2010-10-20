@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-  printf("    Version 0.9.0 -CAN_Test- vom 13.08.2010 \n");
+//  printf("    Version 0.9.0 -CAN_Test- vom 20.10.2010 \n");
   
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
@@ -431,7 +431,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 -CAN_Test- vom 13.08.2010 \n");
+        printf("    Version 0.9.0 vom 20.10.2010 \n");
         return 0;
       }
       case 'h':
@@ -663,23 +663,17 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 4: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 5: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 6: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -687,8 +681,6 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 7: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -697,8 +689,6 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 		        erg=sprintf(pLogFileName_7,"%sY2%03d%02d_7%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
 				
 		case 8: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-//	fprintf(stderr,"---> LogDateiNamenErzeugung 4 Datenrahmen, 1. Logdatei Ergebnis: %d - %s\n",erg,LogFileName_1);
-//	fprintf(stderr,"---> Dateiname: %sY2%03d%02d%s \n",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
 		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
@@ -840,7 +830,7 @@ int open_logfile_CAN(char LogFile[], int datenrahmen)
             0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00,
             0xAA, 0x00, 0xFF, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00};
 
-fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
+//fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
 
   if ((fp_logfile_tmp=fopen(LogFile,"r")) == NULL) /* wenn Logfile noch nicht existiert */
   {
@@ -1200,7 +1190,7 @@ int kopfsatzlesen(void)
 					{
 						fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
 						sleep(3000); /* 3 Sekunden warten */
-						write_erg=write(fd_serialport,sendbuf,1);
+						write_erg=write(sock,sendbuf,1);
 						if (write_erg == 1)    /* Lesen der Antwort*/
 						{
 							if (kopf_DC[0].all_bytes[0] == 0xAA)
@@ -1209,7 +1199,7 @@ int kopfsatzlesen(void)
 								return ( -3 );
 							}
 							else if (kopf_DC[0].all_bytes[0] != 0xAA)
-								result=read(fd_serialport,kopf_DC,21);
+								result=read(sock,kopf_DC,21);
 						}
 					}
 					break;
@@ -2071,7 +2061,6 @@ int datenlesen_A8(int anz_datensaetze)
   middlebyte = 0;
   merkmiddlebyte = middlebyte;
 
-fprintf(stderr, " CAN-Logging: TEST ...\n");
   sendbuf[0]=VERSIONSABFRAGE;   /* Senden der Versionsabfrage */
   if (usb_zugriff)
   {
@@ -2118,9 +2107,9 @@ fprintf(stderr, " CAN-Logging: TEST ...\n");
 	case 0xc0: lowbyte = 3; break;
   }
 
- //#if DEBUG
+ #if DEBUG
 fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
-//#endif
+#endif
   for(;i<anz_datensaetze;i++)
   {
     sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
@@ -2808,7 +2797,7 @@ int datenlesen_DC(int anz_datensaetze)
     sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
 
 /* DEBUG */
-fprintf(stderr," CAN-Logging-Test: %04d. Startadresse: %x %x %x - Endadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3],*end_adresse,*(end_adresse+1),*(end_adresse+2));
+// fprintf(stderr," CAN-Logging-Test: %04d. Startadresse: %x %x %x - Endadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3],*end_adresse,*(end_adresse+1),*(end_adresse+2));
 
     if (usb_zugriff)
     {
