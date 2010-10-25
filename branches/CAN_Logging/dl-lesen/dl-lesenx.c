@@ -431,7 +431,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 vom 20.10.2010 \n");
+        printf("    Version 0.9.0 vom 25.10.2010 \n");
         return 0;
       }
       case 'h':
@@ -1178,6 +1178,7 @@ int kopfsatzlesen(void)
           return 3;
         }
       }  /* if (!ip_first) */
+fprintf(stderr, "Test-CAN-Logging: 1. Versuch Kopfsatz lesen\n");
       write_erg=send(sock,sendbuf,1,0);
       if (write_erg == 1)    /* Lesen der Antwort */
       {
@@ -1190,16 +1191,28 @@ int kopfsatzlesen(void)
 					{
 						fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
 						sleep(3000); /* 3 Sekunden warten */
-						write_erg=write(sock,sendbuf,1);
+fprintf(stderr, "Test-CAN-Logging: 2. Versuch Kopfsatz lesen\n");
+						write_erg=send(sock,sendbuf,1,0);
 						if (write_erg == 1)    /* Lesen der Antwort*/
 						{
 							if (kopf_DC[0].all_bytes[0] == 0xAA)
 							{
-								fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
-								return ( -3 );
+								fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
+								sleep(3000); /* 3 Sekunden warten */
+fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
+								write_erg=send(sock,sendbuf,1,0);
+								if (write_erg == 1)    /* Lesen der Antwort*/
+								{
+									fprintf(stderr, "Test-CAN-Logging: N A C H  3. Versuch Kopfsatz lesen\n");
+									if (kopf_DC[0].all_bytes[0] == 0xAA)
+									{
+										fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
+										return ( -3 );
+									}
+									else if (kopf_DC[0].all_bytes[0] != 0xAA)
+									result=read(sock,kopf_DC,21);
+								}
 							}
-							else if (kopf_DC[0].all_bytes[0] != 0xAA)
-								result=read(sock,kopf_DC,21);
 						}
 					}
 					break;
