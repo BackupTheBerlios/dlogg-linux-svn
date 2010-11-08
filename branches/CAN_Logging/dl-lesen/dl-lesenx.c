@@ -55,6 +55,7 @@
 extern char *optarg;
 extern int optind, opterr, optopt;
 
+int start_socket(void);
 int do_cleanup(void);
 int check_arg(int arg_c, char *arg_v[]);
 int check_arg_getopt(int arg_c, char *arg_v[]);
@@ -131,7 +132,7 @@ int main(int argc, char *argv[])
 {
   struct termios newtio; /* will be used for new port settings */
 
-  int i, anz_ds=0, erg_check_arg, i_varLogFile, erg=0;
+  int i, sr=0, anz_ds=0, erg_check_arg, i_varLogFile, erg=0;
   char *pvarLogFile;
 
   ip_zugriff = 0;
@@ -182,30 +183,34 @@ int main(int argc, char *argv[])
   /* IP-Zugriff  - IP-Adresse und Port sind manuell gesetzt!!! */
   if (ip_zugriff && !usb_zugriff)
   {
+	sr = start_socket();
+	if (sr > 1)
+	{
+		return sr;
+	}
     /* PF_INET instead of AF_INET - because of Protocol-family instead of address family !? */
-    sock = socket(PF_INET, SOCK_STREAM, 0);
-    if (sock == -1)
-    {
-      perror("socket failed()");
-      do_cleanup();
-      return 2;
-    }
+    //~ sock = socket(PF_INET, SOCK_STREAM, 0);
+    //~ if (sock == -1)
+    //~ {
+      //~ perror("socket failed()");
+      //~ do_cleanup();
+      //~ return 2;
+    //~ }
 
-    if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
-    {
-      perror("connect failed()");
-      do_cleanup();
-      return 3;
-    }
+    //~ if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
+    //~ {
+      //~ perror("connect failed()");
+      //~ do_cleanup();
+      //~ return 3;
+    //~ }
 
-    if (ip_handling(sock) == -1)
-    {
-      fprintf(stderr, "%s: Fehler im Initialisieren der IP-Kommunikation\n", argv[0]);
-      do_cleanup();
-      return 4;
-    }
+    //~ if (ip_handling(sock) == -1)
+    //~ {
+      //~ fprintf(stderr, "%s: Fehler im Initialisieren der IP-Kommunikation\n", argv[0]);
+      //~ do_cleanup();
+      //~ return 4;
+    //~ }
     //  close(sock); /* IP-Socket schliessen */
-
   } /* Ende IP-Zugriff */
   else  if (usb_zugriff && !ip_zugriff)
   {
@@ -265,7 +270,22 @@ int main(int argc, char *argv[])
   }
   while((anz_ds == -1) && (i < 6));
   
-  fprintf(stderr, " CAN-Logging-Test: Kopfsatzlesen fertig, Anzahl Datensaetze: %d\n",anz_ds); /********************/
+  i=1;
+  while ((anz_ds == -3) && (uvr_modus == 0xDC) && (i < 3))
+  {
+	sleep(3);
+	close(sock); /* IP-Socket schliessen */
+	sr = start_socket();
+	if (sr > 1)
+	{
+		return sr;
+	}
+	uvr_modus = get_modulmodus();
+	anz_ds = kopfsatzlesen();
+	i++;
+  }
+  
+fprintf(stderr, " CAN-Logging-Test: Kopfsatzlesen fertig, Rueckgabe aus kopfsatzlesen(): %d\n",anz_ds); /********************/
   
   switch(anz_ds)
   {
@@ -325,6 +345,34 @@ int main(int argc, char *argv[])
     retval=-1;
 
   return (retval);
+}
+
+/* socket erzeugen und Verbindung aufbauen */
+int start_socket(void)
+{
+    sock = socket(PF_INET, SOCK_STREAM, 0);
+    if (sock == -1)
+    {
+      perror("socket failed()");
+      do_cleanup();
+      return 2;
+    }
+
+    if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
+    {
+      perror("connect failed()");
+      do_cleanup();
+      return 3;
+    }
+
+    if (ip_handling(sock) == -1)
+    {
+      fprintf(stderr, "Fehler im Initialisieren der IP-Kommunikation!\n");
+      do_cleanup();
+      return 4;
+    }
+	
+	return 1;
 }
 
 /* Aufraeumen und alles Schliessen */
@@ -431,7 +479,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 vom 25.10.2010 \n");
+        printf("    Version 0.9.0 vom 08.11.2010 \n");
         return 0;
       }
       case 'h':
@@ -1142,7 +1190,7 @@ int kopfsatzlesen(void)
 		            if (kopf_DC[0].all_bytes[0] == 0xAA)
 					{
 						fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
-						sleep(3000); /* 3 Sekunden warten */
+						sleep(3); /* 3 Sekunden warten */
 						write_erg=write(fd_serialport,sendbuf,1);
 						if (write_erg == 1)    /* Lesen der Antwort*/
 						{
@@ -1190,7 +1238,7 @@ fprintf(stderr, "Test-CAN-Logging: 1. Versuch Kopfsatz lesen\n");
 		            if (kopf_DC[0].all_bytes[0] == 0xAA)
 					{
 						fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
-						sleep(3000); /* 3 Sekunden warten */
+						sleep(3); /* 3 Sekunden warten */
 fprintf(stderr, "Test-CAN-Logging: 2. Versuch Kopfsatz lesen\n");
 						write_erg=send(sock,sendbuf,1,0);
 						if (write_erg == 1)    /* Lesen der Antwort*/
@@ -1198,7 +1246,7 @@ fprintf(stderr, "Test-CAN-Logging: 2. Versuch Kopfsatz lesen\n");
 							if (kopf_DC[0].all_bytes[0] == 0xAA)
 							{
 								fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
-								sleep(3000); /* 3 Sekunden warten */
+								sleep(3); /* 3 Sekunden warten */
 fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
 								write_erg=send(sock,sendbuf,1,0);
 								if (write_erg == 1)    /* Lesen der Antwort*/
