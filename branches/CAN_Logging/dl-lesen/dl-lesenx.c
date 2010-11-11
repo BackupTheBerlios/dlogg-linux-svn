@@ -274,7 +274,11 @@ int main(int argc, char *argv[])
   while ((anz_ds == -3) && (uvr_modus == 0xDC) && (i < 3))
   {
 	sleep(3);
-	close(sock); /* IP-Socket schliessen */
+	if ( shutdown(sock,SHUT_RDWR) == -1 ) /* IP-Socket schliessen */
+	{
+		zeitstempel();
+	    fprintf(stderr, "\n %s Fehler beim Schliessen der IP-Verbindung!\n", sZeit);
+	}
 	sr = start_socket();
 	if (sr > 1)
 	{
@@ -479,7 +483,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 vom 08.11.2010 \n");
+        printf("    Version 0.9.0 vom 11.11.2010 \n");
         return 0;
       }
       case 'h':
@@ -1237,7 +1241,8 @@ fprintf(stderr, "Test-CAN-Logging: 1. Versuch Kopfsatz lesen\n");
 		  case 0xDC: result = recv(sock,kopf_DC,21,0);
 		            if (kopf_DC[0].all_bytes[0] == 0xAA)
 					{
-						fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
+						zeitstempel();
+						fprintf(stderr, " %s CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n", sZeit);
 						sleep(3); /* 3 Sekunden warten */
 fprintf(stderr, "Test-CAN-Logging: 2. Versuch Kopfsatz lesen\n");
 						write_erg=send(sock,sendbuf,1,0);
@@ -1245,7 +1250,8 @@ fprintf(stderr, "Test-CAN-Logging: 2. Versuch Kopfsatz lesen\n");
 						{
 							if (kopf_DC[0].all_bytes[0] == 0xAA)
 							{
-								fprintf(stderr, " CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n");
+								zeitstempel();
+								fprintf(stderr, " %s CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n", sZeit);
 								sleep(3); /* 3 Sekunden warten */
 fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
 								write_erg=send(sock,sendbuf,1,0);
@@ -1254,7 +1260,8 @@ fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
 									fprintf(stderr, "Test-CAN-Logging: N A C H  3. Versuch Kopfsatz lesen\n");
 									if (kopf_DC[0].all_bytes[0] == 0xAA)
 									{
-										fprintf(stderr, " CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n");
+										zeitstempel();
+										fprintf(stderr, " %s CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n", sZeit);
 										return ( -3 );
 									}
 									else if (kopf_DC[0].all_bytes[0] != 0xAA)
@@ -1319,8 +1326,6 @@ fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
       fprintf(stderr, "  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_D1[0].pruefsum);
     if ( uvr_modus == 0xA8 )
       fprintf(stderr, "  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_A8[0].pruefsum);
-    if ( uvr_modus == 0xDC )
-      fprintf(stderr, "  Durchlauf #%d  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf,pruefz%0x100,kopf_DC[0].pruefsum);
    #endif
   }
   while (( (pruefz != merk_pruefz )  && (durchlauf < 10)));
@@ -1389,28 +1394,28 @@ fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
 #if DEBUG > 3
 	  switch(kopf_DC[0].all_bytes[5])
 	  {
-	    case 1: print_endaddr = kopf_DC[0].DC_Rahmen1.endadresse[0]; 
+	    case 1: /* print_endaddr = kopf_DC[0].DC_Rahmen1.endadresse[0]; */
 		fprintf(stderr,"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
 		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
 		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
 		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
 		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13]);
 		break;
-	    case 2: print_endaddr = kopf_DC[0].DC_Rahmen2.endadresse[0]; 
+	    case 2: /* print_endaddr = kopf_DC[0].DC_Rahmen2.endadresse[0]; */
 		fprintf(stderr,"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
 		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
 		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
 		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
 		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14]);
 		break;
-	    case 3: print_endaddr = kopf_DC[0].DC_Rahmen3.endadresse[0]; 
+	    case 3: /* print_endaddr = kopf_DC[0].DC_Rahmen3.endadresse[0]; */
 		fprintf(stderr,"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
 		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
 		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
 		kopf_DC[0].all_bytes[8],kopf_DC[0].all_bytes[9],kopf_DC[0].all_bytes[10],kopf_DC[0].all_bytes[11],
 		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15]);
 		break;
-	    case 4: print_endaddr = kopf_DC[0].DC_Rahmen4.endadresse[0]; 
+	    case 4: /* print_endaddr = kopf_DC[0].DC_Rahmen4.endadresse[0]; */
 		fprintf(stderr,"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
 		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
 		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
@@ -1418,7 +1423,7 @@ fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
 		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15],
 		kopf_DC[0].all_bytes[16]);
 		break;
-	    case 5: print_endaddr = kopf_DC[0].DC_Rahmen5.endadresse[0]; 
+	    case 5: /* print_endaddr = kopf_DC[0].DC_Rahmen5.endadresse[0]; */
 		fprintf(stderr,"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
 		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
 		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
@@ -1426,7 +1431,7 @@ fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
 		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15],
 		kopf_DC[0].all_bytes[16],kopf_DC[0].all_bytes[17]);
 		break;
-	    case 6: print_endaddr = kopf_DC[0].DC_Rahmen6.endadresse[0]; 
+	    case 6: /* print_endaddr = kopf_DC[0].DC_Rahmen6.endadresse[0]; */
 		fprintf(stderr,"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
 		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
 		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
@@ -1434,7 +1439,7 @@ fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
 		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15],
 		kopf_DC[0].all_bytes[16],kopf_DC[0].all_bytes[17],kopf_DC[0].all_bytes[18]);
 		break;
-	    case 7: print_endaddr = kopf_DC[0].DC_Rahmen7.endadresse[0]; 
+	    case 7: /* print_endaddr = kopf_DC[0].DC_Rahmen7.endadresse[0]; */
 		fprintf(stderr,"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
 		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
 		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
@@ -1442,7 +1447,7 @@ fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
 		kopf_DC[0].all_bytes[12],kopf_DC[0].all_bytes[13],kopf_DC[0].all_bytes[14],kopf_DC[0].all_bytes[15],
 		kopf_DC[0].all_bytes[16],kopf_DC[0].all_bytes[17],kopf_DC[0].all_bytes[18],kopf_DC[0].all_bytes[19]);
 		break;
-	    case 8: print_endaddr = kopf_DC[0].DC_Rahmen8.endadresse[0]; 
+	    case 8: /* print_endaddr = kopf_DC[0].DC_Rahmen8.endadresse[0]; */
 		fprintf(stderr,"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
 		kopf_DC[0].all_bytes[0],kopf_DC[0].all_bytes[1],kopf_DC[0].all_bytes[2],kopf_DC[0].all_bytes[3],
 		kopf_DC[0].all_bytes[4],kopf_DC[0].all_bytes[5],kopf_DC[0].all_bytes[6],kopf_DC[0].all_bytes[7],
@@ -2498,12 +2503,8 @@ int datenlesen_D1(int anz_datensaetze)
 
 //**************************************************************************************** !!!!!!!!
       pruefsumme = berechnepruefziffer_modus_D1( &u_dsatz_uvr[0], result );
-//      printf("Pruefsumme berechnet: %x in Byte %d erhalten %x\n",pruefsumme,result,u_dsatz_uvr[0].DS_alles.all_bytes[result-1]);
 #if DEBUG > 3
-  if (uvr_typ == UVR1611)
-      fprintf(stderr, "%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR1611.pruefsum,pruefsumme);
-  if (uvr_typ == UVR61_3)
-      pfprintf(stderr, "%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_uvr[0].DS_UVR61_3.pruefsum,pruefsumme);
+      printf("Pruefsumme berechnet: %x in Byte %d erhalten %x\n",pruefsumme,result,u_dsatz_uvr[0].DS_alles.all_bytes[result-1]);
 #endif
 
     if (u_dsatz_uvr[0].DS_alles.all_bytes[result-1] == pruefsumme )
