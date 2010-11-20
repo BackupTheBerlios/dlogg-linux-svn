@@ -252,9 +252,14 @@ int main(int argc, char *argv[])
   uvr_modus = get_modulmodus(); /* Welcher Modus 
                                 0xA8 (1DL) / 0xD1 (2DL) / 0xDC (CAN) */
 								
-  if ( uvr_modus == 0xDC )
+  switch (uvr_modus)
   {
-    fprintf(stderr, " CAN-Logging erkannt.\n");
+	case 0xDC: fprintf(stderr, " CAN-Logging erkannt.\n"); break;
+	case 0xA8: fprintf(stderr, " 1DL-Logging erkannt.\n"); break;
+	case 0xD1: fprintf(stderr, " 2DL-Logging erkannt.\n"); break;
+	default: 	fprintf(stderr, " Kein Logging erkannt!\n Abbruch!\n");
+				do_cleanup();
+				return ( -1 );
   }
 
   /* ************************************************************************   */
@@ -285,11 +290,22 @@ int main(int argc, char *argv[])
 		return sr;
 	}
 	uvr_modus = get_modulmodus();
+	switch (uvr_modus)
+	{
+		case 0xDC: fprintf(stderr, " CAN-Logging erkannt.\n"); break;
+		case 0xA8: fprintf(stderr, " 1DL-Logging erkannt.\n"); break;
+		case 0xD1: fprintf(stderr, " 2DL-Logging erkannt.\n"); break;
+		default: 	fprintf(stderr, " Kein Logging erkannt!\n Abbruch!\n");
+					do_cleanup();
+					return ( -1 );
+	}
 	anz_ds = kopfsatzlesen();
 	i++;
   }
-  
-fprintf(stderr, " CAN-Logging-Test: Kopfsatzlesen fertig, Rueckgabe aus kopfsatzlesen(): %d\n",anz_ds); /********************/
+
+/*******************
+fprintf(stderr, " CAN-Logging-Test: Kopfsatzlesen fertig, Rueckgabe aus kopfsatzlesen(): %d\n",anz_ds); 
+*/
   
   switch(anz_ds)
   {
@@ -432,15 +448,18 @@ static int print_usage()
   fprintf(stderr,"          --res -> nach dem Lesen Ruecksetzen des DL\n");
   fprintf(stderr,"                   Standard: KEIN Ruecksetzen des DL nach dem Lesen\n");
   fprintf(stderr,"          --dir -> Verzeichnis in dem die Datei angelegt werden soll\n");
+  fprintf(stderr,"                   das Verzeichnis wird erzeugt, wenn nicht vorhanden \n");
+  fprintf(stderr,"                   (bei gueltigen Rechten)\n");
   fprintf(stderr,"          -h    -> diesen Hilfetext\n");
   fprintf(stderr,"          -v    -> Versionsangabe\n");
   fprintf(stderr,"\n");
   fprintf(stderr,"Beispiel: dl-lesenx -p /dev/ttyUSB0 --res\n");
-  fprintf(stderr,"          Liest die Daten vom USB-Port 0 und setzt den D-LOGG zurueck.\n");
+  fprintf(stderr,"              Liest die Daten vom USB-Port 0 und setzt den D-LOGG zurueck.\n");
   fprintf(stderr,"          dl-lesenx -i blnetz:40000 --res\n");
-  fprintf(stderr,"          Liest die Daten vom Host blnetz und setzt den D-LOGG zurueck.\n");
+  fprintf(stderr,"              Liest die Daten vom Host blnetz und setzt den BL-Net zurueck.\n");
   fprintf(stderr,"          dl-lesenx -i 192.168.0.10:40000 \n");
-  fprintf(stderr,"          Liest die Daten von der IP-Adresse 192.168.0.10 und setzt den D-LOGG nicht zurueck.\n");
+  fprintf(stderr,"              Liest die Daten von der IP-Adresse 192.168.0.10\n");
+  fprintf(stderr,"              und setzt den BL-Net nicht zurueck.\n");
   fprintf(stderr,"\n");
   return 0;
 
@@ -483,7 +502,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 vom 14.11.2010 \n");
+        printf("    Version 0.9.0 vom 20.11.2010 \n");
         return 0;
       }
       case 'h':
@@ -618,18 +637,68 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
   char *pLogFileName=NULL, *pLogFileName_2=NULL;
   pLogFileName = LogFileName;
   pLogFileName_2 = LogFileName_2;
+  struct stat dir_attrib;
+  
+  if (strlen(DirName) > 2 )
+  {
+    if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+	{
+		if ( mkdir(DirName, 0711) == -1 )
+		{
+			fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+			return erg;
+		}
+	}
+  }
 
+  if (uvr_modus == 0xD1)
+  {
+    strcat(DirName,"Log1/");
+    if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+	{
+		if ( mkdir(DirName, 0711) == -1 )
+		{
+			fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+			return erg;
+		}
+	}
+  }
+  
   if (csv ==  1) /* LogDatei im CSV-Format schreiben */
     {
       erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
       if (uvr_modus == 0xD1)
+	  {
+		strcat(DirName,"Log2/");
+		if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+		{
+			if ( mkdir(DirName, 0711) == -1 )
+			{
+				fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+				erg = 0;
+				return erg;
+			}
+		}
         erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
+	  }
     }
   else  /* LogDatei im Winsol-Format schreiben */
     {
       erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
       if (uvr_modus == 0xD1)
+	  {
+		strcat(DirName,"Log2/");
+		if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+		{
+			if ( mkdir(DirName, 0711) == -1 )
+			{
+				fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+				erg = 0;
+				return erg;
+			}
+		}
         erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
+	  }
     }
 
   return erg;
@@ -651,6 +720,19 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
   pLogFileName_6 = LogFileName_6;
   pLogFileName_7 = LogFileName_7;
   pLogFileName_8 = LogFileName_8;
+  struct stat dir_attrib;
+
+  if (strlen(DirName) > 2 )
+  {
+    if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+	{
+		if ( mkdir(DirName, 0711) == -1 )
+		{
+			fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+			return erg;
+		}
+	}
+  }
 
   if (csv ==  1) /* LogDatei im CSV-Format schreiben */
     {
@@ -2408,7 +2490,7 @@ fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
     }
   }
 
-  return i - fehlerhafte_ds;
+  return i + 1 - fehlerhafte_ds;
 }
 
 /* Daten vom DL lesen - 2DL-Modus */
@@ -2760,7 +2842,7 @@ int datenlesen_D1(int anz_datensaetze)
     }
   }
 
-  return i - fehlerhafte_ds;
+  return i + 1 - fehlerhafte_ds;
 }
 
 /* Daten vom DL lesen - CAN-Modus */
