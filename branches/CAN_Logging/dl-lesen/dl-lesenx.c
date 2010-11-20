@@ -633,7 +633,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
 int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
 {
   int erg = 0;
-  char csv_endung[] = ".csv", winsol_endung[] = ".log";
+  char csv_endung[] = ".csv", winsol_endung[] = ".log", temp_DirName[241];
   char *pLogFileName=NULL, *pLogFileName_2=NULL;
   pLogFileName = LogFileName;
   pLogFileName_2 = LogFileName_2;
@@ -651,6 +651,8 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
 	}
   }
 
+  strcat(temp_DirName,DirName);
+  
   if (uvr_modus == 0xD1)
   {
     strcat(DirName,"Log1/");
@@ -669,17 +671,17 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
       erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
       if (uvr_modus == 0xD1)
 	  {
-		strcat(DirName,"Log2/");
-		if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+		strcat(temp_DirName,"Log2/");
+		if (stat(temp_DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
 		{
-			if ( mkdir(DirName, 0711) == -1 )
+			if ( mkdir(temp_DirName, 0711) == -1 )
 			{
 				fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
 				erg = 0;
 				return erg;
 			}
 		}
-        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName,ds_jahr,ds_monat,csv_endung);
 	  }
     }
   else  /* LogDatei im Winsol-Format schreiben */
@@ -687,17 +689,17 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
       erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
       if (uvr_modus == 0xD1)
 	  {
-		strcat(DirName,"Log2/");
-		if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+		strcat(temp_DirName,"Log2/");
+		if (stat(temp_DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
 		{
-			if ( mkdir(DirName, 0711) == -1 )
+			if ( mkdir(temp_DirName, 0711) == -1 )
 			{
 				fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
 				erg = 0;
 				return erg;
 			}
 		}
-        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName,ds_jahr,ds_monat,winsol_endung);
 	  }
     }
 
