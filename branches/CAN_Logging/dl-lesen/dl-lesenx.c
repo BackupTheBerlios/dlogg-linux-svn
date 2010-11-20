@@ -633,34 +633,35 @@ int check_arg_getopt(int arg_c, char *arg_v[])
 int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
 {
   int erg = 0;
-  char csv_endung[] = ".csv", winsol_endung[] = ".log", temp_DirName[241];
+  char csv_endung[] = ".csv", winsol_endung[] = ".log", temp_DirName_2[241], temp_DirName_1[241];
   char *pLogFileName=NULL, *pLogFileName_2=NULL;
   pLogFileName = LogFileName;
   pLogFileName_2 = LogFileName_2;
   struct stat dir_attrib;
   
-  if (strlen(DirName) > 2 )
+  strcpy(temp_DirName_1,DirName);
+  strcpy(temp_DirName_2,DirName);
+  
+  if (strlen(temp_DirName_1) > 2 )
   {
-    if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+    if (stat(temp_DirName_1, &dir_attrib) == -1)  /* das Verz. existiert nicht */
 	{
-		if ( mkdir(DirName, 0711) == -1 )
+		if ( mkdir(temp_DirName_1, 0711) == -1 )
 		{
-			fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+			fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_1);
 			return erg;
 		}
 	}
   }
 
-  strcat(temp_DirName,DirName);
-  
   if (uvr_modus == 0xD1)
   {
-    strcat(DirName,"Log1/");
-    if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+    strcat(temp_DirName_1,"Log1/");
+    if (stat(temp_DirName_1, &dir_attrib) == -1)  /* das Verz. existiert nicht */
 	{
-		if ( mkdir(DirName, 0711) == -1 )
+		if ( mkdir(temp_DirName_1, 0711) == -1 )
 		{
-			fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+			fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_1);
 			return erg;
 		}
 	}
@@ -668,38 +669,38 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
   
   if (csv ==  1) /* LogDatei im CSV-Format schreiben */
     {
-      erg=sprintf(pLogFileName,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
+      erg=sprintf(pLogFileName,"%s2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,csv_endung);
       if (uvr_modus == 0xD1)
 	  {
-		strcat(temp_DirName,"Log2/");
-		if (stat(temp_DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+		strcat(temp_DirName_2,"Log2/");
+		if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
 		{
-			if ( mkdir(temp_DirName, 0711) == -1 )
+			if ( mkdir(temp_DirName_2, 0711) == -1 )
 			{
-				fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName);
+				fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
 				erg = 0;
 				return erg;
 			}
 		}
-        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName,ds_jahr,ds_monat,csv_endung);
+        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,csv_endung);
 	  }
     }
   else  /* LogDatei im Winsol-Format schreiben */
     {
-      erg=sprintf(pLogFileName,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
+      erg=sprintf(pLogFileName,"%sY2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,winsol_endung);
       if (uvr_modus == 0xD1)
 	  {
-		strcat(temp_DirName,"Log2/");
-		if (stat(temp_DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+		strcat(temp_DirName_2,"Log2/");
+		if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
 		{
-			if ( mkdir(temp_DirName, 0711) == -1 )
+			if ( mkdir(temp_DirName_2, 0711) == -1 )
 			{
-				fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName);
+				fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
 				erg = 0;
 				return erg;
 			}
 		}
-        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName,ds_jahr,ds_monat,winsol_endung);
+        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,winsol_endung);
 	  }
     }
 
