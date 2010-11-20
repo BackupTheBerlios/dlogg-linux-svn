@@ -676,7 +676,7 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
 		{
 			if ( mkdir(temp_DirName, 0711) == -1 )
 			{
-				fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+				fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName);
 				erg = 0;
 				return erg;
 			}
@@ -694,7 +694,7 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
 		{
 			if ( mkdir(temp_DirName, 0711) == -1 )
 			{
-				fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+				fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName);
 				erg = 0;
 				return erg;
 			}
