@@ -679,7 +679,7 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
 				return erg;
 			}
 		}
-        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
+        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
 	  }
     }
   else  /* LogDatei im Winsol-Format schreiben */
@@ -697,7 +697,7 @@ int erzeugeLogfileName(UCHAR ds_monat, UCHAR ds_jahr)
 				return erg;
 			}
 		}
-        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
+        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
 	  }
     }
 
