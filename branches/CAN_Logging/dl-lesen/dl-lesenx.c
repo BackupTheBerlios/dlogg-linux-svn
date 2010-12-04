@@ -502,7 +502,8 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 vom 20.11.2010 \n");
+        printf("    Version 0.9.0 vom 04.12.2010 \n");
+		printf("    $Id$ \n");
         return 0;
       }
       case 'h':
@@ -712,9 +713,10 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
 {
   int erg = 0;
   char csv_endung[] = ".csv", winsol_endung[] = ".log";
+  char temp_DirName_1[241], temp_DirName_2[241], temp_DirName_3[241], temp_DirName_4[241],
+       temp_DirName_5[241], temp_DirName_6[241], temp_DirName_7[241], temp_DirName_8[241];
   char *pLogFileName_1=NULL, *pLogFileName_2=NULL, *pLogFileName_3=NULL, *pLogFileName_4=NULL, *pLogFileName_5=NULL,
-  *pLogFileName_6=NULL, *pLogFileName_7=NULL, *pLogFileName_8=NULL;
-  
+  *pLogFileName_6=NULL, *pLogFileName_7=NULL, *pLogFileName_8=NULL;  
   pLogFileName_1 = LogFileName_1;
   pLogFileName_2 = LogFileName_2;
   pLogFileName_3 = LogFileName_3;
@@ -725,13 +727,22 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
   pLogFileName_8 = LogFileName_8;
   struct stat dir_attrib;
 
-  if (strlen(DirName) > 2 )
+  strcpy(temp_DirName_1,DirName);
+  strcpy(temp_DirName_2,DirName);
+  strcpy(temp_DirName_3,DirName);
+  strcpy(temp_DirName_4,DirName);
+  strcpy(temp_DirName_5,DirName);
+  strcpy(temp_DirName_6,DirName);
+  strcpy(temp_DirName_7,DirName);
+  strcpy(temp_DirName_8,DirName);
+  
+  if (strlen(temp_DirName_1) > 2 )
   {
-    if (stat(DirName, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+    if (stat(temp_DirName_1, &dir_attrib) == -1)  /* das Verz. existiert nicht */
 	{
-		if ( mkdir(DirName, 0711) == -1 )
+		if ( mkdir(temp_DirName_1, 0711) == -1 )
 		{
-			fprintf(stderr,"%s konnte nicht angelegt werden!\n",DirName);
+			fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_1);
 			return erg;
 		}
 	}
@@ -741,98 +752,658 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
     {
 	  switch(anzahl_Rahmen) 
 	  {
-	    case 1: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+	    case 1: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,csv_endung); break;
 		
-		case 2: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 2: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 3: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 3: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%s2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 4: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 4: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%s2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%s2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 5: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_5,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 5: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%s2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%s2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_5,"Log2/");
+				if (stat(temp_DirName_5, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_5, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_5);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_5,"%s2%03d%02d%s",temp_DirName_5,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 6: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_5,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_6,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 6: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%s2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%s2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_5,"Log2/");
+				if (stat(temp_DirName_5, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_5, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_5);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_5,"%s2%03d%02d%s",temp_DirName_5,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_6,"Log2/");
+				if (stat(temp_DirName_6, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_6, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_6);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_6,"%s2%03d%02d%s",temp_DirName_6,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 7: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_5,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_6,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_7,"%s2%03d%02d_7%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 7: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%s2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%s2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_5,"Log2/");
+				if (stat(temp_DirName_5, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_5, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_5);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_5,"%s2%03d%02d%s",temp_DirName_5,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_6,"Log2/");
+				if (stat(temp_DirName_6, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_6, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_6);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_6,"%s2%03d%02d%s",temp_DirName_6,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_7,"Log2/");
+				if (stat(temp_DirName_7, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_7, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_7);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_7,"%s2%03d%02d%s",temp_DirName_7,ds_jahr,ds_monat,csv_endung); break;
 				
-		case 8: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_2,"%s2%03d%02d_2%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_3,"%s2%03d%02d_3%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_4,"%s2%03d%02d_4%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_5,"%s2%03d%02d_5%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_6,"%s2%03d%02d_6%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_7,"%s2%03d%02d_7%s",DirName,ds_jahr,ds_monat,csv_endung);
-		        erg=sprintf(pLogFileName_8,"%s2%03d%02d_8%s",DirName,ds_jahr,ds_monat,csv_endung); break;
+		case 8: erg=sprintf(pLogFileName_1,"%s2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%s2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%s2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%s2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_5,"Log2/");
+				if (stat(temp_DirName_5, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_5, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_5);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_5,"%s2%03d%02d%s",temp_DirName_5,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_6,"Log2/");
+				if (stat(temp_DirName_6, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_6, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_6);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_6,"%s2%03d%02d%s",temp_DirName_6,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_7,"Log2/");
+				if (stat(temp_DirName_7, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_7, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_7);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_7,"%s2%03d%02d%s",temp_DirName_7,ds_jahr,ds_monat,csv_endung);
+				strcat(temp_DirName_8,"Log2/");
+				if (stat(temp_DirName_8, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_8, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_8);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_8,"%s2%03d%02d%s",temp_DirName_8,ds_jahr,ds_monat,csv_endung); break;
 	  }
     }
   else  /* LogDatei im Winsol-Format schreiben */
     {
 	  switch(anzahl_Rahmen) 
 	  {
-	    case 1: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+	    case 1: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,winsol_endung); break;
 		
-		case 2: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 2: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 3: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 3: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 4: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 4: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 5: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 5: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_5,"Log2/");
+				if (stat(temp_DirName_5, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_5, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_5);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d%s",temp_DirName_5,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 6: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 6: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_5,"Log2/");
+				if (stat(temp_DirName_5, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_5, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_5);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d%s",temp_DirName_5,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_6,"Log2/");
+				if (stat(temp_DirName_6, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_6, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_6);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d%s",temp_DirName_6,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 7: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_7,"%sY2%03d%02d_7%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 7: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_5,"Log2/");
+				if (stat(temp_DirName_5, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_5, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_5);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d%s",temp_DirName_5,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_6,"Log2/");
+				if (stat(temp_DirName_6, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_6, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_6);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d%s",temp_DirName_6,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_7,"Log2/");
+				if (stat(temp_DirName_7, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_7, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_7);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_7,"%sY2%03d%02d%s",temp_DirName_7,ds_jahr,ds_monat,winsol_endung); break;
 				
-		case 8: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d_2%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d_3%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d_4%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d_5%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d_6%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_7,"%sY2%03d%02d_7%s",DirName,ds_jahr,ds_monat,winsol_endung);
-		        erg=sprintf(pLogFileName_8,"%sY2%03d%02d_8%s",DirName,ds_jahr,ds_monat,winsol_endung); break;
+		case 8: erg=sprintf(pLogFileName_1,"%sY2%03d%02d%s",temp_DirName_1,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_2,"Log2/");
+				if (stat(temp_DirName_2, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_2, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_2);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_2,"%sY2%03d%02d%s",temp_DirName_2,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_3,"Log2/");
+				if (stat(temp_DirName_3, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_3, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_3);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_3,"%sY2%03d%02d%s",temp_DirName_3,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_4,"Log2/");
+				if (stat(temp_DirName_4, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_4, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_4);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_4,"%sY2%03d%02d%s",temp_DirName_4,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_5,"Log2/");
+				if (stat(temp_DirName_5, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_5, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_5);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_5,"%sY2%03d%02d%s",temp_DirName_5,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_6,"Log2/");
+				if (stat(temp_DirName_6, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_6, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_6);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_6,"%sY2%03d%02d%s",temp_DirName_6,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_7,"Log2/");
+				if (stat(temp_DirName_7, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_7, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_7);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_7,"%sY2%03d%02d%s",temp_DirName_7,ds_jahr,ds_monat,winsol_endung);
+				strcat(temp_DirName_8,"Log2/");
+				if (stat(temp_DirName_8, &dir_attrib) == -1)  /* das Verz. existiert nicht */
+				{
+					if ( mkdir(temp_DirName_8, 0711) == -1 )
+					{
+						fprintf(stderr,"%s konnte nicht angelegt werden!\n",temp_DirName_8);
+						erg = 0;
+						return erg;
+					}
+				}
+		        erg=sprintf(pLogFileName_8,"%sY2%03d%02d%s",temp_DirName_8,ds_jahr,ds_monat,winsol_endung); break;
 	  }
     }
 
@@ -1324,37 +1895,10 @@ int kopfsatzlesen(void)
           case 0xD1: result = recv(sock,kopf_D1,14,0); break;
           case 0xA8: result = recv(sock,kopf_A8,13,0); break;
 		  case 0xDC: result = recv(sock,kopf_DC,21,0);
-		            // if (kopf_DC[0].all_bytes[0] == 0xAA)
-					// {
-						// zeitstempel();
-						// fprintf(stderr, " %s CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n", sZeit);
-						// sleep(3); /* 3 Sekunden warten */
-// fprintf(stderr, "Test-CAN-Logging: 2. Versuch Kopfsatz lesen\n");
-						// write_erg=send(sock,sendbuf,1,0);
-						// if (write_erg == 1)    /* Lesen der Antwort*/
-						// {
-							// if (kopf_DC[0].all_bytes[0] == 0xAA)
-							// {
-								// zeitstempel();
-								// fprintf(stderr, " %s CAN-Logging: BL-Net noch nicht bereit, 3 Sekunden warten...\n", sZeit);
-								// sleep(3); /* 3 Sekunden warten */
-// fprintf(stderr, "Test-CAN-Logging: 3. Versuch Kopfsatz lesen\n");
-								// write_erg=send(sock,sendbuf,1,0);
-								// if (write_erg == 1)    /* Lesen der Antwort*/
-								// {
-									// fprintf(stderr, "Test-CAN-Logging: N A C H  3. Versuch Kopfsatz lesen\n");
-									// if (kopf_DC[0].all_bytes[0] == 0xAA)
-									// {
-										// zeitstempel();
-										// fprintf(stderr, " %s CAN-Logging: BL-Net immer noch nicht bereit. Abbruch!\n", sZeit);
-										// return ( -3 );
-									// }
-									// else if (kopf_DC[0].all_bytes[0] != 0xAA)
-									// result=read(sock,kopf_DC,21);
-								// }
-							// }
-						// }
-					// }
+		             if (kopf_DC[0].all_bytes[0] == 0xAA)
+					 {
+						return -3;
+					 }
 					break;
         }
       }
