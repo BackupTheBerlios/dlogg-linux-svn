@@ -55,27 +55,39 @@ in dem der angemeldete User sich gerade befindet.
              MM   -> aktueller Monat
 
 Die 2. Log-Datei (im Modus 2DL) hat den gleichen Aufbau wie die Datei
-im "normalen" Modus plus "_2" nach der Monatsangabe: YJJJJMM_2.log
+im "normalen" Modus. Es werden die Verzeichnisse Log1 und Log2 genutzt 
+und auch bei Notwendigkeit angelegt.
   
 Die 2. - 8. Log-Datei (CAN-Logging) hat den gleichen Aufbau wie die Datei
-im "normalen" Modus plus "_x" (x = 2 ... 8) nach der Monatsangabe: 
-YJJJJMM_3.log oder YJJJJMM_8.log
+im "normalen" Modus. Es werden die Verzeichnisse Log1 bis max. Log8 genutzt 
+und auch bei Notwendigkeit angelegt.
   
 Aufruf des Prgramms:
 --------------------
 
-dl-lesenx (-p USB-Port | -i IP:Port) [--res] [-h] [-v]
+dl-lesenx (-p USB-Port | -i IP:Port)  [--csv] [--res] [--dir] [-h] [-v]
     -p USB-Port -> Angabe des USB-Portes,
                    an dem der D-LOGG angeschlossen ist.
-    -i IP:Port  -> Angabe der IP-Adresse und des Ports,
+    -i IP:Port  -> Angabe der IP-Adresse / Hostname und des Ports,
                    an dem der BL-Net angeschlossen ist.
-          --res  -> nach dem Lesen Ruecksetzen des DL
+                   Ohne Port-Angabe wird der Default-Port 40000 verwendet.
+          --csv -> im CSV-Format speichern (wird noch nicht unterstuetzt)
+                   Standard: ist WINSOL-Format
+          --res -> nach dem Lesen Ruecksetzen des DL
                    Standard: KEIN Ruecksetzen des DL nach dem Lesen
+          --dir -> Verzeichnis in dem die Datei angelegt werden soll
+                   das Verzeichnis wird erzeugt, wenn nicht vorhanden
+                   (bei gueltigen Rechten)
           -h    -> diesen Hilfetext
           -v    -> Versionsangabe
 
-Beispiel: dl-lesenx -p /dev/ttyUSB0 -res
-          Liest die Daten vom USB-Port 0 und setzt den D-LOGG zurueck.
+Beispiel: dl-lesenx -p /dev/ttyUSB0 --res
+              Liest die Daten vom USB-Port 0 und setzt den D-LOGG zurueck.
+          dl-lesenx -i blnetz:40000 --res
+              Liest die Daten vom Host blnetz und setzt den BL-Net zurueck.
+          dl-lesenx -i 192.168.0.10:40000
+              Liest die Daten von der IP-Adresse 192.168.0.10
+              und setzt den BL-Net nicht zurueck.
 
 Die aktuellste Version kann unter http://d-logg-linux.roemix.eu 
 abgerufen werden. Dort befindet sich auch ein Programm zum Einstellen 
@@ -86,4 +98,4 @@ Unterstuetzung und Programmierung von wesentlichen Teilen. Ebenfalls vielen Dank
 die Firma Technische Alternative Elektronische Steuerungsgeraetegesellschaft m.b.H 
 (Oesterreich) fuer ihre Unterstuetzung.
 
-(c)2006,2007,2008,2010 H. Roemer
+(c)2006,2007,2008,2010,2011 H. Roemer

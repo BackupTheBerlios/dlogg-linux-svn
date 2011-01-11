@@ -25,7 +25,7 @@
  * Version 0.7.7    26.12.2007 UVR61-3                                       *
  * Version 0.8      13.01.2008 2DL-Modus                                     *
  * Version 0.8.1    04.12.2009 --dir Parameter aufgenommen                   *
- * Version 0.9.0    ??.08.2010 CAN-Logging                                   *
+ * Version 0.9.0    11.01.2011 CAN-Logging                                   *
  *                  $Id$  *
  *****************************************************************************/
 
@@ -144,8 +144,6 @@ int main(int argc, char *argv[])
   strcpy(DirName,"./");
   erg_check_arg = check_arg_getopt(argc, argv);
 
-//  printf("    Version 0.9.0 -CAN_Test- vom 20.10.2010 \n");
-  
 #if  DEBUG>1
   fprintf(stderr, "Ergebnis vom Argumente-Check %d\n",erg_check_arg);
   fprintf(stderr, "angegebener Port: %s Variablen: reset = %d csv = %d \n",dlport,reset,csv);
@@ -190,29 +188,6 @@ int main(int argc, char *argv[])
 	{
 		return sr;
 	}
-    /* PF_INET instead of AF_INET - because of Protocol-family instead of address family !? */
-    //~ sock = socket(PF_INET, SOCK_STREAM, 0);
-    //~ if (sock == -1)
-    //~ {
-      //~ perror("socket failed()");
-      //~ do_cleanup();
-      //~ return 2;
-    //~ }
-
-    //~ if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
-    //~ {
-      //~ perror("connect failed()");
-      //~ do_cleanup();
-      //~ return 3;
-    //~ }
-
-    //~ if (ip_handling(sock) == -1)
-    //~ {
-      //~ fprintf(stderr, "%s: Fehler im Initialisieren der IP-Kommunikation\n", argv[0]);
-      //~ do_cleanup();
-      //~ return 4;
-    //~ }
-    //  close(sock); /* IP-Socket schliessen */
   } /* Ende IP-Zugriff */
   else  if (usb_zugriff && !ip_zugriff)
   {
@@ -305,10 +280,6 @@ int main(int argc, char *argv[])
 	i++;
   }
 
-/*******************
-fprintf(stderr, " CAN-Logging-Test: Kopfsatzlesen fertig, Rueckgabe aus kopfsatzlesen(): %d\n",anz_ds); 
-*/
-  
   switch(anz_ds)
   {
     case -1: printf(" Kopfsatzlesen fehlgeschlagen\n");
@@ -445,6 +416,7 @@ static int print_usage()
   fprintf(stderr,"                   an dem der D-LOGG angeschlossen ist.\n");
   fprintf(stderr,"    -i IP:Port  -> Angabe der IP-Adresse / Hostname und des Ports,\n");
   fprintf(stderr,"                   an dem der BL-Net angeschlossen ist.\n");
+  fprintf(stderr,"                   Ohne Port-Angabe wird der Default-Port 40000 verwendet.\n");
   fprintf(stderr,"          --csv -> im CSV-Format speichern (wird noch nicht unterstuetzt)\n");
   fprintf(stderr,"                   Standard: ist WINSOL-Format\n");
   fprintf(stderr,"          --res -> nach dem Lesen Ruecksetzen des DL\n");
@@ -504,7 +476,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.0 vom 13.12.2010 \n");
+        printf("    Version 0.9.0 vom 11.01.2011 \n");
 		printf("    $Id$ \n");
         return 0;
       }
@@ -541,29 +513,17 @@ int check_arg_getopt(int arg_c, char *arg_v[])
         else 
         {
           SERVER_sockaddr_in.sin_addr = *(struct in_addr*)*hostinfo->h_addr_list;
-          SERVER_sockaddr_in.sin_port = htons((unsigned short int) atol(strtok(NULL,trennzeichen)));
+          // SERVER_sockaddr_in.sin_port = htons((unsigned short int) atol(strtok(NULL,trennzeichen)));
+			char* port_par =  strtok(NULL,trennzeichen);
+			if ( port_par == NULL )
+				port_par = "40000";
+			SERVER_sockaddr_in.sin_port = htons((unsigned short int) atol(port_par));
           SERVER_sockaddr_in.sin_family = AF_INET;
           fprintf(stderr,"\n Adresse:port gesetzt: %s:%d\n", inet_ntoa(SERVER_sockaddr_in.sin_addr),
           ntohs(SERVER_sockaddr_in.sin_port));
           i_is_set=1;
           ip_zugriff = 1;
 	}
-        //~ if ( strlen(optarg) < 22)
-        //~ {
-          //~ SERVER_sockaddr_in.sin_addr.s_addr = inet_addr(strtok(optarg,trennzeichen));
-          //~ SERVER_sockaddr_in.sin_port = htons((unsigned short int) atol(strtok(NULL,trennzeichen)));
-          //~ SERVER_sockaddr_in.sin_family = AF_INET;
-          //~ fprintf(stderr,"\n Adresse:port gesetzt: %s:%d\n", inet_ntoa(SERVER_sockaddr_in.sin_addr),
-          //~ ntohs(SERVER_sockaddr_in.sin_port));
-          //~ i_is_set=1;
-          //~ ip_zugriff = 1;
-        //~ }
-        //~ else
-        //~ {
-          //~ fprintf(stderr," IP-Adresse zu lang: %s\n",optarg);
-          //~ print_usage();
-          //~ return -1;
-        //~ }
         break;
       }
       case 0:
@@ -905,8 +865,6 @@ int open_logfile_CAN(char LogFile[], int datenrahmen)
   UCHAR kopf_winsol_1611[59]={0x01, 0x02, 0x01, 0x03, 0xF0, 0x0F, 0x00, 0x07, 0xAA, 0xAA, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00,
             0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00,
             0xAA, 0x00, 0xFF, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00, 0xAA, 0x00};
-
-//fprintf(stderr,"---> in open_logfile_CAN() LogFileName: %s - Datenrahmen: %d\n",LogFile,datenrahmen);
 
   if ((fp_logfile_tmp=fopen(LogFile,"r")) == NULL) /* wenn Logfile noch nicht existiert */
   {
@@ -1254,8 +1212,8 @@ int kopfsatzlesen(void)
           return 3;
         }
       }  /* if (!ip_first) */
-// fprintf(stderr, "Test-CAN-Logging: 1. Versuch Kopfsatz lesen\n");
       write_erg=send(sock,sendbuf,1,0);
+	  
       if (write_erg == 1)    /* Lesen der Antwort */
       {
 	    switch(uvr_modus)
@@ -1395,7 +1353,6 @@ int kopfsatzlesen(void)
       break;
   }
 
-//fprintf(stderr," switch uvr_modus... \n");
   switch(uvr_modus)
   {
     case 0xD1: 
@@ -2199,7 +2156,6 @@ fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
     {
       write_erg=write(fd_serialport,sendbuf,6);
       if (write_erg == 6)    /* Lesen der Antwort*/
-        // result=read(fd_serialport, dsatz_uvr1611,65);
         result=read(fd_serialport, u_dsatz_uvr,Bytes_for_0xA8);
     }
     if (ip_zugriff)
@@ -2224,8 +2180,6 @@ fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
        write_erg=send(sock,sendbuf,6,0);
        if (write_erg == 6)    /* Lesen der Antwort */
           result  = recv(sock, u_dsatz_uvr,Bytes_for_0xA8,0);
-
-        // result  = recv(sock, dsatz_uvr1611,65,0);
     } /* if (ip_zugriff) */
 
 //**************************************************************************************** !!!!!!!!
@@ -2277,7 +2231,6 @@ fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
       if ( uvr_typ == UVR61_3 && merk_monat != u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.monat )
         monatswechsel = 1;
 
-//  printf("Monat: %2d Variable monatswechsel: %1d\n", u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.monat,monatswechsel);
       if ( monatswechsel == 1 )
       {
         printf("Monatswechsel!\n");
@@ -2321,18 +2274,15 @@ fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
       if ( csv==1 && fp_csvfile != NULL )
       {
         if (uvr_typ == UVR1611)
-//          writeWINSOLlogfile2CSV(fp_csvfile, &dsatz_winsol[0],
            writeWINSOLlogfile2CSV(fp_logfile, &dsatz_winsol[0],
            u_dsatz_uvr[0].DS_UVR1611.datum_zeit.jahr,
            u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat );
         if (uvr_typ == UVR61_3)
-//          writeWINSOLlogfile2CSV(fp_csvfile, &dsatz_winsol[0],
           writeWINSOLlogfile2CSV(fp_logfile, &dsatz_winsol[0],
            u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.jahr,
            u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.monat );
       }
 
-      /* puffer_dswinsol = &dsatz_winsol[0];*/
       /* schreiben der gelesenen Rohdaten in das LogFile */
       if (uvr_typ == UVR1611)
         tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile);
@@ -2513,7 +2463,6 @@ int datenlesen_D1(int anz_datensaetze)
        write_erg=send(sock,sendbuf,6,0);
        if (write_erg == 6)    /* Lesen der Antwort */
           result  = recv(sock, u_dsatz_uvr,Bytes_for_0xD1,0);
-        // result  = recv(sock, dsatz_uvr1611,65,0);
     } /* if (ip_zugriff) */
 
 //**************************************************************************************** !!!!!!!!
@@ -2538,15 +2487,12 @@ int datenlesen_D1(int anz_datensaetze)
         {
           tmp_erg = erzeugeLogfileName(u_dsatz_uvr[0].DS_1611_1611.datum_zeit.monat,u_dsatz_uvr[0].DS_1611_1611.datum_zeit.jahr);
           merk_monat = u_dsatz_uvr[0].DS_1611_1611.datum_zeit.monat;
-//          printf("merk_monat1: %d\n",merk_monat);
         }
         if (uvr_typ == UVR61_3)
         {
           tmp_erg = (erzeugeLogfileName(u_dsatz_uvr[0].DS_61_3_61_3.datum_zeit.monat,u_dsatz_uvr[0].DS_61_3_61_3.datum_zeit.jahr));
           merk_monat = u_dsatz_uvr[0].DS_61_3_61_3.datum_zeit.monat;
-//          printf("merk_monat2: %d\n",merk_monat);
         }
-//        printf("uvr_typ(1): 0x%x Gelesener Monat: %d, Jahr %d tmp_erg: %d\n",uvr_typ,merk_monat,u_dsatz_uvr[0].DS_1611_1611.datum_zeit.jahr,tmp_erg );
 
         if ( tmp_erg == 0 ) /* Das erste  */
         {
@@ -2557,22 +2503,18 @@ int datenlesen_D1(int anz_datensaetze)
         if (uvr_typ2 == UVR1611 && uvr_typ == UVR1611)
         {
           tmp_erg = (erzeugeLogfileName(u_dsatz_uvr[0].DS_1611_1611.Z_datum_zeit.monat,u_dsatz_uvr[0].DS_1611_1611.Z_datum_zeit.jahr));
-//        printf("Gelesener 2. Monat: %d Jahr %d\n",u_dsatz_uvr[0].DS_1611_1611.Z_datum_zeit.monat,u_dsatz_uvr[0].DS_1611_1611.Z_datum_zeit.jahr);
         }
         else if (uvr_typ2 == UVR1611 && uvr_typ == UVR61_3)
         {
           tmp_erg = (erzeugeLogfileName(u_dsatz_uvr[0].DS_61_3_1611.Z_datum_zeit.monat,u_dsatz_uvr[0].DS_61_3_1611.Z_datum_zeit.jahr));
-//        printf("Gelesener 2. Monat: %d Jahr %d\n",u_dsatz_uvr[0].DS_61_3_1611.Z_datum_zeit.monat,u_dsatz_uvr[0].DS_61_3_1611.Z_datum_zeit.jahr);
         }
         if (uvr_typ2 == UVR61_3 && uvr_typ == UVR61_3)
         {
           tmp_erg = (erzeugeLogfileName(u_dsatz_uvr[0].DS_61_3_61_3.Z_datum_zeit.monat,u_dsatz_uvr[0].DS_61_3_61_3.Z_datum_zeit.jahr));
-//        printf("Gelesener 2. Monat: %d Jahr %d\n",u_dsatz_uvr[0].DS_61_3_61_3.Z_datum_zeit.monat,u_dsatz_uvr[0].DS_61_3_61_3.Z_datum_zeit.jahr);
         }
         else if (uvr_typ2 == UVR61_3 && uvr_typ == UVR1611)
         {
           tmp_erg = (erzeugeLogfileName(u_dsatz_uvr[0].DS_1611_61_3.Z_datum_zeit.monat,u_dsatz_uvr[0].DS_1611_61_3.Z_datum_zeit.jahr));
-//        printf("Gelesener 2. Monat: %d Jahr %d\n",u_dsatz_uvr[0].DS_1611_61_3.Z_datum_zeit.monat,u_dsatz_uvr[0].DS_1611_61_3.Z_datum_zeit.jahr);
         }
         if ( tmp_erg == 0 )
         {
@@ -2599,7 +2541,6 @@ int datenlesen_D1(int anz_datensaetze)
       if ( uvr_typ == UVR61_3 && merk_monat != u_dsatz_uvr[0].DS_61_3_61_3.datum_zeit.monat )
         monatswechsel = 1;
 
-//  printf("Monat: %2d Variable monatswechsel: %1d\n", u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.monat,monatswechsel);
       if ( monatswechsel == 1 )
       {
         printf("Monatswechsel!\n");
@@ -2662,7 +2603,6 @@ int datenlesen_D1(int anz_datensaetze)
         tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile);
       if (uvr_typ == UVR61_3)
         tmp_erg = fwrite(puffer_dswinsol_uvr61_3,59,1,fp_logfile);
-//printf("Nach Schreiben der Daten 1. Geraet\n");
 
       /* ********* 2. Geraet ********* */
       /* Daten in die Winsol-Struktur kopieren */
@@ -2670,28 +2610,11 @@ int datenlesen_D1(int anz_datensaetze)
         copy_UVR2winsol_D1_1611( &u_dsatz_uvr[0], &dsatz_winsol_2[0], 2 );
       if (uvr_typ2 == UVR61_3)
         copy_UVR2winsol_D1_61_3( &u_dsatz_uvr[0], &dsatz_winsol_uvr61_3_2[0], 2 );
-//printf("nach copy_ 2. Geraet.\n");
       /* schreiben der gelesenen Rohdaten in das LogFile */
       if (uvr_typ2 == UVR1611)
         tmp_erg = fwrite(puffer_dswinsol_2,59,1,fp_logfile_2);
       if (uvr_typ2 == UVR61_3)
         tmp_erg = fwrite(puffer_dswinsol_uvr61_3_2 ,59,1,fp_logfile_2);
-//printf("Nach Schreiben der Daten 2. Geraet\n");
-
-/*      if ( csv==1 && fp_csvfile != NULL )
-      {
-        if (uvr_typ == UVR1611)
-//          writeWINSOLlogfile2CSV(fp_csvfile, &dsatz_winsol[0],
-           writeWINSOLlogfile2CSV(fp_logfile, &dsatz_winsol[0],
-           u_dsatz_uvr[0].DS_UVR1611.datum_zeit.jahr,
-           u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat );
-        if (uvr_typ == UVR61_3)
-//          writeWINSOLlogfile2CSV(fp_csvfile, &dsatz_winsol[0],
-          writeWINSOLlogfile2CSV(fp_logfile, &dsatz_winsol[0],
-           u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.jahr,
-           u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.monat );
-      }
-*/
 
       if ( ((i%100) == 0) && (i > 0) )
         printf("%d Datensaetze geschrieben.\n",i);
@@ -2907,64 +2830,46 @@ int datenlesen_DC(int anz_datensaetze)
 		  
     } /* if (ip_zugriff) */
 
-    /* fprintf(stderr,"-> Funktionsaufruf berechnepruefziffer, Anzahl Rahmen: %d\n",anzahl_can_rahmen); */
     if (uvr_typ == UVR1611)
       pruefsumme = berechnepruefziffer_uvr1611_CAN(u_dsatz_can, anzahl_can_rahmen);
 	  
-    /* fprintf(stderr,"-> Funktionsende berechnepruefziffer, Pruefsumme: %d\n",pruefsumme); */
-    /* fprintf(stderr,"-> uvr_typ = %x\n",uvr_typ); */
-
   if (uvr_typ == UVR1611)
   {
-    /* fprintf(stderr,"-> Pruefsummencheck\n");  */
     switch(anzahl_can_rahmen)
 	{
 	  case 1: if (u_dsatz_can[0].DS_CAN_1.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-	        /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_1.pruefsum,pruefsumme); */
 	        break;
 	  case 2: if (u_dsatz_can[0].DS_CAN_2.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-			/* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_2.pruefsum,pruefsumme); */
 	        break;
 	  case 3: if (u_dsatz_can[0].DS_CAN_3.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_3.pruefsum,pruefsumme); */
 	        break;
 	  case 4: if (u_dsatz_can[0].DS_CAN_4.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_4.pruefsum,pruefsumme); */
 	        break;
 	  case 5: if (u_dsatz_can[0].DS_CAN_5.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_5.pruefsum,pruefsumme); */
 	        break;
 	  case 6: if (u_dsatz_can[0].DS_CAN_6.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_6.pruefsum,pruefsumme); */
 	        break;
 	  case 7: if (u_dsatz_can[0].DS_CAN_7.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_7.pruefsum,pruefsumme); */
 	        break;
 	  case 8: if (u_dsatz_can[0].DS_CAN_8.pruefsum == pruefsumme )
 	            pruefsum_check = 1;
-            /* fprintf(stderr,"%d. Datensatz - Pruefsumme gelesen: %x  berechnet: %x \n",i+1,u_dsatz_can[0].DS_CAN_8.pruefsum,pruefsumme); */
 	        break;
 	}
   }	  
   
-/* fprintf(stderr,"-> Pruefsummencheck fertig. pruefsum_check: %i\n",pruefsum_check);  */
-  
     if ( pruefsum_check == 1 )
     {  /*Aenderung: 02.09.06 - Hochzaehlen der Startadresse erst dann, wenn korrekt gelesen wurde (eventuell endlosschleife?) */
-//fprintf(stderr,"-> Pruefsummencheck war ok.\n");
       if ( i == 0 ) /* erster Datenssatz wurde gelesen - Logfile oeffnen / erstellen */
       {
-//fprintf(stderr,"-> vor Funktionsaufruf Logfilenname erzeugen.\n");
         if (uvr_typ == UVR1611)
         {
-//fprintf(stderr," --> vorbelegte Variable LogFileName_1: %s\n",LogFileName_1);
           tmp_erg = ( erzeugeLogfileName_CAN(u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat,u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.jahr,anzahl_can_rahmen) );
           merk_monat = u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat;
         }
@@ -2975,7 +2880,6 @@ int datenlesen_DC(int anz_datensaetze)
         }
         else
         {
-//fprintf(stderr,"-> Funktionsaufruf Logfilenname erfolgreich.\n-> Logfile('s) oeffnen.\n");
 			switch(anzahl_can_rahmen)
 			{
 			  case 1: if ( open_logfile_CAN(LogFileName_1, 1) == -1 )
@@ -3174,7 +3078,6 @@ int datenlesen_DC(int anz_datensaetze)
       if ( merk_monat != u_dsatz_can[0].DS_CAN_1.DS_CAN[0].datum_zeit.monat )
         monatswechsel = 1;
 
-//  printf("Monat: %2d Variable monatswechsel: %1d\n", u_dsatz_uvr[0].DS_UVR61_3.datum_zeit.monat,monatswechsel);
       if ( monatswechsel == 1 )
       {
 	    switch(anzahl_can_rahmen)
@@ -3486,18 +3389,6 @@ int datenlesen_DC(int anz_datensaetze)
 		        break;
 	  }
       
-// fprintf(stderr,"-> %d. Datensatz geschrieben.\n",i+1);
-
-/*
-      if ( csv==1 && fp_csvfile != NULL )
-      {
-        if (uvr_typ == UVR1611)
-           writeWINSOLlogfile2CSV(fp_logfile, &dsatz_winsol[0],
-           u_dsatz_uvr[0].DS_UVR1611.datum_zeit.jahr,
-           u_dsatz_uvr[0].DS_UVR1611.datum_zeit.monat );
-      }
-*/
-
       if ( ((i%100) == 0) && (i > 0) )
         printf("%d Datensaetze geschrieben.\n",i);
 
@@ -4474,7 +4365,6 @@ int reset_datenpuffer_ip(int do_reset )
     if (write_erg == 1)    /* Lesen der Antwort*/
     {
       result  = recv(sock,empfbuf,1,0);
-      /* printf("Vom DL erhaltene Reset-Bestaetigung: %x\n",empfbuf[0]); */
       fprintf(fp_varlogfile,"%s - %s -- Vom DL erhaltene Reset-Bestaetigung: %x.\n",sDatum, sZeit,empfbuf[0]);
     }
     else
@@ -4482,7 +4372,6 @@ int reset_datenpuffer_ip(int do_reset )
   }
   else
   {
-     /* printf("Kein Data-Reset! \n"); */ /* reset-variable=%d \n",reset); */
     fprintf(fp_varlogfile,"%s - %s -- Kein Data-Reset! \n",sDatum, sZeit);
   }
   return 1;
@@ -4605,7 +4494,6 @@ int ip_handling(int sock)
     return -1;
 
   uvr_modus = empfbuf[0];
-  //  printf("\nModus gelesen: %.2hX \n", uvr_modus);
 
   return 0;
 }
