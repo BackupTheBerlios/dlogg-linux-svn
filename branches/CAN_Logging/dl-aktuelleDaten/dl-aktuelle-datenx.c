@@ -42,7 +42,7 @@
  * 								csv-Ausgabe                                  *
  * Version 0.8.2	25.02.2008  --rrd Unterstuetzung                         *
  * Version 0        xx.xx.2010  CAN-Logging                                  *
- *                  $Id: dl-lesenx.c 92 2011-01-11 20:36:49Z roemix $  *
+ *                  $Id: *
  *****************************************************************************/
 
 #include <sys/types.h>
@@ -921,6 +921,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       {
         fprintf(stderr,"\n    UVR1611 / UVR61-3 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
         fprintf(stderr,"    Version 0.9.0 vom 02.08.2010 \n");
+		printf("    $Id: \n");
         printf("\n");
         return -1;
         }
