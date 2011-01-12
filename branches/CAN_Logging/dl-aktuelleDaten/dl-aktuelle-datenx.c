@@ -42,6 +42,7 @@
  * 								csv-Ausgabe                                  *
  * Version 0.8.2	25.02.2008  --rrd Unterstuetzung                         *
  * Version 0        xx.xx.2010  CAN-Logging                                  *
+ *                  $Id: dl-lesenx.c 92 2011-01-11 20:36:49Z roemix $  *
  *****************************************************************************/
 
 #include <sys/types.h>
@@ -2581,7 +2582,10 @@ void write_CSVCONSOLE(int regler, time_t datapoint_time)
     for (i=1;i<=2;i++)
     {
       if (WMReg[i] == 1)
-        fprintf(stdout," %.1f;%.0f%.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
+		if (W_Mwh[i] > 0 )
+			fprintf(stdout," %.1f;%.0f%3.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
+		else
+			fprintf(stdout," %.1f;%.0f%.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
       else
         fprintf(stdout,"  ---;  ---;");
       }
@@ -2603,7 +2607,7 @@ void write_CSVCONSOLE(int regler, time_t datapoint_time)
     if (WMReg[1] == 1)
     {
       fprintf(stdout,"%4d;",akt_daten[18]*0x100 + akt_daten[17]);
-      fprintf(stdout," %.1f;%.1f;%.1f;",Mlstg[1], W_Mwh[1],W_kwh[1]);
+      fprintf(stdout," %.1f;%.0f;%.1f;",Mlstg[1], W_Mwh[1],W_kwh[1]);
     }
     else
       fprintf(stdout,"  ---;  ---;  ---;  ---;");
