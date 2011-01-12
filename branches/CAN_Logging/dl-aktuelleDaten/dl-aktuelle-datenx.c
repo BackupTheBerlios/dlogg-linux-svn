@@ -2584,7 +2584,7 @@ void write_CSVCONSOLE(int regler, time_t datapoint_time)
     {
       if (WMReg[i] == 1)
 		if (W_Mwh[i] > 0 )
-			fprintf(stdout," %.1f;%.0f%3.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
+			fprintf(stdout," %.1f;%.0f%03.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
 		else
 			fprintf(stdout," %.1f;%.0f%.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
       else
