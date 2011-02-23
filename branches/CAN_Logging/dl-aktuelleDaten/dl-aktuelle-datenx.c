@@ -78,6 +78,7 @@
 extern char *optarg;
 extern int optind, opterr, optopt;
 
+int start_socket(WINDOW *fenster1, WINDOW *fenster2);
 int check_arg_getopt(int arg_c, char *arg_v[]);
 int check_pruefsumme(void);
 void print_pruefsumme_not_ok(UCHAR pruefz_berech, UCHAR pruefz_read);
@@ -92,6 +93,7 @@ int write_header2CSV(int regler, FILE *fp);
 void write_CSVFile(int regler, FILE *fp, time_t datapoint_time);
 void write_CSVCONSOLE(int regler, time_t datapoint_time);
 void write_rrd(int regler);
+void write_list(int regler);
 void berechne_werte(int anz_regler);
 void temperaturanz(int regler);
 void ausgaengeanz(int regler);
@@ -145,6 +147,7 @@ struct tm *merk_zeit;
 time_t dauer;  /* -t */
 int csv_output;
 int rrd_output;
+int list_output;
 int ip_zugriff;
 int usb_zugriff;
 int sock;
@@ -156,14 +159,14 @@ UCHAR datenrahmen;
 int main(int argc, char *argv[])
 {
   fp_logfile=NULL; fp_varlogfile=NULL; fp_csvfile=NULL; fp_csvfile_2=NULL;
-  csv_output=0;rrd_output=0;
+  csv_output=0;rrd_output=0;list_output=0;
   struct termios newtio;  /* will be used for new port settings */
 
   UCHAR uvr_modus_tmp, sendbuf[1], sendbuf_can[2];    /*  sendebuffer fuer die Request-Commandos*/
   unsigned char empfbuf[256];
   int send_bytes = 0, erg_check_arg ,result, ip_first;
   int pruefz_ok = 0, t_count, anzahl_can_rahmen = 0;
-  int i, j=2;
+  int i, j=2, sr=0;
 
   WINDOW *fenster1=NULL, *fenster2=NULL;
   PANEL  *panel1=NULL, *panel2=NULL;
@@ -184,16 +187,16 @@ int main(int argc, char *argv[])
   if(dauer==-1)
     {
       dauer = 30;
-      if (!rrd_output)
+      if ( (!rrd_output) && (!list_output) )
         fprintf(stderr," kein update-Zeitintervall angegeben - auf %d gesetzt\n",(int)dauer);
     }
 
   /*************************************************************************/
   /* aktiviert die locale Umgebung Komma oder Punkt als Dezimaltrenner :   */
-  if (!rrd_output)
+  if ( (!rrd_output) && (!list_output) )
     setlocale(LC_ALL, "");
 
-  if ( (dauer != 0) && (!rrd_output) )
+  if ( (dauer != 0) && (!rrd_output) && (!list_output))
   {
     if ( lies_conf() == 1)
       ext_bezeichnung = TRUE;
@@ -209,7 +212,7 @@ int main(int argc, char *argv[])
     bool_farbe=FALSE;
   }
 
-  if ((!csv_output) && (dauer != 0) && (!rrd_output))
+  if ((!csv_output) && (dauer != 0) && (!rrd_output)  && (!list_output))
   {
     initscr();                                /* initialisieren von ncurses */
     if (bool_farbe)
@@ -237,28 +240,35 @@ int main(int argc, char *argv[])
   /* IP-Zugriff  - IP-Adresse und Port sind manuell gesetzt!!! */
   if (ip_zugriff && !usb_zugriff)
   {
-    /* PF_INET instead of AF_INET - because of Protocol-family instead of address family !? */
-    sock = socket(PF_INET, SOCK_STREAM, 0);
-    if (sock == -1)
-    {
-      perror("socket failed()");
-      do_cleanup(fenster1, fenster2);
-      return 2;
-    }
-    if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
-    {
-      perror("connect failed()");
-      do_cleanup(fenster1, fenster2);
-      return 3;
-    }
-    if (ip_handling(sock) == -1)
-    {
-      fprintf(stderr, "%s: Fehler im Initialisieren der IP-Kommunikation\n", argv[0]);
-      do_cleanup(fenster1, fenster2);
-      return 4;
-    }
-      //  close(sock); /* IP-Socket schliessen */
+	sr = start_socket(fenster1, fenster2);
+	if (sr > 1)
+	{
+		return sr;
+	}
   } /* Ende IP-Zugriff */
+  // {
+    // /* PF_INET instead of AF_INET - because of Protocol-family instead of address family !? */
+    // sock = socket(PF_INET, SOCK_STREAM, 0);
+    // if (sock == -1)
+    // {
+      // perror("socket failed()");
+      // do_cleanup(fenster1, fenster2);
+      // return 2;
+    // }
+    // if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
+    // {
+      // perror("connect failed()");
+      // do_cleanup(fenster1, fenster2);
+      // return 3;
+    // }
+    // if (ip_handling(sock) == -1)
+    // {
+      // fprintf(stderr, "%s: Fehler im Initialisieren der IP-Kommunikation\n", argv[0]);
+      // do_cleanup(fenster1, fenster2);
+      // return 4;
+    // }
+      // //  close(sock); /* IP-Socket schliessen */
+  // } /* Ende IP-Zugriff */
   else  if (usb_zugriff && !ip_zugriff)
   {
     /************************************************************************/
@@ -474,7 +484,18 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
 					{
 						if ( akt_daten[2] == (akt_daten[0] + akt_daten[1]) % 0x100 )
 						{
-							fprintf(stderr, " CAN-Logging: %d. Schlafenszeit fuer %d Sekunden\n",i , akt_daten[1]);
+						//	fprintf(stderr, " CAN-Logging: %d. Schlafenszeit fuer %d Sekunden\n",i , akt_daten[1]);
+							sleep(akt_daten[1]);
+							if ( shutdown(sock,SHUT_RDWR) == -1 ) /* IP-Socket schliessen */
+							{
+								zeitstempel();
+								fprintf(stderr, "\n %s Fehler beim Schliessen der IP-Verbindung!\n", sZeit);
+							}
+							sr = start_socket(fenster1, fenster2);
+							if (sr > 1)
+							{
+								return sr;
+							}
 							i++;
 							sleep(akt_daten[1]);
 							uvr_modus_tmp = get_modulmodus();
@@ -675,6 +696,17 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
           dauer = 0;
           c = 'q';
         }
+        if (list_output)
+        {
+          write_list(1);
+          if (uvr_modus == 0xD1)  /* zwei Regler vorhanden */
+          {
+            berechne_werte(2);
+            write_list(2);
+          }
+          dauer = 0;
+          c = 'q';
+        }
         if (csv_output)  /* in Datei schreiben */
         {
           func_csv_output(1, daten_zeitpunkt, fenster1, fenster2);
@@ -817,6 +849,34 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
   return(0);
 } /* Ende main() */
 
+/* socket erzeugen und Verbindung aufbauen */
+int start_socket(WINDOW *fenster1, WINDOW *fenster2)
+{
+    sock = socket(PF_INET, SOCK_STREAM, 0);
+    if (sock == -1)
+    {
+      perror("socket failed()");
+      do_cleanup(fenster1, fenster2);
+      return 2;
+    }
+
+    if (connect(sock, (const struct sockaddr *)&SERVER_sockaddr_in, sizeof(SERVER_sockaddr_in)) == -1)
+    {
+      perror("connect failed()");
+      do_cleanup(fenster1, fenster2);
+      return 3;
+    }
+
+    if (ip_handling(sock) == -1)
+    {
+      fprintf(stderr, "Fehler im Initialisieren der IP-Kommunikation!\n");
+      do_cleanup(fenster1, fenster2);
+      return 4;
+    }
+	
+	return 1;
+}
+
 /* Aufraeumen und alles Schliessen */
 int do_cleanup(WINDOW *fenster1, WINDOW *fenster2)
 {
@@ -854,7 +914,7 @@ static int print_usage()
 {
   fprintf(stderr,"\n    UVR1611 / UVR61-3 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
   fprintf(stderr,"    Version 0.9.0 vom 02.08.2010 \n");
-  fprintf(stderr,"\ndl-aktuelle-datenx (-p USB-Port | -i IP:Port) [-t sek] [-r DR] [-h] [-v] [--csv] [--rrd] \n");
+  fprintf(stderr,"\ndl-aktuelle-datenx (-p USB-Port | -i IP:Port) [-t sek] [-r DR] [-h] [-v] [--csv] [--rrd] [--list] \n");
   fprintf(stderr,"    -p USB-Port -> Angabe des USB-Portes,\n");
   fprintf(stderr,"                   an dem der D-LOGG angeschlossen ist.\n");
   fprintf(stderr,"    -i IP:Port  -> Angabe der IP-Adresse und des Ports,\n");
@@ -869,6 +929,7 @@ static int print_usage()
   fprintf(stderr,"                   (Nur zutreffend bei CAN-Logging.)\n\n");
   fprintf(stderr,"          --csv -> im CSV-Format speichern\n");
   fprintf(stderr,"          --rrd -> output eines RRD tool strings\n");
+  fprintf(stderr,"         --list -> output einer Liste\n");
   fprintf(stderr,"          -h    -> diesen Hilfetext\n");
   fprintf(stderr,"          -v    -> Versionsangabe\n");
   fprintf(stderr,"\n");
@@ -900,6 +961,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
     {
       {"csv", 0, 0, 0},
       {"rrd", 0, 0, 0},
+      {"list", 0, 0, 0},
       {0, 0, 0, 0}
     };
 
@@ -920,7 +982,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         fprintf(stderr,"\n    UVR1611 / UVR61-3 aktuelle Daten lesen vom D-LOGG USB oder BL-NET\n");
-        fprintf(stderr,"    Version 0.9.0 vom 02.08.2010 \n");
+        fprintf(stderr,"    Version 0.9.x vom xx.xx.2011 \n");
 		printf("    $Id$ \n");
         printf("\n");
         return -1;
@@ -949,42 +1011,27 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       }
       case 'i': /* 05.02. neu */
       {
-        if ( optarg  && strlen(optarg) < 22 && strlen(optarg) > 6)
+        struct hostent* hostinfo = gethostbyname(strtok(optarg,trennzeichen));
+        if(0 == hostinfo)
         {
-          char * c = NULL;
-          c=strtok(optarg,trennzeichen);
-          if ( c )
-          {
-            SERVER_sockaddr_in.sin_addr.s_addr = inet_addr(c);
-            c=strtok(NULL,trennzeichen);
-            if ( c )
-              SERVER_sockaddr_in.sin_port = htons((unsigned short int) atol(c) );
-            else
-            {
-              fprintf(stderr," Port-Angabe falsch: %s\n",optarg);
-              return -1;
-            }
-          }
-          else
-          {
-            fprintf(stderr," IP-Adresse falsch: %s\n",optarg);
-            return -1;
-          }
-          SERVER_sockaddr_in.sin_family = AF_INET;
-  /*      fprintf(stderr,"\n Adresse:port gesetzt: %s:%d\n", inet_ntoa(SERVER_sockaddr_in.sin_addr),
-          ntohs(SERVER_sockaddr_in.sin_port)); */
-          i_is_set=1;
-          ip_zugriff = 1;
-        }
-        else
-        {
-          if ( optarg)
-            fprintf(stderr," IP-Adresse falsch: %s\n",optarg);
-          else
-            fprintf(stderr," keine IP-Adresse angegeben!\n");
+          fprintf(stderr," IP-Adresse konnte nicht aufgeloest werden: %s\n",optarg);
           print_usage();
           return -1;
-        }
+        } 
+        else 
+        {
+          SERVER_sockaddr_in.sin_addr = *(struct in_addr*)*hostinfo->h_addr_list;
+          // SERVER_sockaddr_in.sin_port = htons((unsigned short int) atol(strtok(NULL,trennzeichen)));
+			char* port_par =  strtok(NULL,trennzeichen);
+			if ( port_par == NULL )
+				port_par = "40000";
+			SERVER_sockaddr_in.sin_port = htons((unsigned short int) atol(port_par));
+          SERVER_sockaddr_in.sin_family = AF_INET;
+          fprintf(stderr,"\n Adresse:port gesetzt: %s:%d\n", inet_ntoa(SERVER_sockaddr_in.sin_addr),
+          ntohs(SERVER_sockaddr_in.sin_port));
+          i_is_set=1;
+          ip_zugriff = 1;
+		}
         break;
       }
       case 't':
@@ -1017,6 +1064,10 @@ int check_arg_getopt(int arg_c, char *arg_v[])
         if (  strncmp( long_options[option_index].name, "rrd", 3) == 0 )
         {
           rrd_output = 1;  /* RRD */
+        }
+        if (  strncmp( long_options[option_index].name, "list", 4) == 0 )
+        {
+          list_output = 1;  /* Liste */
         }
         break;
       case 'r':
@@ -2702,6 +2753,143 @@ void write_rrd(int regler)
 
       if (i==1)
         fprintf(stdout,":");
+    }
+  }
+
+  if (uvr_typ == UVR61_3) /* UVR61-3 */
+  {
+    fprintf(stdout,"%d:%d:",AUSG[1],DZStufe[1]);
+    fprintf(stdout,"%d:%d:",AUSG[2],AUSG[3]);
+
+    if (tstbit(akt_daten[15],7) == 0) /* Analogausgang */
+    {
+      temp_byte = akt_daten[15] & ~(1 << 8); /* oberestes Bit auf 0 setzen */
+      fprintf(stdout,"%.1f:",(float)temp_byte / 10);
+    }
+    else
+      fprintf(stdout,"0.0:"); /* Analogausgang nicht aktiv */
+
+    if (WMReg[1] == 1)
+    {
+      fprintf(stdout,"%d:",akt_daten[18]*0x100 + akt_daten[17]);
+      fprintf(stdout,"%.1f:%.1f:%.1f:",Mlstg[1], W_Mwh[1],W_kwh[1]);
+    }
+    else
+      fprintf(stdout,"0:0:0:0:0");
+  }
+
+  fprintf(stdout,"\n");
+  uvr_typ = temp_uvr_typ;
+}
+
+
+/* Ausgabe der Werte als Liste am Bildschirm */
+void write_list(int regler)
+{
+  int i=0;
+  int anzSensoren = 16;
+  UCHAR temp_byte = 0;
+  UCHAR temp_uvr_typ=0;
+
+  temp_uvr_typ = uvr_typ;
+  if (regler == 2)  /* 2. Geraet vorhanden */
+    uvr_typ = uvr_typ2;
+//printf("UVR-Typ: %x\n",uvr_typ);
+  switch(uvr_typ)
+  {
+    case UVR1611: anzSensoren = 16; break; /* UVR1611 */
+    case UVR61_3: anzSensoren = 6; break; /* UVR61-3 */
+  }
+
+  for(i=1;i<=anzSensoren;i++) /* sensor-Bezeichnungen */
+  {
+    switch(SENS_Art[i])
+    {
+      case 0: fprintf(stdout,"0:"); break; /* nicht belegt */
+      case 1: fprintf(stdout,"Sensor%d = %f\n",i,SENS[i]); break; /* digitaler Eingang */
+      case 2:
+      case 3: fprintf(stdout,"Sensor%d = %.1f\n",i,SENS[i]); break; /* Temp / flow */
+      case 6: fprintf(stdout,"Sensor%d = %.0f\n",i,SENS[i]); break;
+      case 7: fprintf(stdout,"Sensor%d = %.1f\n",i,SENS[i]); break;
+      case 9: fprintf(stdout,"Sensor%d = %1.0f\n",i,SENS[i]); break; /* digitaler Eingang */
+      case 10: fprintf(stdout,"Sensor%d = %.1f\n",i,SENS[i]); break;
+      case 15: fprintf(stdout,"Sensor%d = %.1f\n",i,SENS[i]); break;
+    }
+  }
+
+  if (uvr_typ == UVR1611)
+  {
+    /* A1/A2 */
+    for (i=1;i<=2;i++)  /* Ausgangs-Bezeichnungen mit Drehzahl */
+    {
+#if DEBUG>3
+      fprintf(stderr,"A%d=%d  dzr=%d  dzs=%d\n",i,AUSG[i],DZR[i],DZStufe[i]);
+#endif
+      if (DZR[i] == 1 )
+	  {
+        fprintf(stdout,"Ausgang%d = %d\n",i,AUSG[i]);
+        fprintf(stdout,"Drehzahlstufe%d = %d\n",i,DZStufe[i]);
+	  }
+      else
+	  {
+        fprintf(stdout,"Ausgang%d = %d\n",i,AUSG[i]);
+        fprintf(stdout,"Drehzahlstufe%d = %d\n",i,DZStufe[i]);
+	  }
+//        fprintf(stdout,"%d:%d:",AUSG[i],DZStufe[i]);
+        /*  fprintf(fp,"%2d; --;",AUSG[i]); */
+    }
+    /* A3-A5 */
+    for (i=3;i<=5;i++)  /* Ausgangs-Bezeichnungen */
+    {
+#if DEBUG>3
+      fprintf(stderr,"A%2d=%2d\n",i,AUSG[i]);
+#endif
+      fprintf(stdout,"Ausgang%d = %d\n",i,AUSG[i]);
+    }
+    for (i=6;i<=7;i++)  /* Ausgangs-Bezeichnungen mit Drehzahl */
+    {
+#if DEBUG>3
+      fprintf(stderr,"A%d=%d dzr=%d  dzs=%d\n",i,AUSG[i],DZR[i],DZStufe[i]);
+#endif
+      if (DZR[i] == 1 )
+	  {
+        fprintf(stdout,"Ausgang%d = %d\n",i,AUSG[i]);
+        fprintf(stdout,"Drehzahlstufe%d = %d\n",i,DZStufe[i]);
+	  }
+      else
+	  {
+        fprintf(stdout,"Ausgang%d = %d\n",i,AUSG[i]);
+        fprintf(stdout,"Drehzahlstufe%d = %d\n",i,DZStufe[i]);
+	  }
+    }
+    for (i=8;i<=13;i++)   /* Ausgangs-Bezeichnungen */
+    {
+#if DEBUG>3
+      fprintf(stderr,"A%2d=%2d\n",i,AUSG[i]);
+#endif
+      fprintf(stdout,"Ausgang%d = %d\n",i,AUSG[i]);
+    }
+    for (i=1;i<=2;i++)
+    {
+      if (WMReg[i] == 1)
+	  {
+        fprintf(stdout,"Momentanleistung%d = %.1f\n",i,Mlstg[i]);
+        fprintf(stdout,"Leistung%d (MW) = %.0f\n",i, W_Mwh[i]);
+        fprintf(stdout,"Leistung%d (kW) = %.1f\n",i,W_kwh[i]);
+	  }
+      else
+	  {
+        fprintf(stdout,"Momentanleistung%d = %.1f\n",i,Mlstg[i]);
+        fprintf(stdout,"Leistung%d (MW) = %.0f\n",i, W_Mwh[i]);
+        fprintf(stdout,"Leistung%d (kW) = %.1f\n",i,W_kwh[i]);
+	  }
+
+      if (i==1)
+	  {
+        fprintf(stdout,"Momentanleistung%d = %.1f\n",i+1,Mlstg[i]);
+        fprintf(stdout,"Leistung%d (MW) = %.0f\n",i+1, W_Mwh[i]);
+        fprintf(stdout,"Leistung%d (kW) = %.1f\n",i+1,W_kwh[i]);
+	  }
     }
   }
 
