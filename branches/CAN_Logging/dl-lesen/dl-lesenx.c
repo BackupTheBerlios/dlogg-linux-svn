@@ -480,7 +480,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
       case 'v':
       {
         printf("\n    UVR1611/UVR61-3 Daten lesen vom D-LOGG USB / BL-Net \n");
-        printf("    Version 0.9.1 vom 23.02.2011 \n");
+        printf("    Version 0.9.2 vom 05.08.2011 \n");
 		printf("    $Id$ \n");
         return 0;
       }
@@ -690,7 +690,11 @@ int erzeugeLogfileName_CAN(UCHAR ds_monat, UCHAR ds_jahr, int anzahl_Rahmen)
   pLogFileName[7] = LogFileName_7;
   pLogFileName[8] = LogFileName_8;
   
-  strcpy(temp_Log[1],"Log1/");
+  if ( anzahl_Rahmen == 1)
+    strcpy(temp_Log[1],"Log/");
+  else
+    strcpy(temp_Log[1],"Log1/");
+	
   strcpy(temp_Log[2],"Log2/");
   strcpy(temp_Log[3],"Log3/");
   strcpy(temp_Log[4],"Log4/");
