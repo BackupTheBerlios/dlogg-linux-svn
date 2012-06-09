@@ -73,7 +73,7 @@
 #define UVR61_3 0x90
 #define UVR1611 0x80
 
-//#define DEBUG 1
+// #define DEBUG 4
 
 extern char *optarg;
 extern int optind, opterr, optopt;
@@ -753,6 +753,8 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
       }
       for (i=0;i<115;i++) /* alles wieder auf 0 setzen */
         akt_daten[i]=0x0;
+	  if (dauer == 0)
+	    break;
     } /* else if (akt_daten[0] == UVR1611 || akt_daten[0] == UVR61_3) */
     else
     { /* some other problem - retry immediately */
@@ -765,11 +767,11 @@ fprintf(stderr, " CAN-Logging: anzahl_can_rahmen -> %d \n", anzahl_can_rahmen);
         halfdelay(10);
         c=getch();
       }
-      if (dauer > 0)
+      if (dauer >= 0)
       {
         jetzt=time(0);
         diff_zeit=difftime(jetzt, beginn);
-        if (dauer > 0)
+        if (dauer >= 0)
         {
           zeitstempel();
           if ((!csv_output) && (dauer != 0))
@@ -2509,7 +2511,10 @@ void write_CSVFile(int regler, FILE *fp, time_t datapoint_time)
     {
       if (WMReg[i] == 1)
 //        fprintf(fp," %.1f;%.1f;", W_Mwh[i],W_kwh[i]);
-        fprintf(fp," %.1f;%.0f%.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
+		if (W_Mwh[i] > 0 )
+            fprintf(fp," %.1f;%.0f%05.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
+        else
+			fprintf(fp," %.1f;%.0f%.1f;",Mlstg[i], W_Mwh[i],W_kwh[i]);
       else
         fprintf(fp,"  ---;  ---;");
     }

@@ -47,7 +47,7 @@
 
 #include "../dl-lesen.h"
 
-//#define DEBUG 4
+// #define DEBUG 4
 
 #define BAUDRATE B115200
 #define UVR61_3 0x5A
@@ -1382,7 +1382,7 @@ int kopfsatzlesen(void)
   if (pruefz != merk_pruefz )
     {
       fprintf(stderr, " Durchlauf #%i -  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf, pruefz, merk_pruefz);
-      return -1;
+//      return -1;
     }
   else
     fprintf(stderr, "Anzahl Durchlaeufe Pruefziffer Kopfsatz: %i\n",durchlauf);
@@ -1546,7 +1546,9 @@ int kopfsatzlesen(void)
 	case -2: zeitstempel();
             fprintf(fp_varlogfile,"%s - %s -- Keine Daten vorhanden.\n",sDatum, sZeit);
             return -1;
-    default: printf(" Anzahl Datensaetze aus Kopfsatz: %i\n",anz_ds); break;
+    default: if (uvr_modus != 0xDC) 
+				printf(" Anzahl Datensaetze aus Kopfsatz: %i\n",anz_ds); 
+			break;
   }
 
   return anz_ds;
@@ -2765,6 +2767,7 @@ int datenlesen_DC(int anz_datensaetze)
   int i=0, j=0, y=0, merk_i=0, fehlerhafte_ds=0, result, lowbyte, middlebyte, merkmiddlebyte, tmp_erg = 0;
   int Bytes_for_0xDC = 524, monatswechsel = 0, anzahl_can_rahmen = 0, marker = 0;
   int pruefsum_check = 0;
+  int Speicherueberlauf = 0; /* = 1 wenn Ringspeicher komplett voll und wird ueberschrieben */
   u_DS_CAN u_dsatz_can[1];
   DS_Winsol dsatz_winsol[8];  /* 8 Datensaetze moeglich */
   DS_Winsol *puffer_dswinsol = &dsatz_winsol[0];
@@ -2773,6 +2776,16 @@ int datenlesen_DC(int anz_datensaetze)
   UCHAR empfbuf[18];
   UCHAR tmp_buf[525];
 
+#if DEBUG > 3
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+  FILE *fp_logfile_debug=NULL;
+  char DebugFile[] = "debug.log";
+  FILE *fp_logfile_debug2=NULL;
+  char DebugFile2[] = "debug2.log";
+  u_DS_CAN *puffer_u_dsatz_can = &u_dsatz_can[0];
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+#endif
+  
   modTeiler = 0x100;
   i = 0; /* Gesamtdurchlaufzaehler mit 0 initialisiert */
   merk_i = 0; /* Bei falscher Pruefziffer den Datensatz bis zu fuenfmal wiederholt lesen */
@@ -2780,7 +2793,21 @@ int datenlesen_DC(int anz_datensaetze)
   lowbyte = 0;
   middlebyte = 0;
   merkmiddlebyte = middlebyte;
-  
+
+#if DEBUG > 3
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+  if ((fp_logfile_debug=fopen(DebugFile,"w")) == NULL) /* dann Neuerstellung der Logdatei */
+  {
+     printf("Debug-Datei %s konnte nicht erstellt werden\n",DebugFile);
+  }
+		
+  if ((fp_logfile_debug2=fopen(DebugFile2,"w")) == NULL) /* dann Neuerstellung der Logdatei */
+  {
+     printf("Debug2-Datei %s konnte nicht erstellt werden\n",DebugFile);
+  }
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+#endif
+
   for(i=1;i<525;i++)
   {
     u_dsatz_can[0].all_bytes[i] = 0xFF;
@@ -2828,7 +2855,12 @@ int datenlesen_DC(int anz_datensaetze)
   anzahl_can_rahmen = empfbuf[0];
 #if DEBUG > 3
   fprintf(stderr,"Anzahl CAN-Datenrahmen: %d. \n",anzahl_can_rahmen); 
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+  fprintf(fp_logfile_debug2,"Anzahl CAN-Datenrahmen: %d. \n",anzahl_can_rahmen); 
 #endif
+
+  if ( *start_adresse > 0 || *(start_adresse+1) > 0 || *(start_adresse+2) > 0 )
+	Speicherueberlauf = 1;  /* Der Ringspeicher im BL-Net ist voll */
 
   /* fuellen des Sendebuffer - 6 Byte */
   sendbuf[0] = DATENBEREICHLESEN;
@@ -2869,12 +2901,23 @@ int datenlesen_DC(int anz_datensaetze)
 			   break;
   }
 
+#if DEBUG > 3
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+  fprintf(fp_logfile_debug2,"Anzahl Datensaetze: %d. \n",anz_datensaetze); 
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+#endif
+
   for(i=0;i<anz_datensaetze;i++)
   {
     sendbuf[5] = (sendbuf[0] + sendbuf[1] + sendbuf[2] + sendbuf[3] + sendbuf[4]) % modTeiler;  /* Pruefziffer */
 
 /* DEBUG */
 // fprintf(stderr," CAN-Logging-Test: %04d. Startadresse: %x %x %x - Endadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3],*end_adresse,*(end_adresse+1),*(end_adresse+2));
+
+#if DEBUG > 3
+/*  ##### Debug CAN-Rahmen ########  */  
+  fprintf(fp_logfile_debug2," CAN-Logging-Debug: %04d. Startadresse: %x %x %x - Endadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3],*end_adresse,*(end_adresse+1),*(end_adresse+2)); 
+#endif
 
     if (usb_zugriff)
     {
@@ -3412,6 +3455,10 @@ int datenlesen_DC(int anz_datensaetze)
 		        tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile_2);
 				copy_UVR2winsol_1611_CAN( &u_dsatz_can[0].DS_CAN_3.DS_CAN[2], &dsatz_winsol[0] );
 		        tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile_3);
+#if DEBUG > 3
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+	tmp_erg = fwrite(puffer_u_dsatz_can,marker,1,fp_logfile_debug);
+#endif
 		        break;
 	    case 4: copy_UVR2winsol_1611_CAN( &u_dsatz_can[0].DS_CAN_4.DS_CAN[0], &dsatz_winsol[0] );
 		        tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile);
@@ -3432,6 +3479,9 @@ int datenlesen_DC(int anz_datensaetze)
 		        tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile_4);
 				copy_UVR2winsol_1611_CAN( &u_dsatz_can[0].DS_CAN_5.DS_CAN[4], &dsatz_winsol[0] );
 		        tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile_5);
+#if DEBUG > 3
+	tmp_erg = fwrite(puffer_u_dsatz_can,marker,1,fp_logfile_debug);
+#endif
 		        break;
 	    case 6: copy_UVR2winsol_1611_CAN( &u_dsatz_can[0].DS_CAN_6.DS_CAN[0], &dsatz_winsol[0] );
 		        tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile);
@@ -3547,18 +3597,18 @@ int datenlesen_DC(int anz_datensaetze)
                    case 2: sendbuf[1] = 0x80; break;
                    case 3: sendbuf[1] = 0x40; break;
                 }
-				if ( y == 0 )
-				    y++;
-				else
-				{
-				    sendbuf[2] = sendbuf[2] + 0x02;
-					y++;
-				}
-                if ( sendbuf[2] >= 0xFE ) /* das highbyte muss erhoeht werden */
+                if (( sendbuf[2] == 0xFE ) && ( sendbuf[1] != 0xc0 )) /* das highbyte muss erhoeht werden */
                 {
                     sendbuf[2] = 0x00;
                     sendbuf[3] = sendbuf[3] + 0x01;
                 }
+				else 
+				{
+					if ( sendbuf[1] != 0xc0 )
+					{
+						sendbuf[2] = sendbuf[2] + 0x02;
+					}
+				}
 				break;
 		case 4: sendbuf[1] = 0x00;
                 sendbuf[2] = sendbuf[2] + 0x02;
@@ -3648,6 +3698,37 @@ int datenlesen_DC(int anz_datensaetze)
 		sendbuf[1] = 0x00;
 		sendbuf[2] = 0x00;
 		sendbuf[3] = 0x00;
+		Speicherueberlauf = 0;
+	  }
+	  
+	  if ( Speicherueberlauf == 0 )
+	  {
+		if ( *(end_adresse+2) == sendbuf[3] || *(end_adresse+2) < sendbuf[3] )
+		{
+			if ( *(end_adresse+1) == sendbuf[2] )
+			{
+#if DEBUG > 3
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+  fprintf(fp_logfile_debug2," Mittel-Byte Abbruch: %04d. Startadresse: %x %x %x - Endadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3],*end_adresse,*(end_adresse+1),*(end_adresse+2)); 
+#endif
+				if ( *end_adresse == sendbuf[1] || *end_adresse < sendbuf[1] )
+				{
+#if DEBUG > 3
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+  fprintf(fp_logfile_debug2," Abbruch erreicht: %04d. Startadresse: %x %x %x - Endadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3],*end_adresse,*(end_adresse+1),*(end_adresse+2)); 
+#endif
+					break;
+				}
+			}
+			else if ( *(end_adresse+1) < sendbuf[2] )
+			{
+#if DEBUG > 3
+/*  ##### Debug 3-CAN-Rahmen ########  */  
+  fprintf(fp_logfile_debug2," Abbruch MittelByte-EA < MittelByte-SA : %04d. Startadresse: %x %x %x - Endadresse: %x %x %x\n",i+1,sendbuf[1],sendbuf[2],sendbuf[3],*end_adresse,*(end_adresse+1),*(end_adresse+2)); 
+#endif
+				break;
+			}
+		}
 	  }
 		
       monatswechsel = 0;
@@ -3670,8 +3751,7 @@ int datenlesen_DC(int anz_datensaetze)
       }
     }
   }
-
-  return anz_datensaetze - fehlerhafte_ds;
+  return i + 1 - fehlerhafte_ds;
 }
 
 

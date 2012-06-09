@@ -11,9 +11,11 @@ der jeweilig abzufragende CAN-Datenrahmen anzugeben (Option -r DR).
 getestete Umgebung:
 debian Linux 3.1 Sarge mit Kernel 2.6 (Standard-Kernel).
 debian Linux 4.0 Etch mit Kernel 2.6 (Standard-Kernel).
-debian linux 5.0 Lenny mit Kernel 2.6 (Standard-Kernel).
-Kubuntu 7.04, 7.10, 8.04
-ARM-Architektur (S3C2440 ARM9 - FriendlyARM Mini2440)
+debian linux 5.0 Lenny (64 Bit) mit Kernel 2.6 (Standard-Kernel).
+(K)Ubuntu 32- und 64 Bit
+ARM-Architektur:
+- S3C2440 ARM9 - FriendlyARM Mini2440
+- OMAP4430 Processor - PandaBoard
 
 Kernel 2.4 mit USB-Unterstuetzung lief auch, aber ich empfehle auf jeden Fall 
 den 2.6er Kernel.
@@ -94,4 +96,4 @@ Programmierung von wesentlichen Teilen. Ebenfalls vielen Dank an die Firma
 Technische Alternative Elektronische Steuerungsgeraetegesellschaft m.b.H 
 (Oesterreich) fuer ihre Unterstuetzung.
 
-(c)2006,2007,2008,2010 H. Roemer
+(c)2006,2007,2008,2010,2011 H. Roemer
