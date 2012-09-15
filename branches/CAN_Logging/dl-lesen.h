@@ -103,6 +103,52 @@ typedef struct {
   UCHAR mwh2[2];
 } DS_Winsol;
 
+//CAN_BC
+typedef struct {
+  /* timestamp */
+  UCHAR tag;
+  UCHAR std;
+  UCHAR min;
+  UCHAR sek;
+
+  UCHAR digbyte1;
+  UCHAR digbyte2;
+
+  /* Sensor-Eingaenge */
+#ifdef NEW_WSOL_TEMP
+  UCHAR sensT[14][2];
+#else
+  UCHAR t1[2];
+  UCHAR t2[2];
+  UCHAR t3[2];
+  UCHAR t4[2];
+  UCHAR t5[2];
+  UCHAR t6[2];
+  UCHAR t7[2];
+  UCHAR t8[2];
+  UCHAR t9[2];
+  UCHAR t10[10]; /*leer*/
+
+#endif
+
+  /* WMZ 1/2 aktiv in bit 1 und bit2 */
+  UCHAR wmzaehler_reg;
+
+  /* Solar1: momentane Leistung, Waermemenge kWh/MWh */
+  UCHAR mlstg1[4];
+  UCHAR kwh1[2];
+  UCHAR mwh1[2];
+
+  /* Solar1: momentane Leistung, Waermemenge kWh/MWh */
+  UCHAR mlstg2[4];
+  UCHAR kwh2[2];
+  UCHAR mwh2[2];
+   /* Solar1: momentane Leistung, Waermemenge kWh/MWh */
+  UCHAR mlstg3[4];
+  UCHAR kwh3[2];
+  UCHAR mwh3[2];
+} DS_CANBC;
+
 /* Datenstruktur des Datensatzes fuer Winsol / Solstat (Logdatei) UVR61-3   */
 /* DSWinsol_UVR61_3 */
 typedef struct {
@@ -284,6 +330,49 @@ typedef struct{
     the_datum_zeit datum_zeit;
 } s_DS_CAN;
 
+/* Datenstuktur des Datensatzes CAN-BC          */
+/* aus dem Bootloader kommend                   */
+typedef struct{
+  /* Sensor-Eingaenge */
+#ifdef NEW_WSOL_TEMP
+    UCHAR sensT[12][2];
+#else
+    UCHAR t2[2];
+    UCHAR t3[2];
+    UCHAR t4[2];
+    UCHAR t5[2];
+    UCHAR t6[2];
+    UCHAR t7[2];
+    UCHAR t8[2];
+    UCHAR t9[2];
+    UCHAR t10[2];
+    UCHAR t11[2];
+    UCHAR t12[2];
+#endif
+    /* Digitale Werte (bei CAN-BC nicht genutzt */
+    UCHAR digbyte1;
+    UCHAR digbyte2;
+
+	/* unbenutzt */
+	UCHAR res[4];
+	
+    /* WMZ 1/2 aktiv in bit 1 und bit2 */
+    UCHAR wmzaehler_reg;
+    /* Solar1: momentane Leistung, Waermemenge kWh/MWh */
+    UCHAR mlstg1[4];
+    UCHAR kwh1[2];
+    UCHAR mwh1[2];
+    /* Solar2: momentane Leistung, Waermemenge kWh/MWh */
+    UCHAR mlstg2[4];
+    UCHAR kwh2[2];
+    UCHAR mwh2[2];
+    /* Solar3: momentane Leistung, Waermemenge kWh/MWh */
+    UCHAR mlstg3[4];
+    UCHAR kwh3[2];
+    UCHAR mwh3[2];
+    the_datum_zeit datum_zeit;
+} s_DS_CANBC;
+
 /* Union fuer Datensatz Modus CAN-Logging       */
 /* aus dem Bootloader kommend                   */
 typedef union{
@@ -296,9 +385,19 @@ typedef union{
   } DS_CAN_1;
   struct {
     UCHAR zeitstempel[3];
+    s_DS_CANBC DS_CANBC[1];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_BC_1;
+  struct {
+    UCHAR zeitstempel[3];
     s_DS_CAN DS_CAN[2];
     UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   } DS_CAN_2;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CANBC DS_CANBC[2];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_BC_2;
   struct {
     UCHAR zeitstempel[3];
     s_DS_CAN DS_CAN[3];
@@ -306,9 +405,19 @@ typedef union{
   } DS_CAN_3;
   struct {
     UCHAR zeitstempel[3];
+    s_DS_CANBC DS_CANBC[3];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_BC_3;
+  struct {
+    UCHAR zeitstempel[3];
     s_DS_CAN DS_CAN[4];
     UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   } DS_CAN_4;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CANBC DS_CANBC[4];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_BC_4;
   struct {
     UCHAR zeitstempel[3];
     s_DS_CAN DS_CAN[5];
@@ -316,9 +425,19 @@ typedef union{
   } DS_CAN_5;
   struct {
     UCHAR zeitstempel[3];
+    s_DS_CANBC DS_CANBC[5];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_BC_5;
+  struct {
+    UCHAR zeitstempel[3];
     s_DS_CAN DS_CAN[6];
     UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   } DS_CAN_6;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CANBC DS_CANBC[6];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_BC_6;
   struct {
     UCHAR zeitstempel[3];
     s_DS_CAN DS_CAN[7];
@@ -326,9 +445,19 @@ typedef union{
   } DS_CAN_7;
   struct {
     UCHAR zeitstempel[3];
+    s_DS_CANBC DS_CANBC[7];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_BC_7;
+  struct {
+    UCHAR zeitstempel[3];
     s_DS_CAN DS_CAN[8];
     UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   } DS_CAN_8;
+  struct {
+    UCHAR zeitstempel[3];
+    s_DS_CANBC DS_CANBC[8];
+    UCHAR pruefsum;  /* Summer der Bytes mod 256 */
+  } DS_CAN_BC_8;
 } u_DS_CAN;
 
 /* Bitfeld Drehzahlreglung*/
@@ -422,7 +551,7 @@ typedef struct {
 /* Modus 0xDC - Laenge 14 bis 21 Byte - KopfsatzDC -                     */
 typedef union{
   UCHAR all_bytes[21];
-  struct 
+  struct
   {
   UCHAR kennung;
   UCHAR version;
@@ -433,7 +562,7 @@ typedef union{
   UCHAR endadresse[3];
   UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   }DC_Rahmen1;
-  struct 
+  struct
   {
   UCHAR kennung;
   UCHAR version;
@@ -445,7 +574,7 @@ typedef union{
   UCHAR endadresse[3];
   UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   }DC_Rahmen2;
-  struct 
+  struct
   {
   UCHAR kennung;
   UCHAR version;
@@ -458,7 +587,7 @@ typedef union{
   UCHAR endadresse[3];
   UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   }DC_Rahmen3;
-  struct 
+  struct
   {
   UCHAR kennung;
   UCHAR version;
@@ -472,7 +601,7 @@ typedef union{
   UCHAR endadresse[3];
   UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   }DC_Rahmen4;
-  struct 
+  struct
   {
   UCHAR kennung;
   UCHAR version;
@@ -487,7 +616,7 @@ typedef union{
   UCHAR endadresse[3];
   UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   }DC_Rahmen5;
-  struct 
+  struct
   {
   UCHAR kennung;
   UCHAR version;
@@ -503,7 +632,7 @@ typedef union{
   UCHAR endadresse[3];
   UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   }DC_Rahmen6;
-  struct 
+  struct
   {
   UCHAR kennung;
   UCHAR version;
@@ -520,7 +649,7 @@ typedef union{
   UCHAR endadresse[3];
   UCHAR pruefsum;  /* Summer der Bytes mod 256 */
   }DC_Rahmen7;
-  struct 
+  struct
   {
   UCHAR kennung;
   UCHAR version;
