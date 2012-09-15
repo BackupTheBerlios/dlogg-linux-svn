@@ -1,0 +1,104 @@
+dl-lesenx
+-------------------------------------------------------------------------------
+
+Das Progamm "dl-lesenx" liest die Daten der UVR1611 oder UVR61-3 aus dem 
+D-LOGG USB oder BL-Net unter Linux ein und speichert diese Daten in dem Format, 
+welches von Winsol erzeugt wird. Somit sind diese Daten mit Winsol und Solstat 
+auswertbar.
+
+Ein anderes Speicherformat nicht unterstuetzt.
+
+Ab Version 0.8.0 wird der Modus 2DL - 2 Regler (das CAN-I/O Modul wird als 2. 
+UVR1611 betrachtet) - unterstuetzt.
+Ab Version 0.9.0 wird CAN-Logging unterstuetzt.
+
+getestete Umgebung:
+debian Linux 4.0 Etch mit Kernel 2.6 (Standard-Kernel).
+debian Linux 5.0 Lenny mit Kernel 2.6 (Standard-Kernel).
+debian linux 5.0 Lenny (64 Bit) mit Kernel 2.6 (Standard-Kernel).
+(K)Ubuntu 32 und 64 Bit
+ARM-Architektur:
+- S3C2440 ARM9 - FriendlyARM Mini2440
+- OMAP4430 Processor - PandaBoard
+
+Kernel 2.4 mit USB-Unterstuetzung lief auch, aber ich empfehle auf jeden Fall 
+den 2.6er Kernel.
+
+Installation:
+-------------
+Das Programm kann in ein Verzeichnis nach Wahl kopiert werden. Ich empfehle das
+Verzeichnis /usr/local/bin.
+Die Rechte (vor allem das Ausfuehr-Recht) muessen den eigenen 
+Gegebenheiten angepasst werden.
+Es wird eine Datei dl-lesenx.log im Verzeichnis /var/log geschrieben. 
+Daher sollte der erste Aufruf des Programms mit root-Rechten erfolgen. 
+Anschliessend koennen die Gruppen-Zugehoerigkeit und die Zugriffsrechte 
+der Datei dl-lesenx.log an die eigenen Beduerfnisse/Gegebenheiten angepasst werden.
+
+Die Logdatei (im Winsol-Format) wird in dem Verzeichnis erstellt, 
+in dem der angemeldete User sich gerade befindet.
+  Beispiel:
+  es existiert ein Verzeichnis /Solar/Log
+  das Programm wurde in das Verzeichnis /usr/local/bin kopiert:
+  
+    cd /Solar/Log
+    /usr/local/bin/dl-lesenx -p /dev/ttyUSB0
+
+    bzw. wenn das Verzeichnis /usr/local/bin im Suchpfad steht:
+  
+    cd /Solar/Log
+    dl-lesenx -p /dev/ttyUSB0
+
+  schreibt die Daten aus dem D-LOGG in die Datei 
+    /Solar/Log/YJJJJMM.log
+  OHNE Datenspeicher RESET im D-LOGG (also zu loeschen)
+  
+  Dateiname: Y    -> immer gegeben
+             JJJJ -> aktuelles Jahr
+             MM   -> aktueller Monat
+
+Die 2. Log-Datei (im Modus 2DL) hat den gleichen Aufbau wie die Datei
+im "normalen" Modus. Es werden die Verzeichnisse Log1 und Log2 genutzt 
+und auch bei Notwendigkeit angelegt.
+  
+Die 2. - 8. Log-Datei (CAN-Logging) hat den gleichen Aufbau wie die Datei
+im "normalen" Modus. Es werden die Verzeichnisse Log1 bis max. Log8 genutzt 
+und auch bei Notwendigkeit angelegt.
+  
+Aufruf des Prgramms:
+--------------------
+
+dl-lesenx (-p USB-Port | -i IP:Port)  [--csv] [--res] [--dir] [-h] [-v]
+    -p USB-Port -> Angabe des USB-Portes,
+                   an dem der D-LOGG angeschlossen ist.
+    -i IP:Port  -> Angabe der IP-Adresse / Hostname und des Ports,
+                   an dem der BL-Net angeschlossen ist.
+                   Ohne Port-Angabe wird der Default-Port 40000 verwendet.
+          --csv -> im CSV-Format speichern (wird noch nicht unterstuetzt)
+                   Standard: ist WINSOL-Format
+          --res -> nach dem Lesen Ruecksetzen des DL
+                   Standard: KEIN Ruecksetzen des DL nach dem Lesen
+          --dir -> Verzeichnis in dem die Datei angelegt werden soll
+                   das Verzeichnis wird erzeugt, wenn nicht vorhanden
+                   (bei gueltigen Rechten)
+          -h    -> diesen Hilfetext
+          -v    -> Versionsangabe
+
+Beispiel: dl-lesenx -p /dev/ttyUSB0 --res
+              Liest die Daten vom USB-Port 0 und setzt den D-LOGG zurueck.
+          dl-lesenx -i blnetz:40000 --res
+              Liest die Daten vom Host blnetz und setzt den BL-Net zurueck.
+          dl-lesenx -i 192.168.0.10:40000
+              Liest die Daten von der IP-Adresse 192.168.0.10
+              und setzt den BL-Net nicht zurueck.
+
+Die aktuellste Version kann unter http://d-logg-linux.roemix.eu 
+abgerufen werden. Dort befindet sich auch ein Programm zum Einstellen 
+des Speicherkriteriums im Regler UVR1611/UVR61-3 (setup-dlogg).
+
+Mein Dank gilt im Besonderen Christoph Dolainsky und Hartmut Gottwald fuer die
+sehr umfangreiche Unterstuetzung und Programmierung von wesentlichen Teilen.
+Ebenfalls vielen Dank an die Firma Technische Alternative Elektronische
+Steuerungsgeraetegesellschaft m.b.H (Oesterreich) fuer ihre Unterstuetzung.
+
+(c)2006,2007,2008,2010,2011 H. Roemer
