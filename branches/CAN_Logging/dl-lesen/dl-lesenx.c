@@ -2483,8 +2483,12 @@ fprintf(stderr," Startadresse: %x %x %x\n",sendbuf[1],sendbuf[2],sendbuf[3]);
         tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile);
 // CAN_BC-------------------------------------------------------------------------------------------------------------------
       if (uvr_typ == CAN_BC)
+	  {
         tmp_erg = fwrite(puffer_dswinsol,59,1,fp_logfile);
+#if DEBUG > 3
         printf("uvr_Typ CAN_BC\n");
+#endif
+		}
       if (uvr_typ == UVR61_3)
         tmp_erg = fwrite(puffer_dswinsol_uvr61_3,59,1,fp_logfile);
 
