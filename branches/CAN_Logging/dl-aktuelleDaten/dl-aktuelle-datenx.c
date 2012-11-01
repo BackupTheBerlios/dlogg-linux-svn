@@ -1324,9 +1324,11 @@ void check_kennung(int received_Bytes)
 /* Abfrage per IP */
 int ip_handling(int sock)
 {
-  unsigned char empfbuf[256];
+//  unsigned char empfbuf[256];
+  UCHAR empfbuf[256];	
   int send_bytes, recv_bytes;
-  int sendbuf[1];
+  UCHAR sendbuf[1];
+//  int sendbuf[1];
 
   sendbuf[0] = 0x81; /* Modusabfrage */
 
@@ -1746,7 +1748,8 @@ void waermemengenanz(int regler)
 void testfunktion(void)
 {
   int result;
-  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+  UCHAR sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+//  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
   UCHAR empfbuf[256];
 
   sendbuf[0]=VERSIONSABFRAGE;   /* Senden der Versionsabfrage */
@@ -3133,8 +3136,10 @@ int lies_conf(void)
 int get_modulmodus(void)
 {
   int result;
-  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
-  int empfbuf[1];
+  UCHAR sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+  UCHAR empfbuf[1];
+//  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+//  int empfbuf[1];
 
   sendbuf[0]=VERSIONSABFRAGE;    /* Senden der Kopfsatz-abfrage */
 

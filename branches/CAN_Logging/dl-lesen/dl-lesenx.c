@@ -1136,8 +1136,10 @@ void writeWINSOLlogfile2CSV(FILE * fp_WSLOGcsvfile, const DS_Winsol  *dsatz_wins
 int get_modulmodus(void)
 {
   int result;
-  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
-  int empfbuf[1];
+  UCHAR sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+  UCHAR empfbuf[1];
+//  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+//  int empfbuf[1];
 
   sendbuf[0]=VERSIONSABFRAGE;    /* Senden der Kopfsatz-abfrage */
 
@@ -1178,7 +1180,8 @@ int get_modulmodus(void)
 int get_modultyp(void)
 {
   int result; //, i=0, j=0, marker=0;
-  int sendbuf[8];       /*  sendebuffer fuer die Request-Commandos*/
+  UCHAR sendbuf[8];       /*  sendebuffer fuer die Request-Commandos*/
+//  int sendbuf[8];       /*  sendebuffer fuer die Request-Commandos*/
   UCHAR empfbuf[5];
 //  UCHAR tmp_buf[5];
   unsigned modTeiler = 0x100;
@@ -1246,7 +1249,8 @@ int get_modultyp(void)
 int kopfsatzlesen(void)
 {
   int result, anz_ds, pruefz, merk_pruefz, durchlauf;
-  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+  UCHAR sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+//  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
   durchlauf=0;
 
   do
@@ -1576,7 +1580,8 @@ int kopfsatzlesen(void)
 void testfunktion(void)
 {
   int result;
-  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+  UCHAR sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+//  int sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
   UCHAR empfbuf[256];
 
   sendbuf[0]=VERSIONSABFRAGE;   /* Senden der Versionsabfrage */
@@ -3936,7 +3941,8 @@ int anzahldatensaetze_A8(KopfsatzA8 kopf[])
 /* Datenpuffer im D-LOGG zuruecksetzen -USB */
 int reset_datenpuffer_usb(int do_reset )
 {
-  int result = 0, sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+  int result = 0;
+  UCHAR sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
   UCHAR empfbuf[256];
 
   sendbuf[0]=ENDELESEN;   /* Senden "Ende lesen" */
@@ -3971,7 +3977,8 @@ int reset_datenpuffer_usb(int do_reset )
 /* Datenpuffer im D-LOGG zuruecksetzen -IP */
 int reset_datenpuffer_ip(int do_reset )
 {
-  int result = 0, sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
+  int result = 0;
+  UCHAR sendbuf[1];       /*  sendebuffer fuer die Request-Commandos*/
   UCHAR empfbuf[256];
 
   sendbuf[0]=ENDELESEN;   /* Senden "Ende lesen" */
@@ -4121,7 +4128,8 @@ int ip_handling(int sock)
 {
   unsigned char empfbuf[256];
   int send_bytes, recv_bytes;
-  int sendbuf[1];
+  UCHAR sendbuf[1];
+//  int sendbuf[1];
 
   sendbuf[0] = 0x81; /* Modusabfrage */
 
