@@ -1397,12 +1397,12 @@ int kopfsatzlesen(void)
   }
   while (( (pruefz != merk_pruefz )  && (durchlauf < 10)));
 
-#ifdef DEBUG
   if (pruefz != merk_pruefz )
     {
       fprintf(stderr, " Durchlauf #%i -  berechnete pruefziffer:%d kopfsatz.pruefsumme:%d\n",durchlauf, pruefz, merk_pruefz);
       return -1;
     }
+#ifdef DEBUG
   else
     fprintf(stderr, "Anzahl Durchlaeufe Pruefziffer Kopfsatz: %i\n",durchlauf);
 #endif
@@ -3575,7 +3575,7 @@ int berechneKopfpruefziffer_DC(KOPFSATZ_DC derKopf[] )
 
   allebytes = 12 + derKopf[0].all_bytes[5];
 
-  for ( i=0; i<=allebytes; i++)
+  for ( i=0; i<allebytes; i++)
         retval += derKopf[0].all_bytes[i];
   return retval % 0x100;
   }
