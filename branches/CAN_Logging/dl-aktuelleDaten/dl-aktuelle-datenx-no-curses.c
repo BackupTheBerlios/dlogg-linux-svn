@@ -778,11 +778,11 @@ int check_arg_getopt(int arg_c, char *arg_v[])
   int p_is_set=-1;
   int i_is_set=-1;
   char trennzeichen[] = ":";
+  list_output = 1;  /* Liste - default */
 
   /* arbeitet alle argumente ab  */
   while (1)
   {
-    list_output = 1;  /* Liste - default */
     int option_index = 0;
     static struct option long_options[] =
     {
