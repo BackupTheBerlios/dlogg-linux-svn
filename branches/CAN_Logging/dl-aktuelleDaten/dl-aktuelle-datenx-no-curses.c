@@ -782,6 +782,7 @@ int check_arg_getopt(int arg_c, char *arg_v[])
   /* arbeitet alle argumente ab  */
   while (1)
   {
+    list_output = 1;  /* Liste - default */
     int option_index = 0;
     static struct option long_options[] =
     {
@@ -885,11 +886,13 @@ int check_arg_getopt(int arg_c, char *arg_v[])
         if (  strncmp( long_options[option_index].name, "csv", 3) == 0 ) /* csv-Format ist gewuenscht */
         {
           csv_output = 1;
+          list_output = 0;  /* Liste aus*/
           fprintf(stderr," csv output aktiviert!\n");
         }
         if (  strncmp( long_options[option_index].name, "rrd", 3) == 0 )
         {
           rrd_output = 1;  /* RRD */
+          list_output = 0;  /* Liste aus*/
         }
         if (  strncmp( long_options[option_index].name, "list", 4) == 0 )
         {
