@@ -1,3 +1,7 @@
+Ohne Bibliothek ncurses:
+gcc -o dl-aktuelle-datenx-no-curses dl-aktuelle-datenx-no-curses.c
+
+Mit Bibliothek ncurses:
 gcc -o dl-aktuelle-datenx dl-aktuelle-datenx.c -lncurses -lpanel
 
 fuer SuSE Linux:
